@@ -55,6 +55,9 @@ header p{margin:0;color:var(--muted);font-size:.85rem}
 .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .fields .full{grid-column:1/-1}
 .fields.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.unit3{display:flex;flex-direction:column;gap:5px;min-width:0}
+.u3-title{font-size:.78rem;font-weight:600;color:var(--muted)}
+.u3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .chip.pass{background:var(--ok-bg);color:var(--water)}
 .chip.fail{background:var(--air-bg);color:var(--accent)}
 .res{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
@@ -206,12 +209,20 @@ tr:hover td{background:var(--field)}
       <label>Orifice
         <select id="p_orf"></select>
       </label>
-      <label>Set pressure (psig)
-        <input id="p_set" type="number" inputmode="decimal" min="0" step="any">
-      </label>
-      <label>CDTP (psig) <span class="hint">bỏ trống nếu không có</span>
-        <input id="p_cdtp" type="number" inputmode="decimal" min="0" step="any">
-      </label>
+      <div class="full unit3"><span class="u3-title">Set pressure <span class="hint">nhập 1 ô, các ô còn lại tự đổi</span></span>
+        <div class="u3">
+          <label>psig<input id="p_set" type="number" inputmode="decimal" min="0" step="any"></label>
+          <label>bar(g)<input id="p_set_bar" type="number" inputmode="decimal" min="0" step="any"></label>
+          <label>kg/cm²(g)<input id="p_set_kg" type="number" inputmode="decimal" min="0" step="any"></label>
+        </div>
+      </div>
+      <div class="full unit3"><span class="u3-title">CDTP <span class="hint">bỏ trống nếu không có</span></span>
+        <div class="u3">
+          <label>psig<input id="p_cdtp" type="number" inputmode="decimal" min="0" step="any"></label>
+          <label>bar(g)<input id="p_cdtp_bar" type="number" inputmode="decimal" min="0" step="any"></label>
+          <label>kg/cm²(g)<input id="p_cdtp_kg" type="number" inputmode="decimal" min="0" step="any"></label>
+        </div>
+      </div>
       <label class="full">Loại thiết bị
         <div class="seg" id="p_kind">
           <button type="button" data-v="Vessel" aria-pressed="true">Vessel (ASME VIII)</button>
@@ -510,7 +521,9 @@ function psvCalc(){
 }
 const resChips = arr => arr.some(x=>x) ? `<div class="res">${arr.map((x,i)=>x?`<span class="chip ${x==='Pass'?'pass':'fail'}">Lần ${i+1}: ${x}</span>`:'').join('')}</div>` : '<span class="hint">Nhập kết quả đo để đánh giá</span>';
 const ps_ = v => v==null?'—':`${v} psig`;
-const psb = v => v==null?'':`${(v*PSI2BAR).toFixed(2)} barg`;
+const PSI_KG = 14.2233433;
+const psb = v => v==null?'':`${(v*PSI2BAR).toFixed(2)} barg · ${(v/PSI_KG).toFixed(2)} kg/cm²`;
+const psbR = (a,b) => a==null?'':`${(a*PSI2BAR).toFixed(2)} – ${(b*PSI2BAR).toFixed(2)} barg · ${(a/PSI_KG).toFixed(2)} – ${(b/PSI_KG).toFixed(2)} kg/cm²`;
 let plast=null;
 function psvRender(){
   $('p_unit_wrap').hidden = ps.med==='Water';
@@ -522,7 +535,7 @@ function psvRender(){
     <div class="stage-head"><h3>Pop test</h3><span class="chip water">${ps.med}</span></div>
     <dl class="rows">
       <dt>Áp suất pop test</dt><dd class="big">${ps_(r.I)}<small>${psb(r.I)}</small></dd>
-      <dt>Áp suất mở cho phép</dt><dd>${r.Q??'—'} – ${r.P??'—'} psig<small>${r.Q!=null?psb(r.Q)+' – '+psb(r.P):''}</small></dd>
+      <dt>Áp suất mở cho phép</dt><dd>${r.Q??'—'} – ${r.P??'—'} psig<small>${psbR(r.Q,r.P)}</small></dd>
       <dt>Áp suất đóng tối thiểu</dt><dd>${ps_(r.R)}<small>${psb(r.R)}</small></dd>
       <dt>Thời gian test</dt><dd>${r.time!=null?r.time+' phút':'—'}</dd>
     </dl>
@@ -544,10 +557,26 @@ function psvSeg(id,key){ $(id).addEventListener('click',e=>{const b=e.target.clo
   ps[key]=b.dataset.v; [...$(id).children].forEach(x=>x.setAttribute('aria-pressed',x===b)); psvRender();}); }
 psvSeg('p_kind','kind'); psvSeg('p_med','med'); psvSeg('p_unit','unit');
 ['p_size','p_orf','p_set','p_cdtp','p_o1','p_o2','p_o3','p_c1','p_c2','p_c3','p_l1','p_l2'].forEach(k=>$(k).addEventListener('input',psvRender));
+// Set pressure / CDTP: 3 o don vi lien thong (psig, bar, kg/cm2)
+const U3={bar:14.5037738,kg:14.2233433};
+const u3fmt=(v,d)=>String(Math.round(v*Math.pow(10,d))/Math.pow(10,d));
+function u3link(base){
+  const f={psi:$(base),bar:$(base+'_bar'),kg:$(base+'_kg')};
+  const sync=src=>{const s=f[src].value.trim();
+    if(s===''){for(const k in f) if(k!==src) f[k].value=''; return;}
+    const v=parseFloat(s); if(isNaN(v)) return;
+    const psi = src==='psi' ? v : v*U3[src];
+    if(src!=='psi') f.psi.value=u3fmt(psi,2);
+    if(src!=='bar') f.bar.value=u3fmt(psi/U3.bar,3);
+    if(src!=='kg') f.kg.value=u3fmt(psi/U3.kg,3);};
+  for(const k in f) f[k].addEventListener('input',()=>{sync(k); psvRender();});
+  return ()=>sync('psi');
+}
+const syncSet=u3link('p_set'), syncCdtp=u3link('p_cdtp');
 $('fp').addEventListener('submit',e=>e.preventDefault());
 $('p_copy').addEventListener('click',async()=>{const r=plast;const b=$('p_copy');
   const t=[`PSV TEST - ${ps.kind} / ${ps.med} / Orifice ${$('p_orf').value} / Size ${r.size??'-'}"`,
-   `Pop test: P = ${r.I??'-'} psig | Open ${r.Q??'-'} - ${r.P??'-'} psig | Close >= ${r.R??'-'} psig | t = ${r.time??'-'} min`,
+   `Pop test: P = ${r.I??'-'} psig (${r.I!=null?(r.I*PSI2BAR).toFixed(2)+' barg / '+(r.I/PSI_KG).toFixed(2)+' kg/cm2':'-'}) | Open ${r.Q??'-'} - ${r.P??'-'} psig | Close >= ${r.R??'-'} psig | t = ${r.time??'-'} min`,
    `Leak test: P = ${r.N??'-'} psig | Max leak = ${r.Y??'-'} ${r.unit}`,
    r.pop.some(x=>x)?`Pop result: ${r.pop.map((x,i)=>x?('#'+(i+1)+' '+x):'').filter(Boolean).join(', ')}`:'',
    r.leak.some(x=>x)?`Leak result: ${r.leak.map((x,i)=>x?('#'+(i+1)+' '+x):'').filter(Boolean).join(', ')}`:''].filter(Boolean).join('\n');
@@ -559,6 +588,7 @@ $('p_copy').addEventListener('click',async()=>{const r=plast;const b=$('p_copy')
   const ex={p_size:'1.5',p_orf:'H',p_set:'90',p_cdtp:''};
   for(const k in ex){const v=load(k);$(k).value = v!==null ? v : ex[k]}
   for(const [id,key] of [['p_kind','kind'],['p_med','med'],['p_unit','unit']]){const v=load(id); if(v){ps[key]=v;[...$(id).children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===v))}}
+  syncSet(); syncCdtp();
   psvRender();
   const t=load('tab'); if(t && $('tab-'+t)) tab(t);
 })();
