@@ -1,0 +1,17 @@
+{
+  "name": "Valve Test Calculator",
+  "short_name": "Valve Test",
+  "description": "Truong Cao dang Dau khi (PV College) - Nguoi viet ung dung: Giang vien Le Duy Nam",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eef1f3",
+  "theme_color": "#1d3a4f",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
