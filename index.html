@@ -170,6 +170,10 @@ td{padding:10px 12px}
 .dispu{flex-direction:row;align-items:center;gap:10px;font-size:1rem}
 .dispu select{width:auto;min-width:130px}
 .dispbar{display:flex;justify-content:flex-end;margin-bottom:12px}
+
+/* orifice 3 o */
+.u3.orf3{grid-template-columns:minmax(0,.8fr) minmax(0,1fr) minmax(0,1fr)}
+@media (max-width:560px){.u3.orf3{grid-template-columns:minmax(0,.8fr) minmax(0,1fr) minmax(0,1fr)}}
 </style><link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
@@ -277,12 +281,13 @@ td{padding:10px 12px}
       <label>Size inlet (inch)
         <input id="p_size" type="text" inputmode="decimal" autocomplete="off" min="0" step="any">
       </label>
-      <label>Orifice
-        <select id="p_orf"></select>
-      </label>
-      <label class="full" id="p_orfmm_wrap" hidden>Diện tích orifice theo datasheet (mm²)
-        <input id="p_orf_mm" type="text" inputmode="decimal" autocomplete="off" placeholder="ví dụ 506">
-      </label>
+      <div class="full unit3"><span class="u3-title">Orifice <span class="hint">chọn chữ cái hoặc nhập đường kính / diện tích, các ô còn lại tự đổi</span></span>
+        <div class="u3 orf3">
+          <label>Ký hiệu<select id="p_orf"></select></label>
+          <label>Đường kính (mm)<input id="p_orf_d" type="text" inputmode="decimal" autocomplete="off" placeholder="Ø mm"></label>
+          <label>Diện tích (mm²)<input id="p_orf_mm" type="text" inputmode="decimal" autocomplete="off" placeholder="mm²"></label>
+        </div>
+      </div>
       <div class="full unit3"><span class="u3-title">Set pressure <span class="hint">nhập 1 ô, các ô còn lại tự đổi</span></span>
         <div class="u3">
           <label>psig<input id="p_set" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
@@ -573,7 +578,22 @@ $('mq').addEventListener('input',matTable);
 
 // ================= PSV =================
 const ps={kind:'Vessel',med:'Air',unit:'bubble/min'};
-$('p_orf').innerHTML = D.orifice.map(o=>`<option value="${o[0]}">${o[0]} · ${o[1]} in² · ${Math.round(o[1]*645.16*10)/10} mm²</option>`).join('') + '<option value="MM">Nhập theo mm²…</option>';
+$('p_orf').innerHTML = D.orifice.map(o=>`<option value="${o[0]}">${o[0]}</option>`).join('') + '<option value="MM">Khác</option>';
+// Orifice: ky hieu <-> duong kinh (mm) <-> dien tich (mm2), A = pi*d^2/4, 1 in2 = 645.16 mm2
+let orfSrc = load('p_orf_src') || 'letter';
+const ORF_IN2 = 645.16;
+const r4 = (v,d) => String(Math.round(v*Math.pow(10,d))/Math.pow(10,d));
+function orfMatch(mm2){ const o=D.orifice.find(x=>Math.abs(x[1]*ORF_IN2-mm2)/mm2 < 0.01); return o?o[0]:'MM'; }
+function orfSync(src){
+  if(src==='letter'){ const o=D.orifice.find(x=>x[0]===$('p_orf').value); if(!o) return;
+    const a=o[1]*ORF_IN2; $('p_orf_mm').value=r4(a,1); $('p_orf_d').value=r4(Math.sqrt(4*a/Math.PI),2); }
+  else if(src==='dia'){ const d=num('p_orf_d'); if(!(d>0)){ $('p_orf_mm').value=''; $('p_orf').value='MM'; return; }
+    const a=Math.PI*d*d/4; $('p_orf_mm').value=r4(a,1); $('p_orf').value=orfMatch(a); }
+  else { const a=num('p_orf_mm'); if(!(a>0)){ $('p_orf_d').value=''; $('p_orf').value='MM'; return; }
+    $('p_orf_d').value=r4(Math.sqrt(4*a/Math.PI),2); $('p_orf').value=orfMatch(a); }
+}
+for(const [id,src] of [['p_orf','letter'],['p_orf_d','dia'],['p_orf_mm','area']])
+  $(id).addEventListener(id==='p_orf'?'change':'input',()=>{ if(id==='p_orf' && $('p_orf').value==='MM') return; orfSrc=src; store('p_orf_src',src); orfSync(src); psvRender(); });
 function approx(tbl,v){ // VLOOKUP(...,TRUE): last row with key <= v
   let hit=null; for(const r of tbl){ if(r[0]<=v) hit=r; else break; } return hit; }
 const num = id => { const v=$(id).value.trim(); return v===''?null:parseFloat(v); };
@@ -602,8 +622,12 @@ function psvCalc(){
     r.N=I*0.9;
   }
   const ov=$('p_orf').value;   // 1 in² = 645.16 mm²
-  if(ov==='MM'){ const mm=num('p_orf_mm'); r.area = mm>0 ? mm/645.16 : null; r.orfName = mm>0 ? mm+' mm²' : '(nhập mm²)'; if(!(mm>0)) W.push('Nhập diện tích orifice (mm²) theo datasheet.'); }
-  else { const o=D.orifice.find(x=>x[0]===ov); r.area=o?o[1]:null; r.orfName=ov; }
+  if(orfSrc==='letter' && ov!=='MM'){ const o=D.orifice.find(x=>x[0]===ov); r.area=o?o[1]:null; }
+  else if(orfSrc==='dia'){ const d=num('p_orf_d'); r.area = d>0 ? Math.PI*d*d/4/645.16 : null; }
+  else { const mm=num('p_orf_mm'); r.area = mm>0 ? mm/645.16 : null; }
+  r.orfD = r.area!=null ? Math.sqrt(4*r.area*645.16/Math.PI) : null;
+  r.orfName = ov!=='MM' ? ov : (r.orfD!=null ? 'Ø'+(Math.round(r.orfD*100)/100)+' mm' : '—');
+  if(r.area==null) W.push('Chọn ký hiệu orifice hoặc nhập đường kính / diện tích orifice (mm).');
   const gas = ps.med!=='Water'; r.unit = gas ? ps.unit : 'ml/min';
   r.Y=null;
   if(gas && r.area!==null && I!==null){
@@ -653,12 +677,11 @@ function psvRender(){
     <dl class="rows">
       <dt>Áp suất leak test (90%)</dt><dd class="big">${pu(r,r.N)}<small>${po(r,r.N)}</small></dd>
       <dt>Rò cho phép</dt><dd>${r.Y!=null?r.Y+' '+r.unit:'—'}</dd>
-      <dt>Diện tích orifice</dt><dd>${r.area!=null?(Math.round(r.area*10000)/10000)+' in²':'—'}<small>${r.area!=null?(Math.round(r.area*645.16*10)/10)+' mm² · '+(r.area<=0.7?'≤ 0,7 in² (bảng nhỏ)':'> 0,7 in² (bảng lớn)'):''}</small></dd>
+      <dt>Diện tích orifice</dt><dd>${r.area!=null?(Math.round(r.area*645.16*10)/10)+' mm²':'—'}<small>${r.area!=null?'Ø '+(Math.round(r.orfD*100)/100)+' mm · '+(Math.round(r.area*10000)/10000)+' in² · '+(r.area<=0.7?'≤ 0,7 in² (bảng nhỏ)':'> 0,7 in² (bảng lớn)'):''}</small></dd>
     </dl>
     <div class="design"><span>Đánh giá</span>${resChips(r.leak)}</div>
   </article>`;
-  $('p_orfmm_wrap').hidden = $('p_orf').value!=='MM';
-  for(const k of ['p_size','p_orf','p_orf_mm','p_set','p_cdtp']) store(k,$(k).value);
+  for(const k of ['p_size','p_orf','p_orf_d','p_orf_mm','p_set','p_cdtp']) store(k,$(k).value);
   store('p_kind',ps.kind); store('p_med',ps.med); store('p_unit',ps.unit);
 }
 function psvSeg(id,key){ $(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
@@ -686,7 +709,7 @@ function u3link(base){
 const syncSet=u3link('p_set'), syncCdtp=u3link('p_cdtp');
 $('fp').addEventListener('submit',e=>e.preventDefault());
 $('p_copy').addEventListener('click',async()=>{const r=plast;const b=$('p_copy');
-  const t=[`PSV TEST - ${ps.kind} / ${ps.med} / Orifice ${r.orfName}${r.area!=null?' ('+(Math.round(r.area*645.16*10)/10)+' mm2)':''} / Size ${r.size??'-'}"`,
+  const t=[`PSV TEST - ${ps.kind} / ${ps.med} / Orifice ${r.orfName}${r.area!=null?' (Ø'+(Math.round(r.orfD*100)/100)+' mm, '+(Math.round(r.area*645.16*10)/10)+' mm2)':''} / Size ${r.size??'-'}"`,
    `Pop test: P = ${pu(r,r.I)} (${po(r,r.I)}) | Open ${puR(r,r.Q,r.P)} | Close >= ${pu(r,r.R)} | t = ${r.time??'-'} min`,
    `Leak test: P = ${pu(r,r.N)} (${po(r,r.N)}) | Max leak = ${r.Y??'-'} ${r.unit}`,
    r.pop.some(x=>x)?`Pop result: ${r.pop.map((x,i)=>x?('#'+(i+1)+' '+x):'').filter(Boolean).join(', ')}`:'',
@@ -696,10 +719,12 @@ $('p_copy').addEventListener('click',async()=>{const r=plast;const b=$('p_copy')
     try{document.execCommand('copy');b.textContent='Đã sao chép'}catch(_){b.textContent='Không sao chép được'}ta.remove();}
   setTimeout(()=>b.textContent='Sao chép kết quả',1600);});
 (function psvStart(){
-  const ex={p_size:'1.5',p_orf:'H',p_orf_mm:'',p_set:'90',p_cdtp:''};
+  const ex={p_size:'1.5',p_orf:'H',p_orf_d:'',p_orf_mm:'',p_set:'90',p_cdtp:''};
   for(const k in ex){const v=load(k);$(k).value = v!==null ? v : ex[k]}
   for(const [id,key] of [['p_kind','kind'],['p_med','med'],['p_unit','unit']]){const v=load(id); if(v){ps[key]=v;[...$(id).children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===v))}}
   syncSet(); syncCdtp();
+  if(orfSrc==='letter' && $('p_orf').value==='MM') orfSrc='area';
+  orfSync(orfSrc);
   psvRender();
   const t=load('tab'); if(t && $('tab-'+t)) tab(t);
 })();
