@@ -174,6 +174,10 @@ td{padding:10px 12px}
 /* orifice 3 o */
 .u3.orf3{grid-template-columns:minmax(0,.8fr) minmax(0,1fr) minmax(0,1fr)}
 @media (max-width:560px){.u3.orf3{grid-template-columns:minmax(0,.8fr) minmax(0,1fr) minmax(0,1fr)}}
+
+/* size inch <-> DN */
+.u3.sz2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:560px){.u3.sz2{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style><link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
@@ -222,9 +226,12 @@ td{padding:10px 12px}
       <label>Kiểu thân (Type Body)
         <select id="body"><option>Gate</option><option>Globe</option><option>Ball</option><option>Plug</option><option>Check</option><option>Butterfly</option><option>Angle</option></select>
       </label>
-      <label>Size (inch)
-        <select id="size"></select>
-      </label>
+      <div class="unit3"><span class="u3-title">Size <span class="hint">inch ↔ DN</span></span>
+        <div class="u3 sz2">
+          <label>inch<select id="size"></select></label>
+          <label>DN<select id="size_dn"></select></label>
+        </div>
+      </div>
       <label class="full">Vật liệu thân (Material lookup)
         <input id="matq" list="matlist" placeholder="Gõ để tìm, ví dụ WCB, CF8M, F51">
         <datalist id="matlist"></datalist>
@@ -235,7 +242,7 @@ td{padding:10px 12px}
       <div class="full unit3"><span class="u3-title">Design pressure <span class="hint">nhập 1 ô, các ô còn lại tự đổi</span></span>
         <div class="u3">
           <label>psig<input id="design" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
-          <label>bar (PN)<input id="design_bar" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
+          <label>bar(g)<input id="design_bar" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
           <label>kg/cm²<input id="design_kg" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
           <label>MPa<input id="design_mpa" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
         </div>
@@ -261,7 +268,7 @@ td{padding:10px 12px}
   </form>
 
   <div>
-    <div class="dispbar"><label class="dispu">Hiển thị áp suất theo<select id="dispu"><option value="psi">psig</option><option value="bar">bar (PN)</option><option value="kg">kg/cm²</option><option value="mpa">MPa</option></select></label></div>
+    <div class="dispbar"><label class="dispu">Hiển thị áp suất theo<select id="dispu"><option value="psi">psig</option><option value="bar">bar(g)</option><option value="kg">kg/cm²</option><option value="mpa">MPa</option></select></label></div>
     <div class="summary" id="summary"></div>
     <div id="warns"></div>
     <div class="stages" id="stages"></div>
@@ -278,9 +285,12 @@ td{padding:10px 12px}
   <form class="panel" id="fp" autocomplete="off">
     <h2>Thông số PSV</h2>
     <div class="fields">
-      <label>Size inlet (inch)
-        <input id="p_size" type="text" inputmode="decimal" autocomplete="off" min="0" step="any">
-      </label>
+      <div class="full unit3"><span class="u3-title">Size inlet <span class="hint">nhập inch hoặc DN, ô còn lại tự đổi</span></span>
+        <div class="u3 sz2">
+          <label>inch<input id="p_size" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
+          <label>DN<input id="p_size_dn" type="text" inputmode="decimal" autocomplete="off" placeholder="DN"></label>
+        </div>
+      </div>
       <div class="full unit3"><span class="u3-title">Orifice <span class="hint">chọn chữ cái hoặc nhập đường kính / diện tích, các ô còn lại tự đổi</span></span>
         <div class="u3 orf3">
           <label>Ký hiệu<select id="p_orf"></select></label>
@@ -291,7 +301,7 @@ td{padding:10px 12px}
       <div class="full unit3"><span class="u3-title">Set pressure <span class="hint">nhập 1 ô, các ô còn lại tự đổi</span></span>
         <div class="u3">
           <label>psig<input id="p_set" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
-          <label>bar (PN)<input id="p_set_bar" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
+          <label>bar(g)<input id="p_set_bar" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
           <label>kg/cm²(g)<input id="p_set_kg" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
           <label>MPa(g)<input id="p_set_mpa" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
         </div>
@@ -299,7 +309,7 @@ td{padding:10px 12px}
       <div class="full unit3"><span class="u3-title">CDTP <span class="hint">bỏ trống nếu không có</span></span>
         <div class="u3">
           <label>psig<input id="p_cdtp" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
-          <label>bar (PN)<input id="p_cdtp_bar" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
+          <label>bar(g)<input id="p_cdtp_bar" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
           <label>kg/cm²(g)<input id="p_cdtp_kg" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
           <label>MPa(g)<input id="p_cdtp_mpa" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
         </div>
@@ -366,7 +376,7 @@ const D = {"tp": [["WC9", 150, 290, 320, 440, null], ["WC9", 300, 750, 830, 1130
 const $ = id => document.getElementById(id);
 const st = {tv:'On-Off Valve', med:'auto', bar:false, disp:(load('dispu')||'psi')};
 const PSI2BAR = 0.0689476;
-// Don vi ap suat tab CV & MV (PN = bar o nhiet do phong)
+// Don vi ap suat tab CV & MV (psig, bar(g), kg/cm2, MPa)
 const CVF={psi:1,bar:14.5037738,kg:14.2233433,mpa:145.037738}, CVL={psi:'psig',bar:'bar',kg:'kg/cm²',mpa:'MPa'};
 const CVSRC={design:(load('design_u')||'psi')};
 const fxc=(v,u)=>{const d=u==='mpa'?4:2; return String(Math.round(Math.round(v*1e6)/Math.pow(10,6-d))/Math.pow(10,d));};
@@ -389,8 +399,15 @@ const vbRound = (v,d=0) => { const p=Math.pow(10,d), x=v*p, f=Math.floor(x), r=x
 
 // ---- sizes ----
 const sizes=[...new Set([...Object.keys(D.mp.liq),...Object.keys(D.time.seatOth),...Object.keys(D.lvi)].map(Number))].sort((a,b)=>a-b);
-const fmtSize = s => ({0.5:'1/2',0.75:'3/4',1.5:'1-1/2',2.5:'2-1/2'})[s] ? `${s} (${({0.5:'1/2',0.75:'3/4',1.5:'1-1/2',2.5:'2-1/2'})[s]}")` : `${s}"`;
+const fmtSize = s => ({0.25:'1/4',0.375:'3/8',0.5:'1/2',0.75:'3/4',1.25:'1-1/4',1.5:'1-1/2',2.5:'2-1/2',3.5:'3-1/2'}[s] || s)+'"';
 $('size').innerHTML = sizes.map(s=>`<option value="${s}">${fmtSize(s)}</option>`).join('');
+// Kich thuoc: NPS (inch) <-> DN (mm) theo ASME B36.10 / ISO 6708
+const NPS_DN={0.125:6,0.25:8,0.375:10,0.5:15,0.75:20,1:25,1.25:32,1.5:40,2:50,2.5:65,3:80,3.5:90,4:100,5:125,6:150,8:200,10:250,12:300,14:350,16:400,18:450,20:500,22:550,24:600,26:650,28:700,30:750,32:800,34:850,36:900,38:950,40:1000,42:1050,44:1100,46:1150,48:1200,52:1300,56:1400,60:1500};
+const toDN = s => NPS_DN[s] ?? (s>=4 && Math.abs(s*25-Math.round(s*25))<1e-9 ? Math.round(s*25) : null);
+const fromDN = dn => { for(const k in NPS_DN) if(NPS_DN[k]===dn) return parseFloat(k); return dn>=100 && dn%25===0 ? dn/25 : null; };
+$('size_dn').innerHTML = sizes.map(s=>`<option value="${s}">${toDN(s)??'?'}</option>`).join('');
+$('size').addEventListener('change',()=>{ $('size_dn').value=$('size').value; });
+$('size_dn').addEventListener('change',()=>{ $('size').value=$('size_dn').value; render(); });
 $('matlist').innerHTML = D.mats.map(m=>`<option value="${m.replace(/"/g,'&quot;')}"></option>`).join('');
 
 function classesFor(mat){
@@ -509,7 +526,7 @@ let last=null;
 function render(){
   document.querySelectorAll('.cv-only').forEach(e=>e.hidden = st.tv!=='Control Valve');
   const i=inputs(); const r=calc(i); last={i,r};
-  $('summary').innerHTML = `<span class="key">${r.key}</span><span class="chip ${r.seatA.med==='Water'?'water':'air'}">${r.seatA.lh}</span>${r.row && r.row[5]?`<span class="hint">${r.row[5]}</span>`:''}${r.row&&r.row[2]?`<span class="hint">CWP ${r.row[2]} psig = ${fxc(r.row[2]/CVF.bar,'bar')} bar (PN) = ${fxc(r.row[2]/CVF.mpa,'mpa')} MPa</span>`:''}`;
+  $('summary').innerHTML = `<span class="key">${r.key}</span><span class="chip ${r.seatA.med==='Water'?'water':'air'}">${r.seatA.lh}</span>${r.row && r.row[5]?`<span class="hint">${r.row[5]}</span>`:''}${r.row&&r.row[2]?`<span class="hint">CWP ${r.row[2]} psig = ${fxc(r.row[2]/CVF.bar,'bar')} bar(g) = ${fxc(r.row[2]/CVF.mpa,'mpa')} MPa</span>`:''}`;
   $('warns').innerHTML = r.warns.map(w=>`<div class="warn">${w}</div>`).join('');
   $('stages').innerHTML = stage('Seat A',r.seatA)+stage('Seat B',r.seatB)+stage('Shell',{...r.shell,leak:{t:'Không rò nhìn thấy'}})+stage('Back seat',r.back);
   for(const k of ['body','size','matq','cls','design','leak','cv','dp']) store(k,$(k).value);
@@ -517,7 +534,7 @@ function render(){
 }
 function text(){
   const {i,r}=last; const L=[];
-  L.push(`VALVE TEST - ${i.tv} / ${i.body} / ${i.size}" / ${r.key}`+(i.tv==='Control Valve'?` / Class ${i.leak} / Cv ${i.cv||'-'}`:''));
+  L.push(`VALVE TEST - ${i.tv} / ${i.body} / ${i.size}"${toDN(i.size)!=null?' (DN'+toDN(i.size)+')':''} / ${r.key}`+(i.tv==='Control Valve'?` / Class ${i.leak} / Cv ${i.cv||'-'}`:''));
   const one=(n,s)=> s? `${n}: ${s.med||''} | P = ${s.p??'-'} psig | t = ${s.t??'-'} s${s.leak?` | Leak = ${fmtL(s.leak)}`:''}${s.des?` | Design-based ${s.des} psig`:''}` : `${n}: N/A`;
   L.push(one('Seat A',r.seatA),one('Seat B',r.seatB),one('Shell',r.shell),one('Back seat',r.back));
   return L.join('\n');
@@ -572,6 +589,7 @@ $('mq').addEventListener('input',matTable);
   if(med){st.med=med;[...$('med').children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===med))}
   const c=load('cls')||ex.cls; fillClasses(); if(c) $('cls').value=c; if(!$('cls').value) $('cls').selectedIndex=0;
   if(!$('size').value) $('size').value='6';
+  $('size_dn').value=$('size').value;
   window.__syncDesign(); $('dispu').value=st.disp;
   render(); matTable();
 })();
@@ -594,6 +612,10 @@ function orfSync(src){
 }
 for(const [id,src] of [['p_orf','letter'],['p_orf_d','dia'],['p_orf_mm','area']])
   $(id).addEventListener(id==='p_orf'?'change':'input',()=>{ if(id==='p_orf' && $('p_orf').value==='MM') return; orfSrc=src; store('p_orf_src',src); orfSync(src); psvRender(); });
+// Size inlet: inch <-> DN
+const psvDN = () => { const s=num('p_size'), d=s>0?toDN(s):null; $('p_size_dn').value = d==null?'':String(d); };
+$('p_size').addEventListener('input',psvDN);
+$('p_size_dn').addEventListener('input',()=>{ const d=num('p_size_dn'), s=d>0?fromDN(d):null; $('p_size').value = s==null?'':String(s); psvRender(); });
 function approx(tbl,v){ // VLOOKUP(...,TRUE): last row with key <= v
   let hit=null; for(const r of tbl){ if(r[0]<=v) hit=r; else break; } return hit; }
 const num = id => { const v=$(id).value.trim(); return v===''?null:parseFloat(v); };
@@ -659,7 +681,7 @@ function psvRender(){
   $('p_unit_wrap').hidden = ps.med==='Water';
   const r=psvCalc(); plast=r;
   $('p_act_u').textContent = '· nhập theo '+UL[r.u];
-  $('p_summary').innerHTML = `<span class="key">${ps.kind} · ${ps.med} · Orifice ${r.orfName}${r.size!=null?' · '+r.size+'"':''}</span><span class="chip ${ps.kind==='Boiler'?'air':'water'}">${ps.kind==='Boiler'?'ASME Section I':'ASME Section VIII'}</span>`;
+  $('p_summary').innerHTML = `<span class="key">${ps.kind} · ${ps.med} · Orifice ${r.orfName}${r.size!=null?' · '+r.size+'"'+(toDN(r.size)!=null?' / DN'+toDN(r.size):''):''}</span><span class="chip ${ps.kind==='Boiler'?'air':'water'}">${ps.kind==='Boiler'?'ASME Section I':'ASME Section VIII'}</span>`;
   $('p_warns').innerHTML = r.W.map(w=>`<div class="warn">${w}</div>`).join('');
   $('p_stages').innerHTML = `
   <article class="stage">
@@ -709,7 +731,7 @@ function u3link(base){
 const syncSet=u3link('p_set'), syncCdtp=u3link('p_cdtp');
 $('fp').addEventListener('submit',e=>e.preventDefault());
 $('p_copy').addEventListener('click',async()=>{const r=plast;const b=$('p_copy');
-  const t=[`PSV TEST - ${ps.kind} / ${ps.med} / Orifice ${r.orfName}${r.area!=null?' (Ø'+(Math.round(r.orfD*100)/100)+' mm, '+(Math.round(r.area*645.16*10)/10)+' mm2)':''} / Size ${r.size??'-'}"`,
+  const t=[`PSV TEST - ${ps.kind} / ${ps.med} / Orifice ${r.orfName}${r.area!=null?' (Ø'+(Math.round(r.orfD*100)/100)+' mm, '+(Math.round(r.area*645.16*10)/10)+' mm2)':''} / Size ${r.size??'-'}"${r.size!=null&&toDN(r.size)!=null?' (DN'+toDN(r.size)+')':''}`,
    `Pop test: P = ${pu(r,r.I)} (${po(r,r.I)}) | Open ${puR(r,r.Q,r.P)} | Close >= ${pu(r,r.R)} | t = ${r.time??'-'} min`,
    `Leak test: P = ${pu(r,r.N)} (${po(r,r.N)}) | Max leak = ${r.Y??'-'} ${r.unit}`,
    r.pop.some(x=>x)?`Pop result: ${r.pop.map((x,i)=>x?('#'+(i+1)+' '+x):'').filter(Boolean).join(', ')}`:'',
@@ -722,7 +744,7 @@ $('p_copy').addEventListener('click',async()=>{const r=plast;const b=$('p_copy')
   const ex={p_size:'1.5',p_orf:'H',p_orf_d:'',p_orf_mm:'',p_set:'90',p_cdtp:''};
   for(const k in ex){const v=load(k);$(k).value = v!==null ? v : ex[k]}
   for(const [id,key] of [['p_kind','kind'],['p_med','med'],['p_unit','unit']]){const v=load(id); if(v){ps[key]=v;[...$(id).children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===v))}}
-  syncSet(); syncCdtp();
+  syncSet(); syncCdtp(); psvDN();
   if(orfSrc==='letter' && $('p_orf').value==='MM') orfSrc='area';
   orfSync(orfSrc);
   psvRender();
