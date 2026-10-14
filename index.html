@@ -161,6 +161,10 @@ td{padding:10px 12px}
   .rows dd.big{font-size:1.75rem}
   .fields.three{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* 4 don vi ap suat PSV */
+.u3{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:560px){.u3{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style><link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
@@ -220,16 +224,16 @@ td{padding:10px 12px}
         <select id="cls"></select>
       </label>
       <label>Design pressure (psig)
-        <input id="design" type="number" inputmode="decimal" min="0" step="any">
+        <input id="design" type="text" inputmode="decimal" autocomplete="off" min="0" step="any">
       </label>
       <label class="cv-only">Leakage class
         <select id="leak"><option>II</option><option>III</option><option selected>IV</option><option>V</option><option>VI</option><option>I</option></select>
       </label>
       <label class="cv-only">Cv
-        <input id="cv" type="number" inputmode="decimal" min="0" step="any">
+        <input id="cv" type="text" inputmode="decimal" autocomplete="off" min="0" step="any">
       </label>
       <label class="cv-only full">ΔP (psi) <span class="hint">dùng cho Class V</span>
-        <input id="dp" type="number" inputmode="decimal" min="0" step="any">
+        <input id="dp" type="text" inputmode="decimal" autocomplete="off" min="0" step="any">
       </label>
       <label class="full">Môi chất test seat
         <div class="seg" id="med">
@@ -261,23 +265,25 @@ td{padding:10px 12px}
     <h2>Thông số PSV</h2>
     <div class="fields">
       <label>Size inlet (inch)
-        <input id="p_size" type="number" inputmode="decimal" min="0" step="any">
+        <input id="p_size" type="text" inputmode="decimal" autocomplete="off" min="0" step="any">
       </label>
       <label>Orifice
         <select id="p_orf"></select>
       </label>
       <div class="full unit3"><span class="u3-title">Set pressure <span class="hint">nhập 1 ô, các ô còn lại tự đổi</span></span>
         <div class="u3">
-          <label>psig<input id="p_set" type="number" inputmode="decimal" min="0" step="any"></label>
-          <label>bar(g)<input id="p_set_bar" type="number" inputmode="decimal" min="0" step="any"></label>
-          <label>kg/cm²(g)<input id="p_set_kg" type="number" inputmode="decimal" min="0" step="any"></label>
+          <label>psig<input id="p_set" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
+          <label>bar(g)<input id="p_set_bar" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
+          <label>kg/cm²(g)<input id="p_set_kg" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
+          <label>MPa(g)<input id="p_set_mpa" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
         </div>
       </div>
       <div class="full unit3"><span class="u3-title">CDTP <span class="hint">bỏ trống nếu không có</span></span>
         <div class="u3">
-          <label>psig<input id="p_cdtp" type="number" inputmode="decimal" min="0" step="any"></label>
-          <label>bar(g)<input id="p_cdtp_bar" type="number" inputmode="decimal" min="0" step="any"></label>
-          <label>kg/cm²(g)<input id="p_cdtp_kg" type="number" inputmode="decimal" min="0" step="any"></label>
+          <label>psig<input id="p_cdtp" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
+          <label>bar(g)<input id="p_cdtp_bar" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
+          <label>kg/cm²(g)<input id="p_cdtp_kg" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
+          <label>MPa(g)<input id="p_cdtp_mpa" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
         </div>
       </div>
       <label class="full">Loại thiết bị
@@ -302,14 +308,14 @@ td{padding:10px 12px}
     </div>
     <h2 style="margin-top:18px">Kết quả đo thực tế <span class="hint">(tuỳ chọn) <span id="p_act_u"></span></span></h2>
     <div class="fields three">
-      <label>Mở lần 1<input id="p_o1" type="number" inputmode="decimal" step="any"></label>
-      <label>Mở lần 2<input id="p_o2" type="number" inputmode="decimal" step="any"></label>
-      <label>Mở lần 3<input id="p_o3" type="number" inputmode="decimal" step="any"></label>
-      <label>Đóng lần 1<input id="p_c1" type="number" inputmode="decimal" step="any"></label>
-      <label>Đóng lần 2<input id="p_c2" type="number" inputmode="decimal" step="any"></label>
-      <label>Đóng lần 3<input id="p_c3" type="number" inputmode="decimal" step="any"></label>
-      <label>Rò lần 1<input id="p_l1" type="number" inputmode="decimal" step="any"></label>
-      <label>Rò lần 2<input id="p_l2" type="number" inputmode="decimal" step="any"></label>
+      <label>Mở lần 1<input id="p_o1" type="text" inputmode="decimal" autocomplete="off" step="any"></label>
+      <label>Mở lần 2<input id="p_o2" type="text" inputmode="decimal" autocomplete="off" step="any"></label>
+      <label>Mở lần 3<input id="p_o3" type="text" inputmode="decimal" autocomplete="off" step="any"></label>
+      <label>Đóng lần 1<input id="p_c1" type="text" inputmode="decimal" autocomplete="off" step="any"></label>
+      <label>Đóng lần 2<input id="p_c2" type="text" inputmode="decimal" autocomplete="off" step="any"></label>
+      <label>Đóng lần 3<input id="p_c3" type="text" inputmode="decimal" autocomplete="off" step="any"></label>
+      <label>Rò lần 1<input id="p_l1" type="text" inputmode="decimal" autocomplete="off" step="any"></label>
+      <label>Rò lần 2<input id="p_l2" type="text" inputmode="decimal" autocomplete="off" step="any"></label>
     </div>
   </form>
   <div>
@@ -573,22 +579,23 @@ function psvCalc(){
   } else if(!gas && size!==null){ r.Y=vbRound(0.17*size,2); }
   if(I===null) W.push('Nhập Set pressure (hoặc CDTP) để tính.');
   // ket qua do thuc te: nhap theo cung don vi voi Set pressure
-  const pop=(o,c)=> o===null||r.P==null ? '' : (o>=fr(r.Q) && o<=fr(r.P) && (c===null || c>=fr(r.R))) ? 'Pass':'Fail';
+  const pop=(o,c)=> o===null||r.P==null ? '' : (o>=fru(r.Q,r.u) && o<=fru(r.P,r.u) && (c===null || c>=fru(r.R,r.u))) ? 'Pass':'Fail';
   r.pop=[pop(num('p_o1'),num('p_c1')),pop(num('p_o2'),num('p_c2')),pop(num('p_o3'),num('p_c3'))];
   const lk=a=> a===null||r.Y===null ? '' : (a<=r.Y?'Pass':'Fail');
   r.leak=[lk(num('p_l1')),lk(num('p_l2'))];
   return r;
 }
 const resChips = arr => arr.some(x=>x) ? `<div class="res">${arr.map((x,i)=>x?`<span class="chip ${x==='Pass'?'pass':'fail'}">Lần ${i+1}: ${x}</span>`:'').join('')}</div>` : '<span class="hint">Nhập kết quả đo để đánh giá</span>';
-const UF={psi:1,bar:14.5037738,kg:14.2233433}, UL={psi:'psig',bar:'barg',kg:'kg/cm²'};
+const UF={psi:1,bar:14.5037738,kg:14.2233433,mpa:145.037738}, UL={psi:'psig',bar:'barg',kg:'kg/cm²',mpa:'MPa'};
 const U3SRC={p_set:(load('p_set_u')||'psi'), p_cdtp:(load('p_cdtp_u')||'psi')};
 const fld=(base,u)=>$(u==='psi'?base:base+'_'+u);
 const fr=v=>Math.round(Math.round(v*1e6)/1e4)/100;             // 2 so le, khong sai so float
-const fx=v=>String(fr(v));
-const pu=(r,v)=>v==null?'—':`${fx(v)} ${UL[r.u]}`;
-const po=(r,v)=>v==null?'':Object.keys(UF).filter(k=>k!==r.u).map(k=>`${fx(v*r.f/UF[k])} ${UL[k]}`).join(' · ');
-const puR=(r,a,b)=>a==null?'—':`${fx(a)} – ${fx(b)} ${UL[r.u]}`;
-const poR=(r,a,b)=>a==null?'':Object.keys(UF).filter(k=>k!==r.u).map(k=>`${fx(a*r.f/UF[k])} – ${fx(b*r.f/UF[k])} ${UL[k]}`).join(' · ');
+const fx=(v,u)=>u==='mpa' ? String(Math.round(Math.round(v*1e7)/1e3)/1e4) : String(fr(v));   // MPa: 4 so le
+const fru=(v,u)=>Number(fx(v,u));
+const pu=(r,v)=>v==null?'—':`${fx(v,r.u)} ${UL[r.u]}`;
+const po=(r,v)=>v==null?'':Object.keys(UF).filter(k=>k!==r.u).map(k=>`${fx(v*r.f/UF[k],k)} ${UL[k]}`).join(' · ');
+const puR=(r,a,b)=>a==null?'—':`${fx(a,r.u)} – ${fx(b,r.u)} ${UL[r.u]}`;
+const poR=(r,a,b)=>a==null?'':Object.keys(UF).filter(k=>k!==r.u).map(k=>`${fx(a*r.f/UF[k],k)} – ${fx(b*r.f/UF[k],k)} ${UL[k]}`).join(' · ');
 let plast=null;
 function psvRender(){
   $('p_unit_wrap').hidden = ps.med==='Water';
@@ -624,17 +631,20 @@ function psvSeg(id,key){ $(id).addEventListener('click',e=>{const b=e.target.clo
 psvSeg('p_kind','kind'); psvSeg('p_med','med'); psvSeg('p_unit','unit');
 ['p_size','p_orf','p_set','p_cdtp','p_o1','p_o2','p_o3','p_c1','p_c2','p_c3','p_l1','p_l2'].forEach(k=>$(k).addEventListener('input',psvRender));
 // Set pressure / CDTP: 3 o don vi lien thong (psig, bar, kg/cm2)
-const U3={bar:14.5037738,kg:14.2233433};
+const U3={bar:14.5037738,kg:14.2233433,mpa:145.037738};
+// Cho phep go dau phay thap phan (14,65) -> tu doi thanh dau cham
+document.addEventListener('input',e=>{const t=e.target; if(t&&t.matches&&t.matches('input[inputmode=decimal]')&&t.value.indexOf(',')>=0){const p=t.selectionStart; t.value=t.value.replace(/,/g,'.'); try{t.setSelectionRange(p,p)}catch(_){}}},true);
 const u3fmt=(v,d)=>String(Math.round(v*Math.pow(10,d))/Math.pow(10,d));
 function u3link(base){
-  const f={psi:$(base),bar:$(base+'_bar'),kg:$(base+'_kg')};
+  const f={psi:$(base),bar:$(base+'_bar'),kg:$(base+'_kg'),mpa:$(base+'_mpa')};
   const sync=src=>{const s=f[src].value.trim();
     if(s===''){for(const k in f) if(k!==src) f[k].value=''; return;}
     const v=parseFloat(s); if(isNaN(v)) return;
     const psi = src==='psi' ? v : v*U3[src];
     if(src!=='psi') f.psi.value=u3fmt(psi,2);
     if(src!=='bar') f.bar.value=u3fmt(psi/U3.bar,3);
-    if(src!=='kg') f.kg.value=u3fmt(psi/U3.kg,3);};
+    if(src!=='kg') f.kg.value=u3fmt(psi/U3.kg,3);
+    if(src!=='mpa') f.mpa.value=u3fmt(psi/U3.mpa,4);};
   for(const k in f) f[k].addEventListener('input',()=>{sync(k); if(f[k].value.trim()!==''){U3SRC[base]=k; store(base+'_u',k);} psvRender();});
   return ()=>sync('psi');
 }
