@@ -900,7 +900,7 @@ let DEC = ld('b_dec') || ',';
 const fmtNum = (v,d) => { if(v==null || v==='' || isNaN(v)) return ''; const s=String(Math.round(Math.round(v*1e6)/Math.pow(10,6-d))/Math.pow(10,d)); return DEC===',' ? s.replace('.',',') : s; };
 const today = () => { const d=new Date(); return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); };
 const sizeTxt = s => { if(s==null) return ''; const f={0.25:'1/4',0.375:'3/8',0.5:'1/2',0.75:'3/4',1.25:'1-1/4',1.5:'1-1/2',2.5:'2-1/2',3.5:'3-1/2'}[s]; return f || (DEC===','?String(s).replace('.',','):String(s)); };
-const PU={psi:1,bar:14.5037738,kg:14.2233433,mpa:145.037738}, PL={psi:'psig',bar:'bar(g)',kg:'kg/cm²',mpa:'MPa'};
+const PU={psi:1,bar:14.5037738,kg:14.2233433,mpa:145.037738}, PL={psi:'psi',bar:'bar(g)',kg:'kg/cm²',mpa:'MPa'};
 const pd = u => u==='mpa'?3:2;
 const conv = (v,from,to) => v==null ? null : v*PU[from]/PU[to];
 
@@ -908,11 +908,11 @@ const conv = (v,from,to) => v==null ? null : v*PU[from]/PU[to];
 const STAGES=[['SHELL','Shell'],['SEATA','Seat A'],['SEATB','Seat B'],['BACK','Back seat']];
 const FIELDS=[['STT','Số thứ tự'],['TAG','Tag No / mã van'],['NGAY','Ngày lập biên bản'],['TIEU_CHUAN','Tiêu chuẩn áp dụng'],
  ['LOAI_VAN','On-Off Valve / Control Valve'],['KIEU_THAN','Gate, Globe, Ball…'],['SIZE','Size (inch)'],['DN','Size DN'],
- ['VAT_LIEU','Vật liệu thân'],['CLASS','Class'],['NHOM_VL','Nhóm vật liệu ASME B16.34'],['CWP_PSI','CWP 38°C (psig)'],['CWP_BAR','CWP 38°C (bar)'],
- ['DESIGN_PSI','Design pressure (psig)'],['DESIGN_BAR','Design pressure (bar)'],['LEAK_CLASS','Leakage class (CV)'],['CV','Cv'],['DP','ΔP (psi)'],
+ ['VAT_LIEU','Vật liệu thân'],['CLASS','Class'],['NHOM_VL','Nhóm vật liệu ASME B16.34'],['CWP_PSI','CWP 38°C (psi)'],['CWP_BAR','CWP 38°C (bar)'],
+ ['DESIGN_PSI','Design pressure (psi)'],['DESIGN_BAR','Design pressure (bar)'],['LEAK_CLASS','Leakage class (CV)'],['CV','Cv'],['DP','ΔP (psi)'],
  ['CHE_DO','Low/High-Pressure Closure'],['MO_TA','Cột Mô tả trong Excel'],['GHI_CHU','Cảnh báo của app']];
-const SFIELDS=[['MOI_CHAT','Môi chất'],['P_PSI','Áp suất test (psig)'],['P_BAR','Áp suất test (bar)'],['P_KG','Áp suất test (kg/cm²)'],['P_MPA','Áp suất test (MPa)'],
- ['TG','Thời gian giữ (s)'],['RO','Rò cho phép'],['DES_PSI','Áp theo design (psig)'],['DES_BAR','Áp theo design (bar)']];
+const SFIELDS=[['MOI_CHAT','Môi chất'],['P_PSI','Áp suất test (psi)'],['P_BAR','Áp suất test (bar)'],['P_KG','Áp suất test (kg/cm²)'],['P_MPA','Áp suất test (MPa)'],
+ ['TG','Thời gian giữ (s)'],['RO','Rò cho phép'],['DES_PSI','Áp theo design (psi)'],['DES_BAR','Áp theo design (bar)']];
 const PFIELDS=[['STT','Số thứ tự'],['TAG','Tag No'],['NGAY','Ngày'],['TIEU_CHUAN','API 527, ASME Section VIII / I'],['LOAI','ASME Section VIII (Vessel) / Section I (Boiler)'],
  ['SIZE','Size inlet (inch)'],['DN','DN'],['ORIFICE','Orifice (ký hiệu hoặc Ø)'],['ORIFICE_D','Đường kính orifice (mm)'],['ORIFICE_MM2','Diện tích orifice (mm²)'],
  ['DON_VI','Đơn vị áp suất đang dùng'],['SET_P','Set pressure'],['CDTP','CDTP'],['POP_P','Áp suất pop test (= CDTP nếu có, không thì Set)'],
@@ -1197,7 +1197,7 @@ function cvProv(it){
       if(/\bclass\b|\brating\b|cap ap/.test(n)) return i.cls;
       if(/vat lieu|material/.test(n)) return i.mat;
       if(/kieu than|body type|type body|loai van|valve type/.test(n)) return i.body;
-      if(/design/.test(n)) { const p=i.dRaw>0?i.dRaw*CVF[i.dU||'psi']:null; return p!=null? fmtNum(p/CVF.bar,2)+' bar(g) ('+fmtNum(p,0)+' psig)' : ''; }
+      if(/design/.test(n)) { const p=i.dRaw>0?i.dRaw*CVF[i.dU||'psi']:null; return p!=null? fmtNum(p/CVF.bar,2)+' bar(g) ('+fmtNum(p,0)+' psi)' : ''; }
       if(/record no|so bien ban/.test(n)) return C(['so bien ban','record no']);
       if(/customer|khach hang/.test(n)) return C(['khach hang','customer']);
       if(/serial|so se ri|so san xuat/.test(n)) return C(['serial no','serial','so se ri']);
@@ -1423,17 +1423,17 @@ async function sampleDocx(){
   const tr=c=>`<w:tr>${c.join('')}</w:tr>`;
   const W1=[2050,2850,2050,2700];
   const info=[['STT / Tag No','{{STT}} / {{TAG}}','Ngày test','{{NGAY}}'],['Loại van','{{LOAI_VAN}}','Kiểu thân','{{KIEU_THAN}}'],['Size','{{SIZE}}" (DN {{DN}})','Class','{{CLASS}}'],
-    ['Vật liệu thân','{{VAT_LIEU}}','CWP ở 38°C','{{CWP_BAR}} bar(g) / {{CWP_PSI}} psig'],['Design pressure','{{DESIGN_BAR}} bar(g) / {{DESIGN_PSI}} psig','Leakage class / Cv','{{LEAK_CLASS}} / {{CV}}']]
+    ['Vật liệu thân','{{VAT_LIEU}}','CWP ở 38°C','{{CWP_BAR}} bar(g) / {{CWP_PSI}} psi'],['Design pressure','{{DESIGN_BAR}} bar(g) / {{DESIGN_PSI}} psi','Leakage class / Cv','{{LEAK_CLASS}} / {{CV}}']]
     .map(r=>tr(r.map((v,j)=>cell(v,W1[j],j%2?{}:{b:true,fill:'E8EEF2'}))));
   info.push(tr([cell('Mô tả',W1[0],{b:true,fill:'E8EEF2'}),cell('{{MO_TA}}',W1[1]+W1[2]+W1[3],{span:3})]));
   const W2=[1250,1080,1130,1080,1020,1480,1130,1130];
-  const H=['Hạng mục','Môi chất','Áp suất test\nbar(g)','Áp suất test\npsig','Thời gian giữ (s)','Rò cho phép','Rò thực tế','Kết quả'];
+  const H=['Hạng mục','Môi chất','Áp suất test\nbar(g)','Áp suất test\npsi','Thời gian giữ (s)','Rò cho phép','Rò thực tế','Kết quả'];
   const t2=[tr(H.map((h,j)=>cell(h,W2[j],{b:true,c:true,fill:'D5DEE5',sz:10})))].concat([['Shell','SHELL'],['Seat A','SEATA'],['Seat B','SEATB'],['Back seat','BACK']].map(([n,k])=>
     tr([n,`{{${k}_MOI_CHAT}}`,`{{${k}_P_BAR}}`,`{{${k}_P_PSI}}`,`{{${k}_TG}}`,`{{${k}_RO}}`,'',''].map((v,j)=>cell(v,W2[j],{b:j===0,c:j>0,sz:10})))));
   const sig=[tr(['NGƯỜI THỰC HIỆN','KIỂM TRA (QC)','ĐẠI DIỆN KHÁCH HÀNG'].map(h=>cell(h,3200,{b:true,c:true}))),tr([1,2,3].map(()=>cell('\n\n\n(Ký, ghi rõ họ tên)',3200,{c:true,sz:10})))];
   const body=p('BIÊN BẢN KIỂM TRA ÁP LỰC VAN',{b:true,sz:16,c:true,after:20})+p('VALVE PRESSURE TEST REPORT',{b:true,sz:12,c:true,after:20})+p('Tiêu chuẩn áp dụng: {{TIEU_CHUAN}}',{c:true,after:200})
     +p('1. Thông tin van',{b:true,sz:13})+tbl(info,W1)+p('',{after:60})+p('2. Thông số và kết quả kiểm tra',{b:true,sz:13})+tbl(t2,W2)+p('',{after:60})
-    +p('Áp suất theo design pressure: Seat {{SEATA_DES_BAR}} bar(g) ({{SEATA_DES_PSI}} psig) · Shell {{SHELL_DES_BAR}} bar(g) ({{SHELL_DES_PSI}} psig)',{sz:10})
+    +p('Áp suất theo design pressure: Seat {{SEATA_DES_BAR}} bar(g) ({{SEATA_DES_PSI}} psi) · Shell {{SHELL_DES_BAR}} bar(g) ({{SHELL_DES_PSI}} psi)',{sz:10})
     +p('Ghi chú: {{GHI_CHU}}',{sz:10,after:280})+p('3. Kết luận:  ☐ Đạt      ☐ Không đạt',{b:true,sz:12,after:360})+tbl(sig,[3200,3200,3200],false);
   const NSW='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
   const z=new JSZip();
@@ -1699,7 +1699,7 @@ async function buildDataXlsx(){
 const S_hr = name => { const S=B.res.find(s=>s.name===name); return S?S.hr:0; };
 
 // ---------- giao dien ----------
-const fP = p => p==null ? '—' : `${fmtNum(p/CVF.bar,2)} bar<small>${fmtNum(p,0)} psig</small>`;
+const fP = p => p==null ? '—' : `${fmtNum(p/CVF.bar,2)} bar<small>${fmtNum(p,0)} psi</small>`;
 const fU = (v,u) => v==null ? '—' : fmtNum(v,pd(u));
 const warnOf = it => it.type==='psv' ? (it.r.W||[]) : (it.r.warns||[]);
 const medCell = s => s==null ? 'N/A' : (s.miss ? '<span class="b-bad">Thiếu</span>' : esc(s.med));
