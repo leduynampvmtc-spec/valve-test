@@ -442,6 +442,7 @@ td{padding:10px 12px}
   <div id="b_out" hidden>
     <div class="b-row" style="margin:12px 0">
       <button class="btn" type="button" id="b_run">Chạy &amp; xuất: Data kết quả + Báo cáo (ZIP)</button>
+      <button class="btn" type="button" id="b_raw" title="Lấy thẳng số liệu đang có trong file Data để điền biên bản, không tra cứu tiêu chuẩn. Ô trống trong Data để trống trong biên bản.">Xuất báo cáo theo Data (không tra cứu)</button>
       <button class="btn ghost" type="button" id="b_data">Chỉ tải file Data kết quả</button>
     </div>
     <div id="b_results"></div>
@@ -1800,6 +1801,39 @@ async function exportAll(){
   const per=nDoc?Math.round((st.fields+st.codes)/nDoc):0;
   status(`Đã xuất file Data kết quả + ${nDoc} biên bản (${({docx:'Word',pdf:'PDF',both:'Word + PDF'})[FMT]})`+(nDoc?` · tự điền ~${per} ô/biên bản`:'')+(noForm.size?` · Sheet chưa có Form phù hợp: ${[...noForm].join(', ')}`:'')+(miss.size?' · Mã không nhận ra: '+[...miss].slice(0,6).map(k=>'{{'+esc(k)+'}}').join(', '):''), noForm.size>0||miss.size>0);
 }
+// ---------- xuat bao cao lay thang so lieu trong file Data (khong tra cuu) ----------
+function rawItem(S,it){
+  const row=S.rows[it.rowIdx]||[]; const hl=new Set(); row.forEach((v,ix)=>{ if(String(v??'').trim()!=='') hl.add(it.rowIdx+','+ix); });
+  const S2={...S,hl}; const c={...it,ovr:null,raw:true};
+  const g=k=> S.map[k]!=null ? String(row[S.map[k]]??'').trim() : '';
+  const medTxt=v=>{ const m=pmed(v); return m==='Water'?'Water':(m==='Air'||m==='Nitrogen'?'Air':v); };
+  if(it.type==='psv'){
+    const x={...it.x}; const M=pmed(g('medA')); x.med = M==='Water'||M==='Air'||M==='Nitrogen' ? M : (g('medA')||null); c.x=x;
+    c.r={u:it.r.u||x.u||'psi',I:null,Q:null,P:null,R:null,N:null,Y:null,time:null,unit:g('lunit')||'',area:it.r.area,orfD:it.r.orfD,orfName:it.r.orfName,pop:['','',''],leak:['',''],W:[]};
+    applyPsvOverrides(S2,c);
+  } else {
+    c.i={...it.i, body:it.i.body||g('body'), mat:it.matRaw||it.i.mat, cls:it.i.cls||g('cls')};
+    const stage=v=> isNA(v) ? null : {med:v?medTxt(v):'',p:null,t:null,leak:undefined,des:null,lh:''};
+    c.r={seatA:stage(g('medA')),seatB:stage(g('medB')),shell:stage(g('medS'))||{med:'',p:null,t:null,des:null,lh:''},back:stage(g('medBk')),key:'',row:null,warns:[]};
+    applyCvOverrides(S2,c);
+  }
+  return c;
+}
+async function exportRaw(){
+  const items=allItems().map(it=>rawItem(B.res.find(S=>S.name===it.sheet),it)); if(!items.length){ status('Chưa có dữ liệu van.',true); return; }
+  const out=new JSZip(); const miss=new Set(), st={codes:0,fields:0,ticks:0}; let nDoc=0; const docs=[]; const noForm=new Set();
+  let sample=null;
+  const fsOf=async it=>{ const fs=formsFor(it); if(fs.length || it.type==='psv') return fs; if(!sample) sample={name:'Bien_ban_mau.docx',buf:await sampleDocx(),type:'valve'}; return [sample]; };
+  const used={};
+  for(let k=0;k<items.length;k++){ const it=items[k]; const fs=await fsOf(it); if(!fs.length){ noForm.add(it.sheet); continue; }
+    status(`Xuất theo Data: ${k+1}/${items.length}…`);
+    for(const f of fs){ const fb=formBase(f); const z=await fillDocx(f.buf,prep(it),miss,st); let fn=fileName(it); const key=fb+'/'+fn; if(used[key]) fn=fn.replace(/\.docx$/,'_'+(k+1)+'.docx'); used[key]=1;
+      docs.push({name:`${fb}/${fn}`, data:await z.generateAsync({type:'uint8array',compression:'DEFLATE'})}); nDoc++; } }
+  if(!docs.length){ status('Chưa nạp Form báo cáo phù hợp.',true); return; }
+  for(const d of await finishDocs(docs)) out.file(d.name,d.data);
+  saveBlob(await out.generateAsync({type:'blob',compression:'DEFLATE'}), safeName(B.data.name.replace(/\.(xlsx|xlsm|xlsb|csv)$/i,''))+'_Bao_cao_theo_Data.zip');
+  status(`Đã xuất ${nDoc} biên bản theo đúng số liệu trong file Data (không tra cứu, ô trống để trống)`+(noForm.size?` · Sheet chưa có Form: ${[...noForm].join(', ')}`:'')+(miss.size?' · Mã không nhận ra: '+[...miss].slice(0,6).map(k=>'{{'+esc(k)+'}}').join(', '):''), noForm.size>0||miss.size>0);
+}
 async function exportData(){ if(!B.res.length) return; saveBlob(await buildDataXlsx(), safeName(B.data.name.replace(/\.(xlsx|xlsm|xlsb|csv)$/i,''))+'_KetQua.xlsx'); status('Đã xuất file Data có kết quả.'); }
 async function exportForItem(it,btn,label){
   let fs=formsFor(it);
@@ -1842,6 +1876,7 @@ $b('b_fmt').value=FMT; $b('b_fmt').addEventListener('change',()=>{ FMT=$b('b_fmt
 $b('b_nodate').checked=ld('b_nodate')==='1'; $b('b_date').disabled=$b('b_nodate').checked; $b('b_nodate').addEventListener('change',()=>{ sv('b_nodate',$b('b_nodate').checked?'1':'0'); $b('b_date').disabled=$b('b_nodate').checked; });
 $b('b_merge').checked=MERGE; $b('b_merge').addEventListener('change',()=>{ MERGE=$b('b_merge').checked; sv('b_merge',MERGE?'1':'0'); });
 $b('b_run').addEventListener('click',()=>exportAll().catch(e=>status('Lỗi: '+esc(e.message),true)));
+$b('b_raw').addEventListener('click',()=>exportRaw().catch(e=>status('Lỗi: '+esc(e.message),true)));
 $b('b_data').addEventListener('click',()=>exportData().catch(e=>status('Lỗi: '+esc(e.message),true)));
 $b('b_results').addEventListener('click',e=>{ const bt=e.target.closest('.b-one'); if(bt) exportForItem(allItems()[+bt.dataset.ix],bt,'Word').catch(er=>status('Lỗi: '+esc(er.message),true)); });
 $b('b_sampledoc').addEventListener('click',async()=>saveBlob(new Blob([await sampleDocx()],{type:DOCX_MIME}),'Bien_ban_mau.docx'));
