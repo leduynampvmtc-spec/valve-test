@@ -211,6 +211,7 @@ td{padding:10px 12px}
 .b-flist .btn{padding:4px 10px;min-height:0}
 .b-sh{margin:18px 0 8px;font-size:1.05rem}
 @media (max-width:560px){.b-flist li{flex-wrap:wrap}.b-fname{flex-basis:100%;white-space:normal}}
+.b-ovr{display:block;color:#1f5fa8;font-weight:600}
 </style><link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
@@ -431,6 +432,7 @@ td{padding:10px 12px}
   <div class="b-head"><h2 style="margin:0">3 · Kết quả</h2><span id="b_info" class="b-meta"></span></div>
   <div class="b-row">
     <label class="b-inline">Ngày biên bản<input id="b_date" type="date"></label>
+    <label class="b-inline b-check"><input type="checkbox" id="b_nodate"> Để trống ngày (điền tay sau)</label>
     <label class="b-inline">Đơn vị áp PSV trong Data<select id="b_defu"><option value="psi">psig</option><option value="kg">kg/cm²</option><option value="bar">bar</option><option value="mpa">MPa</option></select></label>
     <label class="b-inline">Dấu thập phân<select id="b_dec"><option value=",">29,5</option><option value=".">29.5</option></select></label>
     <label class="b-inline b-check"><input type="checkbox" id="b_auto"> Tự nhận vị trí theo nhãn</label>
@@ -928,7 +930,7 @@ function colv(it,aliases){ if(!it||!it.cols) return ''; const ks=Object.keys(it.
 function valveMap(i,r,extra){
   const m={}; const set=(k,v)=>{ m[keyN(k)] = v==null ? '' : String(v); };
   const row=r.row;
-  set('STT',extra.stt); set('TAG',extra.tag); set('NGAY',extra.date||today());
+  set('STT',extra.stt); set('TAG',extra.tag); set('NGAY',extra.date??today());
   set('TIEU_CHUAN', i.tv==='Control Valve' ? 'ANSI/FCI 70-2, ASME B16.34' : 'API 598, ASME B16.34');
   set('LOAI_VAN',i.tv); set('KIEU_THAN',i.body); set('SIZE',sizeTxt(i.size)); set('DN',toDN(i.size)??'');
   set('VAT_LIEU',i.mat); set('CLASS',i.cls); set('NHOM_VL',row&&row[5]?row[5]:'');
@@ -961,7 +963,7 @@ function orfText(r,withD){ if(r.area==null) return ''; const dTxt='Ø'+fmtNum(r.
 function psvMap(it){
   const r=it.r, u=r.u||'psi', m={}; const set=(k,v)=>{ m[keyN(k)] = v==null ? '' : String(v); };
   const P=(k,v)=>{ set(k, v==null?'':fmtNum(v,pd(u))); for(const x of ['psi','bar','kg','mpa']) set(k+'_'+x.toUpperCase(), v==null?'':fmtNum(conv(v,u,x),pd(x))); };
-  set('STT',it.stt); set('TAG',it.tag); set('NGAY',it.date||today()); set('TIEU_CHUAN',psvStd(it.x.kind));
+  set('STT',it.stt); set('TAG',it.tag); set('NGAY',it.date??today()); set('TIEU_CHUAN',psvStd(it.x.kind));
   set('LOAI',it.x.kind==='Boiler'?'ASME Section I (Boiler)':'ASME Section VIII (Vessel)');
   set('SIZE',sizeTxt(it.x.size)); set('DN',it.x.size!=null?(toDN(it.x.size)??''):'');
   set('ORIFICE',orfText(r)); set('ORIFICE_D',r.orfD!=null?fmtNum(r.orfD,2):''); set('ORIFICE_MM2',r.area!=null?fmtNum(r.area*645.16,1):'');
@@ -1141,7 +1143,7 @@ function psvProv(it){
       const C=a=>colv(it,a);
       if(/last date|date tested|ngay thu (gan nhat|nghiem truoc)|ngay thu nghiem truoc/.test(n)) return C(['last date tested','ngay thu gan nhat','ngay thu nghiem truoc','date tested','last test']);
       if(/previous cert|chung chi truoc/.test(n)) return C(['previous certificate','chung chi truoc','chung chi']);
-      if(/date of issue|^ngay\b/.test(n)) return it.date||today();
+      if(/date of issue|^ngay\b/.test(n)) return it.date??today();
       if(/record no|so bien ban/.test(n)) return C(['so bien ban','record no','record']);
       if(/customer|khach hang/.test(n)) return C(['khach hang','customer','ten khach hang']);
       if(/w o no|don hang/.test(n)) return C(['w o no','wo no','w o','wo','don hang cong viec','don hang','work order']);
@@ -1189,7 +1191,7 @@ function cvProv(it){
       return null; },
     result(){ return null; },
     field(n){ const C=a=>colv(it,a);
-      if(/date of issue|^ngay\b/.test(n)) return it.date||today();
+      if(/date of issue|^ngay\b/.test(n)) return it.date??today();
       if(/tag/.test(n)) return it.tag;
       if(/size|kich thuoc/.test(n)) return i.size!=null ? sizeTxt(i.size)+'" (DN '+(toDN(i.size)??'')+')' : '';
       if(/\bclass\b|\brating\b|cap ap/.test(n)) return i.cls;
@@ -1241,6 +1243,11 @@ async function mergeDocx(tplBuf,items,miss,st){
 
 // ---------- doc Excel (.xlsx) / CSV ----------
 const colIdx = ref => { const m=/^([A-Z]+)/.exec(ref); let n=0; for(const ch of m[1]) n=n*26+ch.charCodeAt(0)-64; return n-1; };
+function isWhiteColor(c){ if(!c) return true; if(c.auto==='1'||c.auto==='true') return true;
+  if(c.rgb){ const v=c.rgb.slice(-6).toUpperCase(); return v==='FFFFFF'; }
+  if(c.indexed!=null && c.indexed!=='') return ['1','9','64','65'].includes(String(c.indexed));
+  if(c.theme!=null && c.theme!=='') return String(c.theme)==='0' && !(parseFloat(c.tint||0)< -0.05);
+  return true; }
 async function readXlsx(buf){
   const z=await JSZip.loadAsync(buf); const P=s=>new DOMParser().parseFromString(s,'application/xml');
   const wb=P(await z.file('xl/workbook.xml').async('string'));
@@ -1248,12 +1255,17 @@ async function readXlsx(buf){
   const rmap={}; for(const r of rels.getElementsByTagName('Relationship')) rmap[r.getAttribute('Id')]=r.getAttribute('Target');
   let sst=[]; if(z.file('xl/sharedStrings.xml')){ const s=P(await z.file('xl/sharedStrings.xml').async('string'));
     sst=[...s.getElementsByTagName('si')].map(si=>[...si.getElementsByTagName('t')].map(t=>t.textContent).join('')); }
+  // o duoc to mau (fill khac trang) -> so lieu thuc te do nguoi dung nhap
+  const HLX={}; if(z.file('xl/styles.xml')){ const st=P(await z.file('xl/styles.xml').async('string'));
+    const fills=[...st.getElementsByTagName('fills')[0]?.getElementsByTagName('fill')||[]].map(fl=>{ const pf=fl.getElementsByTagName('patternFill')[0]; if(!pf) return !!fl.getElementsByTagName('gradientFill')[0];
+      const pt=pf.getAttribute('patternType'); if(!pt||pt==='none') return false; const fg=pf.getElementsByTagName('fgColor')[0]; return !isWhiteColor(fg&&{rgb:fg.getAttribute('rgb'),indexed:fg.getAttribute('indexed'),theme:fg.getAttribute('theme'),tint:fg.getAttribute('tint'),auto:fg.getAttribute('auto')}); });
+    const cx=st.getElementsByTagName('cellXfs')[0]; if(cx) [...cx.getElementsByTagName('xf')].forEach((xf,ix)=>{ if(fills[+(xf.getAttribute('fillId')||0)]) HLX[ix]=1; }); }
   const sheets=[];
   for(const sh of wb.getElementsByTagName('sheet')){
     const rid=sh.getAttribute('r:id')||sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');
     let tg=rmap[rid]||''; tg = tg.startsWith('/') ? tg.slice(1) : 'xl/'+tg.replace(/^\.\//,'');
     if(!z.file(tg)) continue;
-    const x=P(await z.file(tg).async('string')); const rows=[];
+    const x=P(await z.file(tg).async('string')); const rows=[]; const hl=new Set();
     for(const row of x.getElementsByTagName('row')){
       const rn=parseInt(row.getAttribute('r'),10)-1; const arr=[];
       for(const c of row.getElementsByTagName('c')){
@@ -1262,11 +1274,11 @@ async function readXlsx(buf){
         else if(t==='inlineStr') val=[...c.getElementsByTagName('t')].map(q=>q.textContent).join('');
         else if(t==='b') val = v ? (v.textContent==='1'?'TRUE':'FALSE') : '';
         else val = v ? v.textContent : '';
-        arr[colIdx(c.getAttribute('r'))]=val;
+        const ci=colIdx(c.getAttribute('r')); arr[ci]=val; if(HLX[c.getAttribute('s')||'0'] && String(val).trim()!=='') hl.add((isNaN(rn)?rows.length:rn)+','+ci);
       }
       rows[isNaN(rn)?rows.length:rn]=Array.from(arr,q=>q==null?'':String(q));
     }
-    sheets.push({name:sh.getAttribute('name'),rows:Array.from(rows,q=>q||[])});
+    sheets.push({name:sh.getAttribute('name'),rows:Array.from(rows,q=>q||[]),hl});
   }
   return sheets;
 }
@@ -1285,15 +1297,22 @@ async function readXlsb(buf){
   const wb=await z.file('xl/workbook.bin').async('uint8array'), wdv=new DataView(wb.buffer,wb.byteOffset,wb.byteLength); const list=[];
   readXlsbRecs(wb,(t,p)=>{ if(t===156){ let q=p+8; const [rid,q2]=wstr(wb,wdv,q); const [name]=wstr(wb,wdv,q2); list.push({rid,name}); } });
   const rk=v=>{ let x; if(v&2) x=v>>2; else { const b=new DataView(new ArrayBuffer(8)); b.setUint32(4,(v&0xFFFFFFFC)>>>0,true); x=b.getFloat64(0,true); } return v&1 ? x/100 : x; };
+  const HLX={}; if(z.file('xl/styles.bin')){ const u=await z.file('xl/styles.bin').async('uint8array'), dv=new DataView(u.buffer,u.byteOffset,u.byteLength); const fills=[]; let inX=false, xi=0;
+    readXlsbRecs(u,(t,p)=>{ if(t===43){ const fls=dv.getUint32(p,true); const fl=u[p+4]>>1, idx=u[p+5], tint=dv.getInt16(p+6,true)/32767, r=u[p+8],g=u[p+9],b=u[p+10];
+        const col = fl===0?{auto:'1'} : fl===1?{indexed:String(idx)} : fl===2?{rgb:[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('')} : fl===3?{theme:String(idx),tint:String(tint)}:{auto:'1'};
+        fills.push(fls!==0 && !isWhiteColor(col)); }
+      else if(t===617) { inX=true; xi=0; } else if(t===618) inX=false;
+      else if(t===47 && inX){ if(fills[dv.getUint16(p+6,true)]) HLX[xi]=1; xi++; } }); }
   const sheets=[];
   for(const s of list){ let tg=rmap[s.rid]||''; tg=tg.startsWith('/')?tg.slice(1):'xl/'+tg.replace(/^\.\//,''); if(!z.file(tg)) continue;
-    const u=await z.file(tg).async('uint8array'), dv=new DataView(u.buffer,u.byteOffset,u.byteLength); const rows=[]; let rw=0;
+    const u=await z.file(tg).async('uint8array'), dv=new DataView(u.buffer,u.byteOffset,u.byteLength); const rows=[]; let rw=0; const hl=new Set();
     readXlsbRecs(u,(t,p)=>{ if(t===0){ rw=dv.getUint32(p,true); return; } if(t<1||t>11) return;
       const col=dv.getUint32(p,true), q=p+8; let v='';
       if(t===2) v=rk(dv.getUint32(q,true)); else if(t===5||t===9) v=dv.getFloat64(q,true);
       else if(t===6||t===8) v=wstr(u,dv,q)[0]; else if(t===7) v=sst[dv.getUint32(q,true)]??''; else if(t===4||t===10) v=u[q]?'TRUE':'FALSE'; else return;
-      if(rw>5000) return; (rows[rw]=rows[rw]||[])[col]=typeof v==='number'?String(Math.round(v*1e9)/1e9):v; });
-    sheets.push({name:s.name,rows:Array.from(rows,r=>Array.from(r||[],x=>x==null?'':String(x)))}); }
+      if(rw>5000) return; (rows[rw]=rows[rw]||[])[col]=typeof v==='number'?String(Math.round(v*1e9)/1e9):v;
+      if(HLX[(dv.getUint32(p+4,true)&0xFFFFFF)] && String(v).trim()!=='') hl.add(rw+','+col); });
+    sheets.push({name:s.name,rows:Array.from(rows,r=>Array.from(r||[],x=>x==null?'':String(x))),hl}); }
   return sheets;
 }
 function readCsv(text){
@@ -1474,12 +1493,53 @@ function sheetMode(sh,map){ const n=norm(sh.name);
   if(map.set!=null || map.cdtp!=null || map.orf!=null) return 'psv';
   if(map.size!=null && (map.cls!=null || map.body!=null || map.mat!=null)) return 'cv';
   return null; }
+// ---------- o to mau = so lieu thuc te (khong tra cuu, khong ghi de) ----------
+const isNA = v => /^\s*n\s*\/?\s*a\s*$/i.test(String(v));
+function parseLeak(v){ const t=String(v).trim(); const m=/^(-?[\d.,]+)\s*(.*)$/.exec(t); if(m){ const n=parseFloat(m[1].replace(',','.')); if(!isNaN(n)) return {v:n,u:m[2].trim()}; } return {t}; }
+function applyCvOverrides(S,it){
+  const hl=S.hl; if(!hl||!hl.size) return; const r=it.r, row=S.rows[it.rowIdx]||[]; const used=[];
+  const stg = k => k==='A'?'seatA':k==='B'?'seatB':k==='S'?'shell':'back';
+  const ensure = k => { const key=stg(k); if(!r[key]) r[key]={med:'',p:null,t:null,leak:undefined,des:null,lh:''}; return r[key]; };
+  S.H.forEach((h,ix)=>{ if(!hl.has(it.rowIdx+','+ix)) return; const n=norm(h), v=String(row[ix]??'').trim(); if(v==='') return;
+    const num=numOrNull(v); let k=null, f=null;
+    const M={'seat a test':['A','p'],'holding time seat a s':['A','t'],'max permit leak a ml min':['A','leak'],'test pressure seat a':['A','lh'],'seat a design':['A','des'],
+      'seat b test':['B','p'],'holding time seat b s':['B','t'],'max permit leak b ml min':['B','leak'],'test pressure seat b':['B','lh'],'seat b design':['B','des'],
+      'medium shell test':['S','med'],'shell test':['S','p'],'holding time shell s':['S','t'],'shell design':['S','des'],
+      'back seat test':['K','p'],'holding time back seat s':['K','t'],'max permit':['K','leak'],'back seat design':['K','des']}[n];
+    if(!M) return; [k,f]=M;
+    if(isNA(v) && (f==='p'||f==='t')){ r[stg(k)]=null; used.push(String(h).trim()); return; }
+    const s=ensure(k); s.miss=false;
+    if(f==='p'||f==='t'||f==='des'){ if(num==null) return; s[f]=num; }
+    else if(f==='leak') s.leak=parseLeak(v);
+    else if(f==='med'){ const m=pmed(v); s.med = m==='Water'||m==='Air'||m==='Nitrogen' ? (m==='Nitrogen'?'Air':m) : v; }
+    else s[f]=v;
+    used.push(String(h).trim()); });
+  if(used.length){ it.ovr=used; r.warns=(r.warns||[]).filter(w=>!(/Medium test Seat A/.test(w) && r.seatA && r.seatA.p!=null && !r.seatA.miss && r.seatA.med)); }
+}
+function applyPsvOverrides(S,it){
+  const hl=S.hl; if(!hl||!hl.size) return; const r=it.r, row=S.rows[it.rowIdx]||[]; const used=[]; const u=r.u||'psi', su=it.setU||u; let pchg=false;
+  S.H.forEach((h,ix)=>{ if(!hl.has(it.rowIdx+','+ix)) return; const n=norm(h), raw=String(h), v=String(row[ix]??'').trim(); if(v==='') return;
+    const num=numOrNull(v), P=x=>conv(x,su,u); let ok=true;
+    if(n==='test pressure pop test' && num!=null){ r.I=P(num); pchg=true; }
+    else if(n==='open pr' && num!=null){ if(/-/.test(raw)) r.Q=P(num); else r.P=P(num); pchg=true; }
+    else if(n==='close pr' && num!=null){ r.R=P(num); pchg=true; }
+    else if(n==='leak test' && num!=null) r.N=P(num);
+    else if(n==='test time' && num!=null) r.time=num;
+    else if(n==='max permit leak' && num!=null){ r.Y=num; r.leak=(it.x.l||[]).map(a=>a==null||r.Y==null?'':(a<=r.Y?'Pass':'Fail')); }
+    else if(/^bubble min or ml min/.test(n)) r.unit=v;
+    else if(n==='orifice inch' && num!=null){ r.area=num; r.orfD=Math.sqrt(4*num*645.16/Math.PI); }
+    else { const m=/^result (pop|leak) ([123])$/.exec(n); if(m && /pass|fail|dat/i.test(v)){ const arr=m[1]==='pop'?r.pop:r.leak; arr[m[2]-1]=/fail|khong/i.test(v)?'Fail':'Pass'; } else ok=false; }
+    if(ok) used.push(raw.trim()); });
+  if(pchg && it.x.o && it.x.o.some(o=>o!=null)){ const cc=it.x.c||[];
+    r.pop=it.x.o.map((o,i)=> o==null||r.P==null ? '' : (o>=r.Q-1e-9 && o<=r.P+1e-9 && (cc[i]==null || cc[i]>=r.R-1e-9)) ? 'Pass':'Fail'); }
+  if(used.length) it.ovr=used;
+}
 function processSheet(sh){
   const hr=findHeader(sh.rows); if(hr<0) return null;
   const H=sh.rows[hr]; const map={}, hdrTxt={};
   H.forEach((h,ix)=>{ const k=headerKey(h); if(k && !(k in map)){ map[k]=ix; hdrTxt[k]=String(h); } });
   const mode=sheetMode(sh,map); if(!mode) return null;
-  const S={name:sh.name,sub:/^mv$/i.test(norm(sh.name))?'MV':(/^cv$/i.test(norm(sh.name))?'CV':''),mode,hr,H,map,items:[],rows:sh.rows};
+  const S={hl:sh.hl||new Set(),name:sh.name,sub:/^mv$/i.test(norm(sh.name))?'MV':(/^cv$/i.test(norm(sh.name))?'CV':''),mode,hr,H,map,items:[],rows:sh.rows};
   const cl={}; for(const k of ['medA','medB','medS','medBk']) if(map[k]!=null){ cl[k]=colL(map[k]); cl[k+'h']=String(H[map[k]]).trim(); }
   let n=0;
   for(let r=hr+1;r<sh.rows.length;r++){
@@ -1504,7 +1564,7 @@ function processSheet(sh){
       let rr; try{ rr=psvCalc(x); }catch(e){ rr={W:['Lỗi tính: '+e.message]}; }
       if(!medOk){ rr.Y=null; rr.unit=''; rr.leak=['','']; rr.W.unshift('Thiếu thông tin Medium test – '+(cl.medA?'cột '+cl.medA+' ('+cl.medAh+')':'không có cột "Medium"')+(M==='X'?' – giá trị "'+g('medA')+'" không hợp lệ':'')); }
       if(x.size==null) rr.W.unshift('Thiếu Size inlet.');
-      S.items.push({type:'psv',sheet:sh.name,sub:'PSV',rowIdx:r,stt:g('stt')||String(n),tag:g('tag'),cols,x,r:rr,setV,setU,cdtpV,cdtpU});
+      const itP={type:'psv',sheet:sh.name,sub:'PSV',rowIdx:r,stt:g('stt')||String(n),tag:g('tag'),cols,x,r:rr,setV,setU,cdtpV,cdtpU}; applyPsvOverrides(S,itP); S.items.push(itP);
     } else {
       const desc=g('desc');
       const body=parseBody(g('body')) || parseBody(desc);
@@ -1523,7 +1583,7 @@ function processSheet(sh){
       let r2; try{ r2=computeCv(i,{A:g('medA'),B:g('medB'),S:g('medS'),Bk:g('medBk')},cl); }catch(e){ r2={warns:['Lỗi tính: '+e.message],seatA:null,seatB:null,shell:{},back:null}; }
       r2.warns=[...new Set([...pre,...(r2.warns||[])])];
       const act={}; for(const k of ['la1','lb1','lbk1','lsh1','la2','lb2','lbk2','lsh2']) act[k]=numOrNull(g(k));
-      S.items.push({type:'cv',sheet:sh.name,sub:S.sub||(tv==='Control Valve'?'CV':'MV'),rowIdx:r,stt:g('stt')||String(n),tag:g('tag'),desc,cols,i,r:r2,act,matOk:!!mat,matRaw});
+      const itC={type:'cv',sheet:sh.name,sub:S.sub||(tv==='Control Valve'?'CV':'MV'),rowIdx:r,stt:g('stt')||String(n),tag:g('tag'),desc,cols,i,r:r2,act,matOk:!!mat,matRaw}; applyCvOverrides(S,itC); S.items.push(itC);
     }
   }
   return S;
@@ -1592,8 +1652,8 @@ const WARNH='Cảnh báo (App)';
 function sheetChanges(S){ // [{r,c,v}]
   const ch=[]; let wc=S.H.findIndex(h=>norm(h)===norm(WARNH)); if(wc<0){ wc=S.H.length; ch.push({r:S.hr,c:wc,v:WARNH,hdr:true}); }
   for(const it of S.items){ const o = it.type==='psv' ? psvOut(S,it) : cvOut(S,it);
-    for(const c in o) ch.push({r:it.rowIdx,c:+c,v:o[c]});
-    const W = it.type==='psv' ? (it.r.W||[]) : (it.r.warns||[]); ch.push({r:it.rowIdx,c:wc,v:W.join('; ')||'OK'}); }
+    for(const c in o) if(!S.hl.has(it.rowIdx+','+c)) ch.push({r:it.rowIdx,c:+c,v:o[c]});
+    const W = (it.type==='psv' ? (it.r.W||[]) : (it.r.warns||[])).slice(); if(it.ovr) W.push('Giữ số liệu thực tế (ô tô màu): '+it.ovr.join(', ')); ch.push({r:it.rowIdx,c:wc,v:W.join('; ')||'OK'}); }
   return ch; }
 const xesc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'');
 async function buildDataXlsx(){
@@ -1658,12 +1718,12 @@ function renderList(){
         <td>${it.setV!=null?fU(it.setV,it.setU)+'<small>'+PL[it.setU]+'</small>':'—'}</td><td>${it.x.med?esc(it.x.med):'<span class="b-bad">Thiếu</span>'}</td>
         <td>${fU(r.I,u)}<small>${PL[u]}</small></td><td>${r.Q!=null?fU(r.Q,u)+' – '+fU(r.P,u):'—'}</td><td>${fU(r.R,u)}</td><td>${fU(r.N,u)}</td>
         <td>${r.Y!=null?fmtNum(r.Y,2)+'<small>'+esc(r.unit)+'</small>':'—'}</td><td>${r.time??'—'}</td>
-        <td class="b-note">${W.map(esc).join('<br>')||'✓'}</td><td>${fb}</td></tr>`; }
+        <td class="b-note">${W.map(esc).join('<br>')||(it.ovr?'':'✓')}${it.ovr?'<span class="b-ovr">Số liệu thực tế: '+esc(it.ovr.join(', '))+'</span>':''}</td><td>${fb}</td></tr>`; }
       const i=it.i,r=it.r;
       return `<tr class="${W.length?'b-warnrow':''}"><td>${esc(it.stt)}</td><td>${esc(it.tag)}</td><td>${esc(i.tv==='Control Valve'?'CV':'On-Off')}</td><td>${esc(i.body)}</td>
       <td>${i.size!=null?esc(sizeTxt(i.size))+'"<small>DN '+(toDN(i.size)??'?')+'</small>':'—'}</td><td>${esc(i.mat)}${!it.matOk&&it.matRaw?'<small>'+esc(it.matRaw)+'</small>':''}</td><td>${esc(i.cls)}</td>
       <td>${r.shell?fP(r.shell.p):'—'}</td><td>${medCell(r.seatA)}${r.seatA&&!r.seatA.miss?' · '+fP(r.seatA.p):''}</td><td>${r.seatB===null?'N/A':medCell(r.seatB)+(r.seatB&&!r.seatB.miss?' · '+fP(r.seatB.p):'')}</td>
-      <td>${r.seatA&&r.seatA.t!=null?r.seatA.t+' s':'—'}</td><td class="b-note">${W.map(esc).join('<br>')||'✓'}</td><td>${fb}</td></tr>`; }).join('');
+      <td>${r.seatA&&r.seatA.t!=null?r.seatA.t+' s':'—'}</td><td class="b-note">${W.map(esc).join('<br>')||(it.ovr?'':'✓')}${it.ovr?'<span class="b-ovr">Số liệu thực tế: '+esc(it.ovr.join(', '))+'</span>':''}</td><td>${fb}</td></tr>`; }).join('');
     const head = S.mode==='psv'
       ? '<tr><th>STT</th><th>Tag</th><th>Size</th><th>Orifice</th><th>Set</th><th>Medium</th><th>Pop test</th><th>Dung sai mở</th><th>Đóng ≥</th><th>Thử kín</th><th>Rò cho phép</th><th>t (phút)</th><th>Ghi chú</th><th></th></tr>'
       : '<tr><th>STT</th><th>Tag</th><th>Loại</th><th>Kiểu thân</th><th>Size</th><th>Vật liệu</th><th>Class</th><th>Shell</th><th>Seat A</th><th>Seat B</th><th>Giữ seat</th><th>Ghi chú</th><th></th></tr>';
@@ -1688,7 +1748,7 @@ function codesTable(){
     <tr><td><code>{{Tên cột Excel}}</code></td><td>Mọi cột trong file Data, VD <code>{{Serial}}</code>, <code>{{Manufacture}}</code></td></tr></tbody></table>`;
 }
 function status(msg,bad){ const e=$b('b_status'); e.innerHTML=msg?`<span class="${bad?'b-bad':'b-ok'}">${msg}</span>`:''; }
-const date = () => { const v=$b('b_date').value; if(!v) return today(); const [y,m,d]=v.split('-'); return d+'/'+m+'/'+y; };
+const date = () => { if($b('b_nodate') && $b('b_nodate').checked) return ''; const v=$b('b_date').value; if(!v) return today(); const [y,m,d]=v.split('-'); return d+'/'+m+'/'+y; };
 function prep(it){
   it.date=date();
   if(it.type==='psv'){ it.map=psvMap(it); it.prov=psvProv(it); }
@@ -1779,6 +1839,7 @@ $b('b_defu').value=DEFU; $b('b_defu').addEventListener('change',()=>{ DEFU=$b('b
 $b('b_auto').checked=AUTO; $b('b_auto').addEventListener('change',()=>{ AUTO=$b('b_auto').checked; sv('b_auto',AUTO?'1':'0'); });
 pdfReady().then(ok=>{ if(ok) return; for(const o of $b('b_fmt').options) if(o.value!=='docx'){ o.disabled=true; o.textContent+=' – chỉ bản Windows'; } if(FMT!=='docx'){ FMT='docx'; $b('b_fmt').value='docx'; } });
 $b('b_fmt').value=FMT; $b('b_fmt').addEventListener('change',()=>{ FMT=$b('b_fmt').value; sv('b_fmt',FMT); if(FMT!=='docx') pdfReady().then(ok=>{ if(!ok) status('Xuất PDF chỉ chạy trong app Windows (.exe) có Microsoft Word hoặc LibreOffice.',true); }); });
+$b('b_nodate').checked=ld('b_nodate')==='1'; $b('b_date').disabled=$b('b_nodate').checked; $b('b_nodate').addEventListener('change',()=>{ sv('b_nodate',$b('b_nodate').checked?'1':'0'); $b('b_date').disabled=$b('b_nodate').checked; });
 $b('b_merge').checked=MERGE; $b('b_merge').addEventListener('change',()=>{ MERGE=$b('b_merge').checked; sv('b_merge',MERGE?'1':'0'); });
 $b('b_run').addEventListener('click',()=>exportAll().catch(e=>status('Lỗi: '+esc(e.message),true)));
 $b('b_data').addEventListener('click',()=>exportData().catch(e=>status('Lỗi: '+esc(e.message),true)));
