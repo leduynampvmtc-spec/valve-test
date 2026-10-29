@@ -681,7 +681,7 @@ function render(){
   const i=inputs(); const r=calc(i); last={i,r};
   $('summary').innerHTML = `<span class="key">${r.key}</span><span class="chip ${r.seatA.med==='Water'?'water':'air'}">${r.seatA.lh}</span>${r.row && r.row[5]?`<span class="hint">${r.row[5]}</span>`:''}${r.row&&r.row[2]?`<span class="hint">CWP ${r.row[2]} psig = ${fxc(r.row[2]/CVF.bar,'bar')} bar(g) = ${fxc(r.row[2]/CVF.mpa,'mpa')} MPa</span>`:''}`;
   $('warns').innerHTML = r.warns.map(w=>`<div class="warn">${w}</div>`).join('');
-  $('stages').innerHTML = stage('Seat A (Đế kín A)',r.seatA)+stage('Seat B (Đế kín B)',r.seatB)+stage('Shell (Thân van)',{...r.shell,leak:{t:'No visible leakage (Không rò nhìn thấy)'}})+stage('Back seat (Đế kín phụ)',r.back);
+  $('stages').innerHTML = stage('Seat A (Đế kín A)',r.seatA)+stage('Seat B (Đế kín B)',r.seatB)+stage('Shell (Thân van)',{...r.shell,leak:{t:'No visible leakage (Không phát hiện rò rỉ khi quan sát bằng mắt thường)'}})+stage('Back seat (Đế kín phụ)',r.back);
   $('stdbox').innerHTML = stdBox(cvStds(i));
   for(const k of ['body','size','matq','cls','design','leak','cv','dp']) store(k,$(k).value);
   store('tv',st.tv); store('med',st.med);
@@ -1017,7 +1017,7 @@ function valveMap(i,r,extra){
   set('DESIGN_PSI',desPsi!=null?fmtNum(desPsi,1).replace(/[.,]0$/,''):''); set('DESIGN_BAR',desPsi!=null?fmtNum(desPsi/CVF.bar,2):'');
   set('LEAK_CLASS',i.tv==='Control Valve'?i.leak:''); set('CV',i.cv||''); set('DP',i.dp||'');
   set('CHE_DO',r.seatA?r.seatA.lh:''); set('MO_TA',extra.desc||''); set('GHI_CHU',(r.warns||[]).join('; '));
-  const st={SHELL:{...r.shell,leak:{t:'Không rò nhìn thấy'}},SEATA:r.seatA,SEATB:r.seatB,BACK:r.back};
+  const st={SHELL:{...r.shell,leak:{t:'Không phát hiện rò rỉ khi quan sát bằng mắt thường'}},SEATA:r.seatA,SEATB:r.seatB,BACK:r.back};
   for(const [k] of STAGES){ const s=st[k];
     if(!s){ for(const [f] of SFIELDS) set(k+'_'+f,'N/A'); continue; }
     set(k+'_MOI_CHAT',s.med==='Water'?'Nước (Water)':(s.med==='Air'?'Khí (Air)':(s.med||'')));
@@ -1257,7 +1257,7 @@ function psvProv(it){
 // ---------- nguon du lieu cho tu dien: CV & MV ----------
 function cvProv(it){
   const r=it.r, i=it.i;
-  const stg=label=>{ if(/back ?seat|ghe sau|backseat/.test(label)) return r.back; if(/shell|than van|vo van|body/.test(label)) return {...r.shell,leak:{t:'Không rò nhìn thấy'}};
+  const stg=label=>{ if(/back ?seat|ghe sau|backseat/.test(label)) return r.back; if(/shell|than van|vo van|body/.test(label)) return {...r.shell,leak:{t:'Không phát hiện rò rỉ khi quan sát bằng mắt thường'}};
     if(/seat b|phia b|side b/.test(label)) return r.seatB; if(/seat|kin|closure|dong kin|seat a/.test(label)) return r.seatA; return undefined; };
   return {
     kind: () => 'cv', unitText: (k,key)=> key==='press' ? 'bar(g)' : null,
