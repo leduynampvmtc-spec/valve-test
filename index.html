@@ -69,7 +69,7 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);ou
 .seg button+button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--steel);color:var(--panel)}
 .hint{font-size:.75rem;color:var(--muted);font-weight:400}
-.cv-only[hidden],.on-only[hidden]{display:none}
+.cv-only[hidden],.on-only[hidden],p.cv-only[hidden]{display:none}
 .summary{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;margin-bottom:14px}
 .summary .key{font:500 1rem var(--f-mono);color:var(--ink)}
 .chip{display:inline-flex;align-items:center;gap:6px;font:600 .75rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:3px}
@@ -289,6 +289,16 @@ td{padding:10px 12px}
       <label class="cv-only">Cv
         <input id="cv" type="text" inputmode="decimal" autocomplete="off" min="0" step="any">
       </label>
+      <label class="cv-only">FL – water test (thử nước)
+        <input id="fl" type="text" inputmode="decimal" autocomplete="off" placeholder="0.8">
+      </label>
+      <label class="cv-only">xT – air test (thử khí)
+        <input id="xt" type="text" inputmode="decimal" autocomplete="off" placeholder="0.54">
+      </label>
+      <p class="cv-only full hint" style="margin:-4px 0 4px">FL, xT: from the manufacturer's sizing data for this valve / trim (Fisher, Masoneilan, Samson…); empty = old file values 0.8 / 0.54 (Lấy theo dữ liệu của hãng cho van / trim này; để trống = giá trị file cũ).</p>
+      <label class="cv-only full">Port (seat) diameter, inch (Đường kính cửa van) <span class="hint">for Class V, VI (dùng cho Class V, VI)</span>
+        <input id="port" type="text" inputmode="decimal" autocomplete="off">
+      </label>
       <label class="cv-only full">ΔP (psi) <span class="hint">for Class V (dùng cho Class V)</span>
         <input id="dp" type="text" inputmode="decimal" autocomplete="off" min="0" step="any">
       </label>
@@ -501,7 +511,7 @@ const STD={
  a598:['API 598:2023','11th Edition, Feb 2023 (Ấn bản 11, 02/2023)','Test pressures, holding times, allowable seat leakage of on-off / manual valves (Áp suất thử, thời gian giữ, rò cho phép van đóng mở / van tay)'],
  a598t:['API 598:2023','11th Edition, Feb 2023 (Ấn bản 11, 02/2023)','Shell and back seat holding times (Thời gian giữ shell, back seat)'],
  b1634:['ASME B16.34-2025','2025 Edition (Ấn bản 2025)','Pressure–temperature rating (CWP at 38 °C); shell test = 1.5 × CWP rounded up to 25 psi; seat test = 1.1 × CWP (Áp làm việc ở 38 °C; shell test = 1,5 × CWP làm tròn lên bậc 25 psi; seat test = 1,1 × CWP)'],
- fci:['ANSI/FCI 70-2-2021','2021 Edition (Ấn bản 2021)','Control valve seat leakage classes I–VI, seat test 50 psig (Cấp rò van điều khiển I–VI, áp thử seat 50 psig)'],
+ fci:['ANSI/FCI 70-2-2021','2021 Edition (Ấn bản 2021)','Control valve seat leakage classes I–VI, seat test 50 psig. Class II–IV = 0.5 / 0.1 / 0.01 % of rated capacity calculated from Cv with FL (water) or xT (air) per IEC 60534-2-1; Class V, VI by port diameter (Cấp rò I–VI, thử seat 50 psig; Class II–IV = % lưu lượng định mức tính từ Cv kèm FL khi thử nước, xT khi thử khí; Class V, VI theo đường kính cửa van)'],
  a527:['API 527:2020 (R2025)','5th Edition, Jul 2020, reaffirmed 2025 (Ấn bản 5, 07/2020, tái xác nhận 2025)','Seat tightness of pressure relief valves: leak test at 90 % of set pressure, allowable leakage, test time (Độ kín đế van an toàn: thử ở 90 % áp cài đặt, rò cho phép, thời gian thử)'],
  s13:['ASME BPVC Section XIII-2025','2025 Edition, used with Section VIII Div. 1 (Ấn bản 2025, dùng cùng Section VIII Div. 1)','Set pressure tolerance of relief valves for pressure vessels (Dung sai áp suất cài đặt – bình áp lực)'],
  s1:['ASME BPVC Section I-2025','2025 Edition (Ấn bản 2025)','Set pressure tolerance and blowdown of power boiler safety valves (Dung sai áp cài đặt và blowdown – nồi hơi)'],
@@ -628,22 +638,24 @@ function calc(i){
   let R=null;
   const cv=parseFloat(i.cv), dp=parseFloat(i.dp), g=i.leak;
   if(isCV){
+    const flIn=parseFloat(String(i.fl??'').replace(',','.')), xtIn=parseFloat(String(i.xt??'').replace(',','.')), port=parseFloat(String(i.port??'').replace(',','.'));
+    const FL = flIn>0 && flIn<=1 ? flIn : 0.8, XT = xtIn>0 && xtIn<=1 ? xtIn : 0.54;   // mac dinh = file Excel cu
+    const frac={II:0.005,III:0.001,IV:0.0001}[g];
     if(g==='I'){R={t:'Not specified – Class I (Không quy định)'}}
-    else if(M==='Water'){
-      if(g==='II') R={v:vbRound(cv*121.6667,1),u:'ml/min'};
-      else if(g==='III') R={v:vbRound(cv*24.3334,1),u:'ml/min'};
-      else if(g==='IV') R={v:vbRound(cv*2.43334,1),u:'ml/min'};
-      else if(g==='V') R={v:vbRound(cv*0.0005*dp,1),u:'ml/min'};
-      else if(g==='VI'){const x=look(D.lvi,size);R=x?{v:x[0],u:'ml/min'}:null}
-    } else {
-      if(g==='II') R={v:vbRound(cv*0.158,1),u:'SCFM'};
-      else if(g==='III') R={v:vbRound(cv*0.0315,1),u:'SCFM'};
-      else if(g==='IV') R={v:vbRound(cv*0.00315,1),u:'SCFM'};
-      else if(g==='V') R={v:vbRound(cv*0.0005*dp,1),u:'SCFM'};
-      else if(g==='VI'){const x=look(D.lvi,size);R=x?(size<=8?{v:x[1],u:'bubbles/min'}:{v:x[0],u:'ml/min'}):null}
+    else if(frac){
+      if(cv>0){ const q=fciRated(cv,M,FL,XT,50), v=q*frac;
+        R = M==='Water' ? {v:Math.round(v*100)/100, u:`ml/min (FL ${FL})`} : {v:Math.round(v*100)/100, u:`ml/min = ${Math.round(v/28316.85*1e5)/1e5} SCFM (xT ${XT})`}; }
+      if(M==='Water' ? !(flIn>0) : !(xtIn>0)) W.push(M==='Water' ? 'FL not entered – default 0.8 (as the old Excel file) is used; enter FL from the manufacturer\'s data (Chưa nhập FL – dùng mặc định 0,8 như file cũ; nên nhập FL theo dữ liệu của hãng).' : 'xT not entered – default 0.54 (as the old Excel file) is used; enter xT from the manufacturer\'s data (Chưa nhập xT – dùng mặc định 0,54 như file cũ; nên nhập xT theo dữ liệu của hãng).');
     }
-    if(['II','III','IV'].includes(g) && !(cv>0)) W.push('Enter Cv to compute the Class '+g+' leakage rate (Nhập Cv để tính tốc độ rò Class '+g+').');
-    if(g==='V' && !(cv>0 && dp>0)) W.push('Class V needs both Cv and ΔP (Class V cần cả Cv và ΔP).');
+    else if(g==='V'){
+      if(M==='Water'){ if(port>0 && dp>0) R={v:Math.round(5e-4*port*dp*1000)/1000, u:'ml/min (5×10⁻⁴ × D × ΔP)'}; }
+      else if(port>0) R={v:Math.round(4.7*port*100)/100, u:'std ml/min (4.7 × D, air 50 psig)'};
+      if(!(port>0) || (M==='Water' && !(dp>0))) W.push('Class V needs the port (seat) diameter'+(M==='Water'?' and the max. service ΔP':'')+' (Class V cần đường kính cửa van'+(M==='Water'?' và ΔP làm việc lớn nhất':'')+').');
+    }
+    else if(g==='VI'){ const d=port>0?port:size, x=look(D.lvi,d);
+      R=x?(M!=='Water' && d<=8 && x[1]!=='-' ? {v:x[0],u:`ml/min (${x[1]} bubbles/min)`} : {v:x[0],u:'ml/min'}):null;
+      if(!(port>0)) W.push('Class VI: port (seat) diameter not entered – valve size is used (Class VI: chưa nhập đường kính cửa van – tạm lấy theo size van).'); }
+    if(frac && !(cv>0)) W.push('Enter Cv to compute the Class '+g+' leakage rate (Nhập Cv để tính tốc độ rò Class '+g+').');
   } else if(['Gate','Globe','Ball','Butterfly','Plug'].includes(H)){
     R = M==='Air' ? wrap(look(D.mp.air,size),'bubbles/min') : wrap(look(D.mp.liq,size),'ml/min');
   } else if(H==='Check'){
@@ -687,6 +699,12 @@ function calc(i){
   return (on && i.tstd==='6D') ? api6D(RES,i,{size,row}) : RES;
 }
 
+// ANSI/FCI 70-2: rated capacity tu Cv theo IEC 60534-2-1 / ANSI/ISA-75.01 (ml/min), thu o ptest psig, xa ra khi quyen
+function fciRated(cv,med,FL,XT,ptest){
+  const p1=ptest/14.5038+1.01325, dp=p1-1.01325, Kv=0.865*cv; let q;   // bar abs; Kv m3/h
+  if(med==='Water'){ const dpc=FL*FL*(p1-0.9571*0.0234); q=Kv*Math.sqrt(Math.min(dp,dpc)); }        // chat long: nghen theo FL
+  else { const x=dp/p1, xs=Math.min(x,XT), Y=1-xs/(3*XT); q=2600*Kv*p1*Y*Math.sqrt(xs/8343.36); }   // khi: nghen theo xT, Y=2/3 khi nghen
+  return q*1e6/60; }
 function oldOf(nw,od){ const o={}; let any=false; for(const k in od){ const a=nw[k], b=od[k]; const same = k==='leak' ? (!a&&!b)||(a&&b&&a.v===b.v&&a.t===b.t) : a===b; if(!same && b!=null){ o[k]=b; any=true; } } return any?o:null; }
 // ---- render ----
 const fmtP = p => p==null ? '—' : `${fxc(p/CVF[st.disp],st.disp)} ${CVL[st.disp]}`;
@@ -710,7 +728,7 @@ function stage(title,s,extra){
 }
 function inputs(){
   return {tv:st.tv,med:st.med,body:$('body').value,size:parseFloat($('size').value),mat:$('matq').value.trim(),
-    cls:$('cls').value,design:$('design').value,leak:$('leak').value,cv:$('cv').value,dp:$('dp').value,
+    cls:$('cls').value,design:$('design').value,leak:$('leak').value,cv:$('cv').value,dp:$('dp').value,fl:$('fl').value,xt:$('xt').value,port:$('port').value,
     tstd:st.tv==='On-Off Valve'?$('tstd').value:'598',seatT:$('seatT').value,isoR:$('isoR').value};
 }
 let last=null;
@@ -722,7 +740,7 @@ function render(){
   $('warns').innerHTML = r.warns.map(w=>`<div class="warn">${w}</div>`).join('');
   $('stages').innerHTML = stage('Seat A (Đế kín A)',r.seatA)+stage('Seat B (Đế kín B)',r.seatB)+stage('Shell (Thân van)',{...r.shell,leak:{t:'No visible leakage (Không phát hiện rò rỉ khi quan sát bằng mắt thường)'}})+stage('Back seat (Đế kín phụ)',r.back);
   $('stdbox').innerHTML = stdBox(cvStds(i));
-  for(const k of ['body','size','matq','cls','design','leak','cv','dp','tstd','seatT','isoR']) store(k,$(k).value);
+  for(const k of ['body','size','matq','cls','design','leak','cv','dp','tstd','seatT','isoR','fl','xt','port']) store(k,$(k).value);
   store('tv',st.tv); store('med',st.med);
 }
 function text(){
@@ -744,7 +762,7 @@ function segInit(id,keyName){
 segInit('tv','tv'); segInit('med','med');
 $('matq').addEventListener('input',()=>{fillClasses();render()});
 $('matq').addEventListener('change',()=>{fillClasses();render()});
-['body','size','cls','design','leak','cv','dp'].forEach(k=>$(k).addEventListener('input',render));
+['body','size','cls','design','leak','cv','dp','fl','xt','port'].forEach(k=>$(k).addEventListener('input',render));
 ['tstd','seatT','isoR'].forEach(k=>$(k).addEventListener('change',render));
 function setDisp(k){st.disp=k; $('dispu').value=k; store('dispu',k);}
 $('dispu').addEventListener('change',()=>{setDisp($('dispu').value); render();});
@@ -779,7 +797,7 @@ $('mq').addEventListener('input',matTable);
 
 // ---- start with saved inputs or an example ----
 (function start(){
-  const ex={body:'Gate',size:'6',matq:'ASTM A216 GR WCB',cls:'600',design:'1200',leak:'IV',cv:'',dp:'',tstd:'598',seatT:'Soft',isoR:''};
+  const ex={body:'Gate',size:'6',matq:'ASTM A216 GR WCB',cls:'600',design:'1200',leak:'IV',cv:'',dp:'',tstd:'598',seatT:'Soft',isoR:'',fl:'',xt:'',port:''};
   for(const k in ex){const v=load(k);$(k).value = v!==null ? v : ex[k]}
   const tv=load('tv'), med=load('med');
   if(tv){st.tv=tv;[...$('tv').children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===tv))}
@@ -1028,7 +1046,7 @@ const STAGES=[['SHELL','Shell'],['SEATA','Seat A'],['SEATB','Seat B'],['BACK','B
 const FIELDS=[['STT','Item No. (Số thứ tự)'],['TAG','Tag No (mã van)'],['NGAY','Report date (Ngày lập biên bản)'],['TIEU_CHUAN','Applicable standard (Tiêu chuẩn áp dụng)'],
  ['LOAI_VAN','On-Off Valve / Control Valve'],['KIEU_THAN','Gate, Globe, Ball…'],['SIZE','Size (inch)'],['DN','Size DN'],
  ['VAT_LIEU','Body material (Vật liệu thân)'],['CLASS','Class'],['NHOM_VL','ASME B16.34 material group (Nhóm vật liệu)'],['CWP_PSI','CWP 38°C (psi)'],['CWP_BAR','CWP 38°C (bar)'],
- ['DESIGN_PSI','Design pressure (psi)'],['DESIGN_BAR','Design pressure (bar)'],['LEAK_CLASS','Leakage class (CV)'],['CV','Cv'],['DP','ΔP (psi)'],
+ ['DESIGN_PSI','Design pressure (psi)'],['DESIGN_BAR','Design pressure (bar)'],['LEAK_CLASS','Leakage class (CV)'],['CV','Cv'],['DP','ΔP (psi)'],['FL','FL (CV)'],['XT','xT (CV)'],['PORT','Port diameter, inch (CV)'],
  ['CHE_DO','Low/High-Pressure Closure'],['MO_TA','Description column in Excel (Cột Mô tả)'],['GHI_CHU','App warnings (Cảnh báo của app)']];
 const SFIELDS=[['MOI_CHAT','Test medium (Môi chất)'],['P_PSI','Test pressure, psi (Áp suất test)'],['P_BAR','Test pressure, bar (Áp suất test)'],['P_KG','Test pressure, kg/cm² (Áp suất test)'],['P_MPA','Test pressure, MPa (Áp suất test)'],
  ['TG','Holding time, s (Thời gian giữ)'],['RO','Allowable leakage (Rò cho phép)'],['DES_PSI','By design pressure, psi (Áp theo design)'],['DES_BAR','By design pressure, bar (Áp theo design)']];
@@ -1056,7 +1074,7 @@ function valveMap(i,r,extra){
   set('CWP_PSI',row&&row[2]!=null?fmtNum(row[2],0):''); set('CWP_BAR',row&&row[2]!=null?fmtNum(row[2]/CVF.bar,2):'');
   const desPsi = i.dRaw>0 ? i.dRaw*CVF[i.dU||'psi'] : null;
   set('DESIGN_PSI',desPsi!=null?fmtNum(desPsi,1).replace(/[.,]0$/,''):''); set('DESIGN_BAR',desPsi!=null?fmtNum(desPsi/CVF.bar,2):'');
-  set('LEAK_CLASS',i.tv==='Control Valve'?i.leak:''); set('CV',i.cv||''); set('DP',i.dp||'');
+  set('LEAK_CLASS',i.tv==='Control Valve'?i.leak:''); set('CV',i.cv||''); set('DP',i.dp||''); set('FL',i.fl||''); set('XT',i.xt||''); set('PORT',i.port||'');
   set('CHE_DO',r.seatA?r.seatA.lh:''); set('MO_TA',extra.desc||''); set('GHI_CHU',(r.warns||[]).join('; '));
   const st={SHELL:{...r.shell,leak:{t:'Không phát hiện rò rỉ khi quan sát bằng mắt thường'}},SEATA:r.seatA,SEATB:r.seatB,BACK:r.back};
   for(const [k] of STAGES){ const s=st[k];
@@ -1456,7 +1474,7 @@ const ALIAS={
   cls:['class','rating','cap ap','pressure class','class rating','cap ap suat'],
   design:['design pressure','design','ap suat thiet ke','design pressure psig','design psig','ap thiet ke'],
   leak:['leakage class','leak class','leakage','cap ro','class ro'],
-  cv:['cv'], dp:['dp','delta p','chenh ap'],
+  cv:['cv'], dp:['dp','delta p','chenh ap'], fl:['fl','f l','liquid pressure recovery factor'], xt:['xt','x t','pressure differential ratio factor'], port:['port diameter','seat diameter','port size','duong kinh cua van','duong kinh de'],
   medA:['medium seat test a','medium seat a','moi chat seat a','medium','moi chat','test medium','moi chat test','moi chat thu','medium test'],
   medB:['medium seat test b','medium seat b','moi chat seat b'],
   medS:['medium shell test','medium shell','moi chat shell','moi chat thu than'],
@@ -1697,7 +1715,7 @@ function processSheet(sh){
       let leak=g('leak').toUpperCase().replace(/CLASS|\s/g,''); if(!['I','II','III','IV','V','VI'].includes(leak)) leak='IV';
       const dRaw=numv(g('design'));
       n++;
-      const i={tv, body:body||'', size, mat:mat||matRaw||'', cls:cls||'', leak, cv:g('cv'), dp:g('dp'), tstd:/6\s*d/i.test(g('tstd'))?'6D':'598', seatT:/metal|kim lo/i.test(g('seatT'))?'Metal':'Soft', isoR:((/\b(EE|CC|B|C|D|E|F|G)\b/.exec(g('isoR').toUpperCase().replace(/RATE|ISO\s*5208/g,' '))||[])[1]||''), dU:map.design!=null?unitOf(hdrTxt.design,'psi'):'psi', dRaw: dRaw>0?dRaw:NaN};
+      const i={tv, body:body||'', size, mat:mat||matRaw||'', cls:cls||'', leak, cv:g('cv'), dp:g('dp'), fl:g('fl'), xt:g('xt'), port:g('port'), tstd:/6\s*d/i.test(g('tstd'))?'6D':'598', seatT:/metal|kim lo/i.test(g('seatT'))?'Metal':'Soft', isoR:((/\b(EE|CC|B|C|D|E|F|G)\b/.exec(g('isoR').toUpperCase().replace(/RATE|ISO\s*5208/g,' '))||[])[1]||''), dU:map.design!=null?unitOf(hdrTxt.design,'psi'):'psi', dRaw: dRaw>0?dRaw:NaN};
       const pre=[]; if(!body) pre.push('Body type not recognised (Không xác định được kiểu thân van).'); if(size==null) pre.push('Invalid size (Size không hợp lệ).');
       if(!cls) pre.push('Missing Class (Thiếu Class).'); if(!mat) pre.push('Material "'+(matRaw||'(empty / trống)')+'" not found in table TP_CV (Không tìm thấy vật liệu trong bảng TP_CV).');
       let r2; try{ r2=computeCv(i,{A:g('medA'),B:g('medB'),S:g('medS'),Bk:g('medBk')},cl); }catch(e){ r2={warns:['Calculation error (Lỗi tính): '+e.message],seatA:null,seatB:null,shell:{},back:null}; }
@@ -2022,7 +2040,7 @@ renderForms(); renderList();
 // ---------- dan du lieu tu Excel ----------
 for(const id of ['hdr_form','gd_form','b_formdl']){ const e=$b(id); if(e) e.addEventListener('click',dlDataForm); }
 const PASTE_H={
-  CV:['No','Tag Name','CV','Unit','Size','Class','Leakage Class','Type Body','Material Body','Type Control Valve','Serial','Design Pressure','Medium Seat test A','Medium Seat test B','Medium Shell test','Medium test back seat','Manufacture'],
+  CV:['No','Tag Name','CV','Unit','Size','Class','Leakage Class','Type Body','Material Body','Type Control Valve','Serial','Design Pressure','Medium Seat test A','Medium Seat test B','Medium Shell test','Medium test back seat','Manufacture','FL','XT','Port Diameter'],
   MV:['No','Tag Name','Unit','Size','Class','Type Body','Material Body','Serial','Design Pressure','Medium Seat test A','Medium Seat test B','Medium Shell test','Medium test back seat','Manufacture','Leak Seat A 1','Leak Seat B 1','Leak Back seat 1','Leak Shell 1','Leak Seat A 2','Leak Seat B 2','Leak Back seat 2','Leak Shell 2','Test Standard','Seat Type','ISO 5208 Rate'],
   PSV:['No','Tag Name','Size in','Size out','Class in','Class out','Set Pr','CDTP','Back Pr','Orrifice Size','Medium','Vessel/Boiler','Open actual 1','Open actual 2','Open actual 3','Close Actual 1','Close Actual 2','Close Actual 3','Actual Leak 1','Actual Leak 2','Model','Serial','Manufacture']};
 const PASTE_R={CV:['Seat A test','Holding time seat A (s)','Max permit leak A (ml/min)','Seat B test','Holding time seat B (s)','Max permit leak B (ml/min)','Shell test','Holding time shell. (s)','Back seat test','Holding time back seat (s)','Max permit','Test Pressure Seat A','Test Pressure Seat B','Class and Material','Seat A/Design','Seat B/Design','Shell/Design','Back seat/Design','Material lookup'],
@@ -2072,8 +2090,9 @@ async function buildDataForm(){
     T('Leakage Class',9,'FCI 70-2: I…VI, empty = IV (Cấp độ kín, trống = IV)','leak'),T('Type Body',11,'Gate, Globe, Ball, Butterfly, Plug, Check, Angle (Kiểu thân)','body'),T('Material Body',18,'Pick from the list or type, e.g. WCB, CF8M, A105 (Chọn hoặc gõ vật liệu thân)','mat'),
     T('Type Control Valve',14,'Control Valve / On-Off Valve (Loại van)','tv'),T('Serial',10,'Optional (Không bắt buộc)'),T('Design Pressure',10,'psig, optional (Áp suất thiết kế)'),
     T('Medium Seat test A',11,'Water / Air / Nitrogen – required (bắt buộc)','med'),T('Medium Seat test B',11,'Water / Air / Nitrogen, or N/A if no seat B (N/A nếu không test Seat B)','med'),
-    T('Medium Shell test',11,'Usually Water (Thường là nước)','med'),T('Medium test back seat',11,'Water / Air, or N/A if no back seat (N/A nếu không có back seat)','med'),T('Manufacture',14,'Optional (Hãng sản xuất)')];
-  const MVI=CVI.filter(c=>!['CV','Leakage Class','Type Control Valve'].includes(c.h));
+    T('Medium Shell test',11,'Usually Water (Thường là nước)','med'),T('Medium test back seat',11,'Water / Air, or N/A if no back seat (N/A nếu không có back seat)','med'),T('Manufacture',14,'Optional (Hãng sản xuất)'),
+    T('FL',6,'Control valve: FL from the manufacturer, empty = 0.8 (Hệ số FL của hãng)'),T('XT',6,'Control valve: xT from the manufacturer, empty = 0.54 (Hệ số xT của hãng)'),T('Port Diameter',8,'Control valve: port (seat) diameter, inch – Class V, VI (Đường kính cửa van)')];
+  const MVI=CVI.filter(c=>!['CV','Leakage Class','Type Control Valve','FL','XT','Port Diameter'].includes(c.h));
   for(const n of [1,2]) for(const p of ['Seat A','Seat B','Back seat','Shell']) MVI.push(T(`Leak ${p} ${n}`,9,`Actual leak ${p} #${n}, optional (Rò thực tế lần ${n})`));
   MVI.push(T('Test Standard',11,'API 598 (default, mặc định) or API 6D for pipeline valves (van đường ống)','tstd'),T('Seat Type',9,'API 6D: Soft (đế mềm) / Metal (đế kim loại)','seat'),T('ISO 5208 Rate',9,'API 6D metal seat: B, C, CC, D, E, EE, F, G per project spec (theo spec dự án)','iso'));
   const PSI=[T('No',5,'Item no. (Số thứ tự)'),T('Tag Name',14,'Valve tag (Mã van)'),T('Size in',7,'Inlet size, inch (Size đầu vào)'),T('Size out',7,'Outlet size, inch (Size đầu ra)'),T('Class in',7,'Optional','cls'),T('Class out',7,'Optional','cls'),
