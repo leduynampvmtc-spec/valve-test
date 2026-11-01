@@ -70,7 +70,7 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);ou
 .seg button[aria-pressed="true"]{background:var(--steel);color:var(--panel)}
 .hint{font-size:.75rem;color:var(--muted);font-weight:400}
 .cv-only[hidden],.on-only[hidden],p.cv-only[hidden]{display:none}
-.cvrow{display:flex;gap:6px}.cvrow input{flex:1 1 auto;min-width:0}.cvrow select{width:78px;flex:0 0 78px;padding-left:6px;padding-right:2px}
+#p_unit_wrap[hidden]{display:none}.cvrow{display:flex;gap:6px}.cvrow input{flex:1 1 auto;min-width:0}.cvrow select{width:78px;flex:0 0 78px;padding-left:6px;padding-right:2px}
 .summary{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;margin-bottom:14px}
 .summary .key{font:500 1rem var(--f-mono);color:var(--ink)}
 .chip{display:inline-flex;align-items:center;gap:6px;font:600 .75rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:3px}
@@ -306,8 +306,8 @@ td{padding:10px 12px}
       <label class="on-only full">Test standard (Tiêu chuẩn thử)
         <select id="tstd"><option value="598">API 598:2023 – general / industrial valves (van công nghiệp)</option><option value="6D">API 6D:2021 – pipeline valves (van đường ống)</option></select>
       </label>
-      <label class="on-only std6d">Seat type (Loại đế)
-        <select id="seatT"><option value="Soft">Soft seat (Đế mềm)</option><option value="Metal">Metal seat (Đế kim loại)</option></select>
+      <label class="on-only">Seat type (Loại đế) <span class="hint">empty = metal-seat rates (API 598) / Rate A (API 6D) – trống = rò đế kim loại (API 598) / Rate A (API 6D)</span>
+        <select id="seatT"><option value="">— not specified (chưa chọn) —</option><option value="Metal">Metal seat (Đế kim loại)</option><option value="Soft">Soft / resilient seat (Đế mềm)</option></select>
       </label>
       <label class="on-only std6d metal-only">ISO 5208 leakage rate (Cấp rò ISO 5208)
         <select id="isoR"><option value="">— per project spec (theo spec dự án) —</option><option value="B">Rate B</option><option value="C">Rate C</option><option value="CC">Rate CC</option><option value="D">Rate D</option><option value="E">Rate E</option><option value="EE">Rate EE</option><option value="F">Rate F</option><option value="G">Rate G</option></select>
@@ -383,6 +383,13 @@ td{padding:10px 12px}
           <button type="button" data-v="Air" aria-pressed="true">Air (Khí)</button>
           <button type="button" data-v="Nitrogen" aria-pressed="false">Nitrogen (Nitơ)</button>
           <button type="button" data-v="Water" aria-pressed="false">Water (Nước)</button>
+          <button type="button" data-v="Steam" aria-pressed="false">Steam (Hơi nước)</button>
+        </div>
+      </label>
+      <label class="full">Seat type (Loại đế)
+        <div class="seg" id="p_seat">
+          <button type="button" data-v="Metal" aria-pressed="true">Metal seat (Đế kim loại)</button>
+          <button type="button" data-v="Soft" aria-pressed="false">Soft seat (Đế mềm)</button>
         </div>
       </label>
       <label class="full" id="p_unit_wrap">Leakage unit (Đơn vị đo rò)
@@ -509,11 +516,12 @@ const xround10 = v => -Math.floor(-(v-1e-6)/10)*10;
 const xround25 = v => -Math.floor(-(v-1e-6)/25)*25;   // B16.34 / API 598: shell test lam tron LEN bac 25 psi
 // ---- tieu chuan tra cuu (phien ban moi nhat) ----
 const STD={
- a598:['API 598:2023','11th Edition, Feb 2023 (Ấn bản 11, 02/2023)','Test pressures, holding times, allowable seat leakage of on-off / manual valves (Áp suất thử, thời gian giữ, rò cho phép van đóng mở / van tay)'],
+ a598:['API 598:2023','11th Edition, Feb 2023 (Ấn bản 11, 02/2023)','Test pressures, holding times, allowable seat leakage of on-off / manual valves. Low-pressure gas closure test (60–100 psig) for gate, plug, ball, butterfly NPS ≤ 4 Class ≤ 1500 and NPS > 4 Class ≤ 600, otherwise high-pressure liquid 1.1 × CWP; resilient (soft) seat: no visible leakage; backseat test: liquid at 1.1 × CWP (Áp suất thử, thời gian giữ, rò cho phép van đóng mở / van tay. Thử kín khí áp thấp 60–100 psig cho gate, plug, ball, butterfly NPS ≤ 4 Class ≤ 1500 và NPS > 4 Class ≤ 600, còn lại thử nước 1,1 × CWP; đế mềm: không rò; back seat: thử nước 1,1 × CWP)'],
  a598t:['API 598:2023','11th Edition, Feb 2023 (Ấn bản 11, 02/2023)','Shell and back seat holding times (Thời gian giữ shell, back seat)'],
  b1634:['ASME B16.34-2025','2025 Edition (Ấn bản 2025)','Pressure–temperature rating (CWP at 38 °C); shell test = 1.5 × CWP rounded up to 25 psi; seat test = 1.1 × CWP (Áp làm việc ở 38 °C; shell test = 1,5 × CWP làm tròn lên bậc 25 psi; seat test = 1,1 × CWP)'],
- fci:['ANSI/FCI 70-2-2021','2021 Edition (Ấn bản 2021)','Control valve seat leakage classes I–VI, seat test 50 psig. Class II–IV = 0.5 / 0.1 / 0.01 % of rated capacity calculated from Cv (or Kvs, Cv = 1.156 × Kvs) with FL (water) or xT (air) per IEC 60534-2-1; Class V, VI by port diameter (Cấp rò I–VI, thử seat 50 psig; Class II–IV = % lưu lượng định mức tính từ Cv kèm FL khi thử nước, xT khi thử khí; Class V, VI theo đường kính cửa van)'],
- a527:['API 527:2020 (R2025)','5th Edition, Jul 2020, reaffirmed 2025 (Ấn bản 5, 07/2020, tái xác nhận 2025)','Seat tightness of pressure relief valves: leak test at 90 % of set pressure, allowable leakage, test time (Độ kín đế van an toàn: thử ở 90 % áp cài đặt, rò cho phép, thời gian thử)'],
+ fci:['ANSI/FCI 70-2-2021','2021 Edition (Ấn bản 2021)','Control valve seat leakage classes I–VI, seat test 50 psig. Test pressure: Class II–IV and VI 50 psig (or max. ΔP if lower), Class V max. service ΔP. Class II–IV = 0.5 / 0.1 / 0.01 % of rated capacity calculated from Cv (or Kvs, Cv = 1.156 × Kvs) with FL (water) or xT (air) per IEC 60534-2-1; Class V, VI by port diameter (Cấp rò I–VI, thử seat 50 psig; Class II–IV = % lưu lượng định mức tính từ Cv kèm FL khi thử nước, xT khi thử khí; Class V, VI theo đường kính cửa van)'],
+ a527:['API 527:2020 (R2025)','5th Edition, Jul 2020, reaffirmed 2025 (Ấn bản 5, 07/2020, tái xác nhận 2025)','Seat tightness of pressure relief valves: test at 90 % of set pressure (5 psi below set when set ≤ 50 psig); metal seat, gas: Table 1 by set pressure, orifice ≤ F (0.307 in²) or larger; liquid: 10 cm³/h per inch of inlet size (min. 10 cm³/h); soft seat: no leakage; steam: no visible or audible leakage (Độ kín đế van an toàn: thử ở 90 % áp cài đặt – set ≤ 50 psig thì thấp hơn set 5 psi; đế kim loại thử khí theo Bảng 1, orifice ≤ F hoặc lớn hơn; thử nước 10 cm³/h mỗi inch cửa vào, tối thiểu 10 cm³/h; đế mềm: không rò; hơi nước: không thấy / không nghe rò)'],
+ isa7519:['ANSI/ISA-75.19.01','Hydrostatic Testing of Control Valves – latest edition 2024 (bản mới nhất 2024)','Control valve shell test 1.5 × CWP at 38 °C rounded up to 25 psi; minimum test duration by pressure class and size (Thử thủy lực thân van điều khiển 1,5 × CWP làm tròn lên 25 psi; thời gian thử tối thiểu theo cấp áp lực và kích cỡ)'],
  s13:['ASME BPVC Section XIII-2025','2025 Edition, used with Section VIII Div. 1 (Ấn bản 2025, dùng cùng Section VIII Div. 1)','Set pressure tolerance of relief valves for pressure vessels (Dung sai áp suất cài đặt – bình áp lực)'],
  s1:['ASME BPVC Section I-2025','2025 Edition (Ấn bản 2025)','Set pressure tolerance and blowdown of power boiler safety valves (Dung sai áp cài đặt và blowdown – nồi hơi)'],
  a6d:['API 6D (25th Edition)','25th Edition, Nov 2021 + Addendum 1 (Apr 2023) + Addendum 2 (Sep 2024) (Ấn bản 25, 11/2021, kèm Bổ sung 1, 2)','Pipeline valves: shell test 1.5 ×, seat and back seat test 1.1 × CWP, test durations (Tables 8–10), seat leakage acceptance (Van đường ống: thử shell 1,5 ×, seat / back seat 1,1 × CWP, thời gian thử, tiêu chí rò)'],
@@ -527,7 +535,7 @@ const STD={
   for(const k in D.mp.liq){ const n=parseFloat(k); D.mp.liq[k]= n<=2 ? 0 : Math.round(2*n/16*100+1e-9)/100; }   // API 598:2023 Table 5: 2 x NPS giot/phut, 16 giot = 1 ml
   for(const r of D.tp){ r[6]=r[4]; if(r[2]!=null) r[4]=-Math.floor(-(1.5*r[2]-1e-6)/25)*25; }   // shell = 1,5 x CWP lam tron LEN 25 psi; r[6] = file cu
 })();
-const cvStds = i => i.tv==='Control Valve' ? ['fci','b1634','a598t'] : (i.tstd==='6D' ? ['a6d','iso5208','b1634'] : ['a598','b1634']);
+const cvStds = i => i.tv==='Control Valve' ? ['fci','isa7519','b1634'] : (i.tstd==='6D' ? ['a6d','iso5208','b1634'] : ['a598','b1634']);
 // ---- API 6D (25th Ed., Nov 2021 + Addendum 1, 2) – van duong ong ----
 const ISO5208={liq:{B:0.01,C:0.03,CC:0.08,D:0.1,E:0.3,EE:0.39,F:1,G:2}, gas:{B:0.3,C:3,CC:22.3,D:30,E:300,EE:470,F:3000,G:6000}};   // ISO 5208:2015, mm3/s x DN
 function iso5208Leak(seatT,rate,med,size){
@@ -624,7 +632,7 @@ function calc(i){
   // medium seat A
   let M, lowhigh;
   if(i.med==='auto'){
-    if(F<1500 && lowTypes && size<=4){M='Air'}
+    if(F<=1500 && lowTypes && size<=4){M='Air'}   // API 598 Table 1: NPS <= 4 Class <= 1500
     else if(F<=600 && lowTypes && size>4){M='Air'}
     else M='Water';
     if(isCV && i.leak==='VI') M='Air';
@@ -644,7 +652,7 @@ function calc(i){
     const frac={II:0.005,III:0.001,IV:0.0001}[g];
     if(g==='I'){R={t:'Not specified – Class I (Không quy định)'}}
     else if(frac){
-      if(cv>0){ const q=fciRated(cv,M,FL,XT,50), v=q*frac;
+      if(cv>0){ const q=fciRated(cv,M,FL,XT,dp>0&&dp<50?dp:50), v=q*frac;
         R = M==='Water' ? {v:Math.round(v*100)/100, u:`ml/min (FL ${FL})`} : {v:Math.round(v*100)/100, u:`ml/min = ${Math.round(v/28316.85*1e5)/1e5} SCFM (xT ${XT})`}; }
       if(M==='Water' ? !(flIn>0) : !(xtIn>0)) W.push(M==='Water' ? 'FL not entered – default 0.8 (as the old Excel file) is used; enter FL from the manufacturer\'s data (Chưa nhập FL – dùng mặc định 0,8 như file cũ; nên nhập FL theo dữ liệu của hãng).' : 'xT not entered – default 0.54 (as the old Excel file) is used; enter xT from the manufacturer\'s data (Chưa nhập xT – dùng mặc định 0,54 như file cũ; nên nhập xT theo dữ liệu của hãng).');
     }
@@ -657,26 +665,31 @@ function calc(i){
       R=x?(M!=='Water' && d<=8 && x[1]!=='-' ? {v:x[0],u:`ml/min (${x[1]} bubbles/min)`} : {v:x[0],u:'ml/min'}):null;
       if(!(port>0)) W.push('Class VI: port (seat) diameter not entered – valve size is used (Class VI: chưa nhập đường kính cửa van – tạm lấy theo size van).'); }
     if(frac && !(cv>0)) W.push('Enter Cv or Kvs to compute the Class '+g+' leakage rate (Nhập Cv hoặc Kvs để tính tốc độ rò Class '+g+').');
-  } else if(['Gate','Globe','Ball','Butterfly','Plug'].includes(H)){
+  } else if(on && i.seatT==='Soft' && i.tstd!=='6D'){
+    R = {t:'0 – resilient (soft) seat, no visible leakage – API 598 Table 5 (Đế mềm: không rò, không phát hiện rò rỉ khi quan sát bằng mắt thường)'};
+  } else if(['Gate','Globe','Ball','Butterfly','Plug','Angle'].includes(H)){
     R = M==='Air' ? wrap(look(D.mp.air,size),'bubbles/min') : wrap(look(D.mp.liq,size),'ml/min');
   } else if(H==='Check'){
     R = M==='Water' ? wrap(look(D.mp.chkLiq,size),'ml/min') : wrap(look(D.mp.chkAir,size),'l/min');
-  } else if(H==='Angle'){ R={t:'No rule for Angle On-Off (Không có quy tắc cho Angle On-Off)'} }
+    if(size>24) W.push('Check valve larger than NPS 24: allowable leakage by agreement between purchaser and manufacturer (API 598) – value shown is 3 ml/min (water) / 0.042 m³/h (gas) per NPS (Van một chiều > NPS 24: rò cho phép theo thỏa thuận người mua – nhà sản xuất; số hiển thị tính theo NPS).');
+  }
   function wrap(v,u){return v===null?null:{v,u}}
   // pressure seat A
   const row=tpRow(i.mat,cl);
   let P;
   if(M==='Water' && on){ P = row && row[3]!=null ? row[3] : null; if(!row) W.push('"'+cl+', '+i.mat+'" not found in table TP_CV (Không tìm thấy trong bảng TP_CV).'); else if(row[3]==null) W.push('This material has no seat test pressure in TP_CV (Vật liệu này không có áp seat test trong TP_CV).'); }
   else if(on && M==='Air') P=100;
+  else if(isCV && g==='V') P = dp>0 ? dp : 50;              // FCI 70-2 Class V: max. service dP
+  else if(isCV && dp>0 && dp<50) P = dp;                    // II-IV, VI: 50 psig hoac dP lon nhat neu thap hon
   else P=50;
   const dU=i.dU||CVSRC.design||'psi', dEl=$(dU==='psi'?'design':'design_'+dU), dRaw=i.dRaw!==undefined?i.dRaw:(dEl?parseFloat(dEl.value):NaN);
   const des = dRaw>0 ? dRaw*CVF[dU] : NaN;   // psig chinh xac
   const dk = k => !(des>0) ? null : (dU==='psi' ? xround10(des*k) : des*k);   // nhap psig: lam tron LEN boi 10 nhu Excel; don vi khac: khong lam tron
   const AF = dk(1.1);
   // seat B
-  const noB = H==='Globe' || H==='Check' || (H==='Butterfly' && F===150);
+  const noB = H==='Globe' || H==='Angle' || H==='Check' || (H==='Butterfly' && F===150);
   // shell
-  const X=look(D.time.shell,size);
+  const X = isCV ? isaTime(F,size) : look(D.time.shell,size);
   let Wsh;
   if(H==='Butterfly' && F===150) Wsh = des>0 ? (dU==='psi' ? -Math.floor(-(des*1.5-1e-6)) : des*1.5) : null;
   else { Wsh = row && row[4]!=null ? row[4] : null; if(!row && !(M==='Water'&&on)) W.push('"'+cl+', '+i.mat+'" not found in table TP_CV – shell test (Không tìm thấy trong bảng TP_CV).'); }
@@ -694,11 +707,16 @@ function calc(i){
     seatA:{med:M,lh:lowhigh,p:P,t:Q,leak:R,des:AF,old:oldOf({t:Q,leak:R},{t:Qo,leak:Ro})},
     seatB: noB ? null : {med:M,lh:lowhigh,p:P,t:Q,leak:R,des:AF,old:oldOf({t:Q,leak:R},{t:Qo,leak:Ro})},
     shell:{med:'Water',p:Wsh,t:X,des:AH,old:oldOf({p:Wsh,t:X,des:AH},{p:(H==='Butterfly'&&F===150)?Wsh:(row&&row[6]!=null?row[6]:Wsh),t:look(D.timeOld.shell,size),des:AHold})},
-    back: hasBack ? {med:M,p:P,t:AA,leak:{v:0,u:''},des:dk(1.1),old:oldOf({t:AA},{t:look(D.timeOld.back,size)})} : null,
+    back: !hasBack ? null : (on && i.med!=='Air') ? {med:'Water',lh:'High-pressure backseat test (Thử back seat thủy lực)',p:(row&&row[3]!=null?row[3]:null),t:AA,leak:{t:'No visible leakage (Không phát hiện rò rỉ khi quan sát bằng mắt thường)'},des:dk(1.1),old:oldOf({p:(row&&row[3]!=null?row[3]:null),t:AA},{p:P,t:look(D.timeOld.back,size)})}
+      : {med:M,p:P,t:AA,leak:{v:0,u:''},des:dk(1.1),old:oldOf({t:AA},{t:look(D.timeOld.back,size)})},
     warns:[...new Set(W)]
   };
+  if(on && hasBack && i.med==='Air') RES.warns.push('API 598: the backseat test is a high-pressure liquid test at 1.1 × CWP (Back seat theo API 598 là thử thủy lực 1,1 × CWP).');
   return (on && i.tstd==='6D') ? api6D(RES,i,{size,row}) : RES;
 }
+// ANSI/ISA-75.19.01: thoi gian thu shell toi thieu (phut) theo cap ap luc va size -> giay
+function isaTime(F,size){ if(!(size>0)) return null; const c = !(F>150) ? 0 : F<=600 ? 1 : F<=1500 ? 2 : 3, s = size<=2 ? 0 : size<=4 ? 1 : size<=8 ? 2 : 3;
+  return 60*[[1,2,2,3],[1,2,3,5],[2,4,5,8],[3,5,8,10]][c][s]; }
 
 // ANSI/FCI 70-2: rated capacity tu Cv theo IEC 60534-2-1 / ANSI/ISA-75.01 (ml/min), thu o ptest psig, xa ra khi quyen
 // He so luu luong: Kv (m3/h, dP 1 bar) = 0.865 x Cv (US gpm, dP 1 psi); Cv = 1.156 x Kv
@@ -733,7 +751,7 @@ function stage(title,s,extra){
 function inputs(){
   return {tv:st.tv,med:st.med,body:$('body').value,size:parseFloat($('size').value),mat:$('matq').value.trim(),
     cls:$('cls').value,design:$('design').value,leak:$('leak').value,cv:$('cv').value,cvu:$('cvu').value,dp:$('dp').value,fl:$('fl').value,xt:$('xt').value,port:$('port').value,
-    tstd:st.tv==='On-Off Valve'?$('tstd').value:'598',seatT:$('seatT').value,isoR:$('isoR').value};
+    tstd:st.tv==='On-Off Valve'?$('tstd').value:'598',seatT:st.tv==='On-Off Valve'?$('seatT').value:'',isoR:$('isoR').value};
 }
 let last=null;
 function render(){
@@ -803,8 +821,9 @@ $('mq').addEventListener('input',matTable);
 
 // ---- start with saved inputs or an example ----
 (function start(){
-  const ex={body:'Gate',size:'6',matq:'ASTM A216 GR WCB',cls:'600',design:'1200',leak:'IV',cv:'',cvu:'Cv',dp:'',tstd:'598',seatT:'Soft',isoR:'',fl:'',xt:'',port:''};
+  const ex={body:'Gate',size:'6',matq:'ASTM A216 GR WCB',cls:'600',design:'1200',leak:'IV',cv:'',cvu:'Cv',dp:'',tstd:'598',seatT:'',isoR:'',fl:'',xt:'',port:''};
   for(const k in ex){const v=load(k);$(k).value = v!==null ? v : ex[k]}
+  if(load('stv')!=='2'){ $('seatT').value=''; store('stv','2'); }   // loai de: mac dinh moi = chua chon
   const tv=load('tv'), med=load('med');
   if(tv){st.tv=tv;[...$('tv').children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===tv))}
   if(med){st.med=med;[...$('med').children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===med))}
@@ -816,7 +835,7 @@ $('mq').addEventListener('input',matTable);
 })();
 
 // ================= PSV =================
-const ps={kind:'Vessel',med:'Air',unit:'bubble/min'};
+const ps={kind:'Vessel',med:'Air',unit:'bubble/min',seat:'Metal'};
 $('p_orf').innerHTML = D.orifice.map(o=>`<option value="${o[0]}">${o[0]}</option>`).join('') + '<option value="MM">Other (Khác)</option>';
 // Orifice: ky hieu <-> duong kinh (mm) <-> dien tich (mm2), A = pi*d^2/4, 1 in2 = 645.16 mm2
 let orfSrc = load('p_orf_src') || 'letter';
@@ -844,7 +863,7 @@ function psvInputs(){
   const useC = $('p_cdtp').value.trim()!=='';
   const base = useC ? 'p_cdtp' : 'p_set', u = U3SRC[base]||'psi';
   const raw = fld(base,u).value.trim();
-  return {size:num('p_size'), I: raw==='' ? null : parseFloat(raw), u, kind:ps.kind, med:ps.med, unit:ps.unit,
+  return {size:num('p_size'), I: raw==='' ? null : parseFloat(raw), u, kind:ps.kind, med:ps.med, unit:ps.unit, seat:ps.seat,
     ov:$('p_orf').value, orfSrc, d:num('p_orf_d'), mm:num('p_orf_mm'),
     o:[num('p_o1'),num('p_o2'),num('p_o3')], c:[num('p_c1'),num('p_c2'),num('p_c3')], l:[num('p_l1'),num('p_l2')]};
 }
@@ -859,16 +878,16 @@ function psvCalc(X){
   if(I!==null){
     const Ip=I*f, d=psi=>psi/f;   // nguong & dung sai ASME dinh nghia theo psi -> doi sang don vi dang dung
     if(X.kind==='Boiler'){
-      if(Ip>15 && Ip<=72){r.P=I+d(2);r.Q=I-d(2)}
-      else if(Ip<=15 || (Ip>72 && Ip<=300)){r.P=I*1.03;r.Q=I*0.97}
-      else if(Ip>300 && Ip<=996){r.P=I+d(10);r.Q=I-d(10)}
+      if(Ip<=70){r.P=I+d(2);r.Q=I-d(2)}                       // ASME Section I PG-72.2
+      else if(Ip<=300){r.P=I*1.03;r.Q=I*0.97}
+      else if(Ip<=1000){r.P=I+d(10);r.Q=I-d(10)}
       else {r.P=I*1.01;r.Q=I*0.99}
       if(Ip<=67) r.R=I-d(4); else if(Ip<=250) r.R=I*0.94; else if(Ip<375) r.R=I-d(15); else r.R=I*0.96;
     } else {
-      if(Ip<=71){r.P=I+d(2);r.Q=I-d(2)} else {r.P=I*1.03;r.Q=I*0.97}
+      if(Ip<=70){r.P=I+d(2);r.Q=I-d(2)} else {r.P=I*1.03;r.Q=I*0.97}   // ASME XIII / VIII: +-2 psi den 70 psi, +-3 % tren 70 psi
       r.R=I*0.93;
     }
-    r.N=I*0.9;
+    r.N = Ip<=50 ? I-d(5) : I*0.9;   // API 527: 90 % set; set <= 50 psig -> thap hon set 5 psi
   }
   const ov=X.ov;   // 1 in² = 645.16 mm²
   if(X.orfSrc==='letter' && ov!=='MM'){ const o=D.orifice.find(x=>x[0]===ov); r.area=o?o[1]:null; }
@@ -877,19 +896,21 @@ function psvCalc(X){
   r.orfD = r.area!=null ? Math.sqrt(4*r.area*645.16/Math.PI) : null;
   r.orfName = ov && ov!=='MM' ? ov : (r.orfD!=null ? 'Ø'+(Math.round(r.orfD*100)/100)+' mm' : '—');
   if(r.area==null) W.push('Select an orifice letter or enter the orifice diameter / area in mm (Chọn ký hiệu orifice hoặc nhập đường kính / diện tích orifice).');
-  const gas = X.med!=='Water'; r.unit = gas ? X.unit : 'ml/min';
-  r.Y=null;
-  if(gas && r.area!==null && I!==null){
-    const row=approx(r.area<=0.7?D.mpSmall:D.mpLarge,I*f);
+  const steam = X.med==='Steam', soft = X.seat==='Soft', gas = X.med!=='Water' && !steam; r.unit = steam ? '' : gas ? X.unit : 'ml/min';
+  r.Y=null; r.Yt=null;
+  if(steam){ r.Yt='No visible or audible leakage – steam (Không thấy / không nghe rò – hơi nước)'; }
+  else if(soft){ r.Y=0; r.Yt='0 – soft seat, no leakage (Đế mềm: không rò)'; }
+  else if(gas && r.area!==null && I!==null){
+    const row=approx(r.area<=0.307?D.mpSmall:D.mpLarge,I*f);   // API 527 Table 1: orifice <= F (0.307 in2) / lon hon
     if(row) r.Y = X.unit==='bubble/min'?row[1]:row[2];
     else W.push('Pop test pressure below 15 psig: no value in table MP_PSV (Áp suất pop test nhỏ hơn 15 psig: bảng MP_PSV không có giá trị).');
-  } else if(!gas && size!==null){ r.Y=vbRound(0.17*size,2); }
+  } else if(!gas && size!==null){ r.Y=Math.round(10*Math.max(size,1)/60*100)/100; }   // API 527: 10 cm3/h moi inch cua vao, toi thieu 10 cm3/h
   if(I===null) W.push('Enter Set pressure (or CDTP) to calculate (Nhập Set pressure hoặc CDTP để tính).');
   // ket qua do thuc te: nhap theo cung don vi voi Set pressure
   const pop=(o,c)=> o==null||r.P==null ? '' : (o>=fru(r.Q,r.u) && o<=fru(r.P,r.u) && (c==null || c>=fru(r.R,r.u))) ? 'Pass':'Fail';
   const oo=X.o||[], cc=X.c||[], ll=X.l||[];
   r.pop=[pop(oo[0],cc[0]),pop(oo[1],cc[1]),pop(oo[2],cc[2])];
-  const lk=a=> a==null||r.Y===null ? '' : (a<=r.Y?'Pass':'Fail');
+  const lk=a=> a==null||r.Y===null ? '' : (a<=r.Y+1e-9?'Pass':'Fail');
   r.leak=[lk(ll[0]),lk(ll[1])];
   return r;
 }
@@ -906,7 +927,7 @@ const puR=(r,a,b)=>a==null?'—':`${fx(a,r.u)} – ${fx(b,r.u)} ${UL[r.u]}`;
 const poR=(r,a,b)=>a==null?'':Object.keys(UF).filter(k=>k!==r.u).map(k=>`${fx(a*r.f/UF[k],k)} – ${fx(b*r.f/UF[k],k)} ${UL[k]}`).join(' · ');
 let plast=null;
 function psvRender(){
-  $('p_unit_wrap').hidden = ps.med==='Water';
+  $('p_unit_wrap').hidden = ps.med==='Water' || ps.med==='Steam' || ps.seat==='Soft';
   const r=psvCalc(); plast=r;
   $('p_act_u').textContent = '· in (nhập theo) '+UL[r.u];
   $('p_summary').innerHTML = `<span class="key">${ps.kind} · ${ps.med} · Orifice ${r.orfName}${r.size!=null?' · '+r.size+'"'+(toDN(r.size)!=null?' / DN'+toDN(r.size):''):''}</span><span class="chip ${ps.kind==='Boiler'?'air':'water'}">${ps.kind==='Boiler'?'ASME Section I-2025':'ASME Section XIII-2025 / VIII Div. 1'}</span>`;
@@ -926,18 +947,18 @@ function psvRender(){
   <article class="stage air">
     <div class="stage-head"><h3>Leak test (API 527:2020)</h3><span class="chip air">${ps.med}</span></div>
     <dl class="rows">
-      <dt>Leak test pressure, 90% (Áp suất leak test)</dt><dd class="big">${pu(r,r.N)}<small>${po(r,r.N)}</small></dd>
-      <dt>Allowable leakage (Rò cho phép)</dt><dd>${r.Y!=null?r.Y+' '+r.unit:'—'}</dd>
-      <dt>Orifice area (Diện tích orifice)</dt><dd>${r.area!=null?(Math.round(r.area*645.16*10)/10)+' mm²':'—'}<small>${r.area!=null?'Ø '+(Math.round(r.orfD*100)/100)+' mm · '+(Math.round(r.area*10000)/10000)+' in² · '+(r.area<=0.7?'≤ 0.7 in² (small table / bảng nhỏ)':'> 0.7 in² (large table / bảng lớn)'):''}</small></dd>
+      <dt>Leak test pressure (Áp suất leak test)<br><span class="hint">90 % set; set ≤ 50 psig: set − 5 psi</span></dt><dd class="big">${pu(r,r.N)}<small>${po(r,r.N)}</small></dd>
+      <dt>Allowable leakage (Rò cho phép)</dt><dd>${r.Yt? r.Yt : r.Y!=null?r.Y+' '+r.unit+(ps.med==='Water'?' (10 cm³/h per inch inlet – mỗi inch cửa vào)':''):'—'}</dd>
+      <dt>Orifice area (Diện tích orifice)</dt><dd>${r.area!=null?(Math.round(r.area*645.16*10)/10)+' mm²':'—'}<small>${r.area!=null?'Ø '+(Math.round(r.orfD*100)/100)+' mm · '+(Math.round(r.area*10000)/10000)+' in² · '+(r.area<=0.307?'≤ 0.307 in² – orifice F and smaller (API 527 Table 1, cột orifice ≤ F)':'> 0.307 in² – larger than F (API 527 Table 1, cột orifice > F)'):''}</small></dd>
     </dl>
     <div class="design"><span>Evaluation (Đánh giá)</span>${resChips(r.leak)}</div>
   </article>`;
   for(const k of ['p_size','p_orf','p_orf_d','p_orf_mm','p_set','p_cdtp']) store(k,$(k).value);
-  store('p_kind',ps.kind); store('p_med',ps.med); store('p_unit',ps.unit);
+  store('p_kind',ps.kind); store('p_med',ps.med); store('p_unit',ps.unit); store('p_seat',ps.seat);
 }
 function psvSeg(id,key){ $(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   ps[key]=b.dataset.v; [...$(id).children].forEach(x=>x.setAttribute('aria-pressed',x===b)); psvRender();}); }
-psvSeg('p_kind','kind'); psvSeg('p_med','med'); psvSeg('p_unit','unit');
+psvSeg('p_kind','kind'); psvSeg('p_med','med'); psvSeg('p_unit','unit'); psvSeg('p_seat','seat');
 ['p_size','p_orf','p_orf_mm','p_set','p_cdtp','p_o1','p_o2','p_o3','p_c1','p_c2','p_c3','p_l1','p_l2'].forEach(k=>$(k).addEventListener('input',psvRender));
 // Set pressure / CDTP: 3 o don vi lien thong (psig, bar, kg/cm2)
 const U3={bar:14.5037738,kg:14.2233433,mpa:145.037738};
@@ -962,7 +983,7 @@ $('fp').addEventListener('submit',e=>e.preventDefault());
 $('p_copy').addEventListener('click',async()=>{const r=plast;const b=$('p_copy');
   const t=[`PSV TEST - ${ps.kind} / ${ps.med} / Orifice ${r.orfName}${r.area!=null?' (Ø'+(Math.round(r.orfD*100)/100)+' mm, '+(Math.round(r.area*645.16*10)/10)+' mm2)':''} / Size ${r.size??'-'}"${r.size!=null&&toDN(r.size)!=null?' (DN'+toDN(r.size)+')':''}`,
    `Pop test: P = ${pu(r,r.I)} (${po(r,r.I)}) | Open ${puR(r,r.Q,r.P)} | Close >= ${pu(r,r.R)} | t = ${r.time??'-'} min`,
-   `Leak test: P = ${pu(r,r.N)} (${po(r,r.N)}) | Max leak = ${r.Y??'-'} ${r.unit}`,
+   `Leak test: P = ${pu(r,r.N)} (${po(r,r.N)}) | Max leak = ${r.Yt||((r.Y??'-')+' '+r.unit)}`,
    r.pop.some(x=>x)?`Pop result: ${r.pop.map((x,i)=>x?('#'+(i+1)+' '+x):'').filter(Boolean).join(', ')}`:'',
    r.leak.some(x=>x)?`Leak result: ${r.leak.map((x,i)=>x?('#'+(i+1)+' '+x):'').filter(Boolean).join(', ')}`:''].filter(Boolean).join('\n');
   try{await navigator.clipboard.writeText(t);b.textContent='Copied (Đã sao chép)'}catch(e){
@@ -972,7 +993,7 @@ $('p_copy').addEventListener('click',async()=>{const r=plast;const b=$('p_copy')
 (function psvStart(){
   const ex={p_size:'1.5',p_orf:'H',p_orf_d:'',p_orf_mm:'',p_set:'90',p_cdtp:''};
   for(const k in ex){const v=load(k);$(k).value = v!==null ? v : ex[k]}
-  for(const [id,key] of [['p_kind','kind'],['p_med','med'],['p_unit','unit']]){const v=load(id); if(v){ps[key]=v;[...$(id).children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===v))}}
+  for(const [id,key] of [['p_kind','kind'],['p_med','med'],['p_unit','unit'],['p_seat','seat']]){const v=load(id); if(v){ps[key]=v;[...$(id).children].forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===v))}}
   syncSet(); syncCdtp(); psvDN();
   if(orfSrc==='letter' && $('p_orf').value==='MM') orfSrc='area';
   orfSync(orfSrc);
@@ -1097,7 +1118,7 @@ function valveMap(i,r,extra){
 }
 
 // ---------- map gia tri PSV ----------
-const psvMed = m => !m ? '' : m==='Water'?'Nước (Water)':(m==='Nitrogen'?'Nitơ (N₂)':'Khí (Air)');
+const psvMed = m => !m ? '' : m==='Water'?'Nước (Water)':m==='Steam'?'Hơi nước (Steam)':(m==='Nitrogen'?'Nitơ (N₂)':'Khí (Air)');
 const psvStd = k => k==='Boiler' ? 'API 527:2020 (R2025), ASME BPVC Section I-2025' : 'API 527:2020 (R2025), ASME BPVC Section XIII-2025 / Section VIII Div. 1';
 const kq = x => x==='Pass'?'Đạt':(x==='Fail'?'Không đạt':'');
 function psvAll(arr){ const a=(arr||[]).filter(Boolean); if(!a.length) return null; return a.every(x=>x==='Pass')?'Pass':'Fail'; }
@@ -1113,7 +1134,7 @@ function psvMap(it){
   set('DON_VI',PL[u]); P('SET_P',it.setU!=null?conv(it.setV,it.setU,u):null); P('CDTP',it.cdtpV!=null?conv(it.cdtpV,it.cdtpU,u):null);
   P('POP_P',r.I); P('OPEN_MIN',r.Q); P('OPEN_MAX',r.P); P('CLOSE_MIN',r.R); P('LEAK_P',r.N);
   set('DUNG_SAI', r.Q!=null ? fmtNum(r.Q,pd(u))+' – '+fmtNum(r.P,pd(u)) : '');
-  set('LEAK_MAX', r.Y!=null ? fmtNum(r.Y,2) : ''); set('LEAK_UNIT', r.unit||''); set('TG', r.time??'');
+  set('LEAK_MAX', r.Y!=null ? fmtNum(r.Y,2) : (r.Yt||'')); set('LEAK_UNIT', r.unit||''); set('TG', r.time??'');
   set('MOI_CHAT', psvMed(it.x.med));
   (it.x.o||[]).forEach((v,ix)=>set('MO_'+(ix+1), v==null?'':fmtNum(v,pd(u))));
   set('KQ_POP',kq(psvAll(r.pop))); set('KQ_LEAK',kq(psvAll(r.leak))); set('GHI_CHU',(r.W||[]).join('; '));
@@ -1276,7 +1297,7 @@ function psvProv(it){
       if(key==='med') return psvMed(x.med);
       if(key==='press') return pv(r.N,cu,hasU);
       if(key==='time') return r.time!=null ? String(r.time) : null;
-      if(key==='allow') return r.Y!=null ? fmtNum(r.Y,2)+(hasU?'':' '+r.unit) : null;
+      if(key==='allow') return r.Y!=null ? fmtNum(r.Y,2)+(hasU?'':' '+r.unit) : (r.Yt||null);
       if(key==='meas') return x.l && x.l[idx]!=null ? fmtNum(x.l[idx],2)+(hasU?'':' '+r.unit) : null;
       if(key==='result') return kq(r.leak && r.leak[idx]);
       return null;
@@ -1590,7 +1611,7 @@ async function sampleDocx(){
 }
 // ---------- trang thai ----------
 const colL = ix => { let s='',n=ix+1; while(n>0){ const m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26); } return s; };
-const pmed = s => { const n=norm(s); if(!n) return null; if(/^n a$|^na$|khong|none/.test(n)) return 'NA'; if(/water|nuoc|liq|hydro/.test(n)) return 'Water'; if(/nitro|\bn2\b|nito/.test(n)) return 'Nitrogen'; if(/air|khi|gas/.test(n)) return 'Air'; return 'X'; };
+const pmed = s => { const n=norm(s); if(!n) return null; if(/^n a$|^na$|khong|none/.test(n)) return 'NA'; if(/water|nuoc|liq|hydro/.test(n)) return 'Water'; if(/nitro|\bn2\b|nito/.test(n)) return 'Nitrogen'; if(/steam|hoi nuoc/.test(n)) return 'Steam'; if(/air|khi|gas/.test(n)) return 'Air'; return 'X'; };
 const B={data:null,sheets:[],forms:[],res:[]};
 let DEFU = ld('b_defu') || 'psi', MERGE = ld('b_merge')==='1';
 // Form da luu
@@ -1698,11 +1719,11 @@ function processSheet(sh){
       const cdtpU = map.cdtp!=null ? unitOf(hdrTxt.cdtp, ucol||setU) : setU;
       const base = cdtpV!=null ? {v:cdtpV,u:cdtpU} : {v:setV,u:setU};
       const kindS=norm(g('kind')); const kind=/boiler|section i\b|asme i\b|noi hoi|phan i\b/.test(kindS) && !/viii/.test(kindS)?'Boiler':'Vessel';
-      const M=pmed(g('medA')); const medOk = M==='Water'||M==='Air'||M==='Nitrogen';
+      const M=pmed(g('medA')); const medOk = M==='Water'||M==='Air'||M==='Nitrogen'||M==='Steam';
       const lunit = M==='Water' ? 'ml/min' : (/ml/.test(norm(g('lunit')))?'ml/min':'bubble/min');
       const ok = map.orfd!=null && g('orfd') ? parseOrf(g('orfd'),'orfd') : map.orfa!=null && g('orfa') ? parseOrf(g('orfa'),'orfa') : parseOrf(g('orf'),'orf');
       const rd=k=>{ const v=numOrNull(g(k)); return v==null?null:conv(v,setU,base.u); };
-      const x={size:parseSize(g('size')), I:base.v, u:base.u, kind, med: medOk?M:null, unit:lunit, ...ok,
+      const x={size:parseSize(g('size')), I:base.v, u:base.u, kind, med: medOk?M:null, unit:lunit, seat:/soft|mem|resilient|o.?ring|elasto/i.test(g('seatT'))?'Soft':'Metal', ...ok,
         o:[rd('o1'),rd('o2'),rd('o3')], c:[rd('c1'),rd('c2'),rd('c3')], l:[numOrNull(g('l1')),numOrNull(g('l2'))]};
       n++;
       let rr; try{ rr=psvCalc(x); }catch(e){ rr={W:['Calculation error (Lỗi tính): '+e.message]}; }
@@ -1721,7 +1742,7 @@ function processSheet(sh){
       let leak=g('leak').toUpperCase().replace(/CLASS|\s/g,''); if(!['I','II','III','IV','V','VI'].includes(leak)) leak='IV';
       const dRaw=numv(g('design'));
       n++;
-      const i={tv, body:body||'', size, mat:mat||matRaw||'', cls:cls||'', leak, cv:g('cv'), kvs:g('kvs'), dp:g('dp'), fl:g('fl'), xt:g('xt'), port:g('port'), tstd:/6\s*d/i.test(g('tstd'))?'6D':'598', seatT:/metal|kim lo/i.test(g('seatT'))?'Metal':'Soft', isoR:((/\b(EE|CC|B|C|D|E|F|G)\b/.exec(g('isoR').toUpperCase().replace(/RATE|ISO\s*5208/g,' '))||[])[1]||''), dU:map.design!=null?unitOf(hdrTxt.design,'psi'):'psi', dRaw: dRaw>0?dRaw:NaN};
+      const i={tv, body:body||'', size, mat:mat||matRaw||'', cls:cls||'', leak, cv:g('cv'), kvs:g('kvs'), dp:g('dp'), fl:g('fl'), xt:g('xt'), port:g('port'), tstd:/6\s*d/i.test(g('tstd'))?'6D':'598', seatT:/metal|kim lo/i.test(g('seatT'))?'Metal':(/soft|mem|resilient|elasto|ptfe|rubber/i.test(g('seatT'))?'Soft':''), isoR:((/\b(EE|CC|B|C|D|E|F|G)\b/.exec(g('isoR').toUpperCase().replace(/RATE|ISO\s*5208/g,' '))||[])[1]||''), dU:map.design!=null?unitOf(hdrTxt.design,'psi'):'psi', dRaw: dRaw>0?dRaw:NaN};
       const pre=[]; if(!body) pre.push('Body type not recognised (Không xác định được kiểu thân van).'); if(size==null) pre.push('Invalid size (Size không hợp lệ).');
       if(!cls) pre.push('Missing Class (Thiếu Class).'); if(!mat) pre.push('Material "'+(matRaw||'(empty / trống)')+'" not found in table TP_CV (Không tìm thấy vật liệu trong bảng TP_CV).');
       let r2; try{ r2=computeCv(i,{A:g('medA'),B:g('medB'),S:g('medS'),Bk:g('medBk')},cl); }catch(e){ r2={warns:['Calculation error (Lỗi tính): '+e.message],seatA:null,seatB:null,shell:{},back:null}; }
@@ -1784,7 +1805,7 @@ function psvOut(S,it){
     else if(n==='test time') v=r.time??'';
     else if(n==='open pr') v= /-/.test(raw) ? r2n(r.Q) : r2n(r.P);
     else if(n==='close pr') v=r2n(r.R);
-    else if(n==='max permit leak') v=r.Y!=null?r2n(r.Y):'';
+    else if(n==='max permit leak') v=r.Y!=null?r2n(r.Y):(r.Yt||'');
     else if(n==='orifice inch') v=r.area!=null?r2n(r.area,4):'';
     else if(/^bubble min or ml min/.test(n)) v=r.unit||'';
     else { const m=/^result pop ([123])$/.exec(n); if(m) v=r.pop?r.pop[m[1]-1]||null:null;
@@ -1861,7 +1882,7 @@ function renderList(){
         return `<tr class="${W.length?'b-warnrow':''}"><td>${esc(it.stt)}</td><td>${esc(it.tag)}</td><td>${it.x.size!=null?esc(sizeTxt(it.x.size))+'"':'—'}</td><td>${esc(orfText(r)||'—')}</td>
         <td>${it.setV!=null?fU(it.setV,it.setU)+'<small>'+PL[it.setU]+'</small>':'—'}</td><td>${it.x.med?esc(it.x.med):'<span class="b-bad">Missing (Thiếu)</span>'}</td>
         <td>${fU(r.I,u)}<small>${PL[u]}</small></td><td>${r.Q!=null?fU(r.Q,u)+' – '+fU(r.P,u):'—'}</td><td>${fU(r.R,u)}</td><td>${fU(r.N,u)}</td>
-        <td>${r.Y!=null?fmtNum(r.Y,2)+'<small>'+esc(r.unit)+'</small>':'—'}</td><td>${r.time??'—'}</td>
+        <td>${r.Y!=null?fmtNum(r.Y,2)+'<small>'+esc(r.unit)+'</small>':(r.Yt?esc(r.Yt):'—')}</td><td>${r.time??'—'}</td>
         <td class="b-note">${W.map(esc).join('<br>')||(it.ovr?'':'✓')}${it.ovr?'<span class="b-ovr">Actual values (Số liệu thực tế): '+esc(it.ovr.join(', '))+'</span>':''}</td><td>${fb}</td></tr>`; }
       const i=it.i,r=it.r;
       return `<tr class="${W.length?'b-warnrow':''}"><td>${esc(it.stt)}</td><td>${esc(it.tag)}</td><td>${esc(i.tv==='Control Valve'?'CV':'On-Off')}</td><td>${esc(i.body)}</td>
@@ -2048,7 +2069,7 @@ for(const id of ['hdr_form','gd_form','b_formdl']){ const e=$b(id); if(e) e.addE
 const PASTE_H={
   CV:['No','Tag Name','CV','Unit','Size','Class','Leakage Class','Type Body','Material Body','Type Control Valve','Serial','Design Pressure','Medium Seat test A','Medium Seat test B','Medium Shell test','Medium test back seat','Manufacture','FL','XT','Port Diameter','Kvs'],
   MV:['No','Tag Name','Unit','Size','Class','Type Body','Material Body','Serial','Design Pressure','Medium Seat test A','Medium Seat test B','Medium Shell test','Medium test back seat','Manufacture','Leak Seat A 1','Leak Seat B 1','Leak Back seat 1','Leak Shell 1','Leak Seat A 2','Leak Seat B 2','Leak Back seat 2','Leak Shell 2','Test Standard','Seat Type','ISO 5208 Rate'],
-  PSV:['No','Tag Name','Size in','Size out','Class in','Class out','Set Pr','CDTP','Back Pr','Orrifice Size','Medium','Vessel/Boiler','Open actual 1','Open actual 2','Open actual 3','Close Actual 1','Close Actual 2','Close Actual 3','Actual Leak 1','Actual Leak 2','Model','Serial','Manufacture']};
+  PSV:['No','Tag Name','Size in','Size out','Class in','Class out','Set Pr','CDTP','Back Pr','Orrifice Size','Medium','Vessel/Boiler','Open actual 1','Open actual 2','Open actual 3','Close Actual 1','Close Actual 2','Close Actual 3','Actual Leak 1','Actual Leak 2','Model','Serial','Manufacture','Seat Type']};
 const PASTE_R={CV:['Seat A test','Holding time seat A (s)','Max permit leak A (ml/min)','Seat B test','Holding time seat B (s)','Max permit leak B (ml/min)','Shell test','Holding time shell. (s)','Back seat test','Holding time back seat (s)','Max permit','Test Pressure Seat A','Test Pressure Seat B','Class and Material','Seat A/Design','Seat B/Design','Shell/Design','Back seat/Design','Material lookup'],
   PSV:['Test Pressure (Pop test)','Leak Test','Test time','Open Pr. +','Open Pr. -','Close Pr.','Max permit leak','Orifice Inch','bubble/min or ml/min (Air) - ml/min (Water)','Result Pop 1','Result Pop 2','Result Pop 3','Result Leak 1','Result Leak 2']};
 function readTsv(text){ // clipboard Excel / Numbers / Google Sheets: tab giua cac o, o co xuong dong duoc boc ""
@@ -2089,7 +2110,7 @@ if($b('b_pastebtn')){
 // ---------- Form Data Valve: app tu tao file Excel trong de nhap (khong nhung file) ----------
 async function buildDataForm(){
   const mats=[]; for(const r of D.tp){ const n=String(r[0]); if(!mats.includes(n)) mats.push(n); }
-  const L={mat:mats, cls:['150','300','600','900','1500','2500','4500'], body:BODIES.slice(), med:['Water','Air','Nitrogen','N/A'], med3:['Air','Nitrogen','Water'], leak:['I','II','III','IV','V','VI'], tv:['Control Valve','On-Off Valve'], kind:['Vessel','Boiler'], orf:'DEFGHJKLMNPQRT'.split(''), tstd:['API 598','API 6D'], seat:['Soft','Metal'], iso:['B','C','CC','D','E','EE','F','G']};
+  const L={mat:mats, cls:['150','300','600','900','1500','2500','4500'], body:BODIES.slice(), med:['Water','Air','Nitrogen','N/A'], med3:['Air','Nitrogen','Water','Steam'], leak:['I','II','III','IV','V','VI'], tv:['Control Valve','On-Off Valve'], kind:['Vessel','Boiler'], orf:'DEFGHJKLMNPQRT'.split(''), tstd:['API 598','API 6D'], seat:['Soft','Metal'], iso:['B','C','CC','D','E','EE','F','G']};
   const LK=Object.keys(L), ref=k=>{ const j=LK.indexOf(k); return `Lists!$${colL(j)}$1:$${colL(j)}$${L[k].length}`; };
   const T=(h,w,n,li)=>({h,w,n,li});
   const CVI=[T('No',5,'Item no. (Số thứ tự)'),T('Tag Name',14,'Valve tag (Mã van)'),T('CV',7,'Cv value (Hệ số Cv). If only Kvs is known, leave empty and fill the Kvs column (Nếu chỉ có Kvs thì để trống, nhập cột Kvs)'),T('Unit',7,'Plant unit, optional (Khu vực)'),T('Size',7,'Inch: 4, 3/4, 1-1/2 (Kích thước inch)'),T('Class',7,'ASME class 150, 300, 600… (Cấp áp lực)','cls'),
@@ -2100,12 +2121,12 @@ async function buildDataForm(){
     T('FL',6,'Control valve: FL from the manufacturer, empty = 0.8 (Hệ số FL của hãng)'),T('XT',6,'Control valve: xT from the manufacturer, empty = 0.54 (Hệ số xT của hãng)'),T('Port Diameter',8,'Control valve: port (seat) diameter, inch – Class V, VI (Đường kính cửa van)'),T('Kvs',7,'Kvs (m³/h) – used when Cv is empty, Cv = 1.156 × Kvs (Dùng khi không có Cv; Cv = 1,156 × Kvs)')];
   const MVI=CVI.filter(c=>!['CV','Leakage Class','Type Control Valve','FL','XT','Port Diameter','Kvs'].includes(c.h));
   for(const n of [1,2]) for(const p of ['Seat A','Seat B','Back seat','Shell']) MVI.push(T(`Leak ${p} ${n}`,9,`Actual leak ${p} #${n}, optional (Rò thực tế lần ${n})`));
-  MVI.push(T('Test Standard',11,'API 598 (default, mặc định) or API 6D for pipeline valves (van đường ống)','tstd'),T('Seat Type',9,'API 6D: Soft (đế mềm) / Metal (đế kim loại)','seat'),T('ISO 5208 Rate',9,'API 6D metal seat: B, C, CC, D, E, EE, F, G per project spec (theo spec dự án)','iso'));
+  MVI.push(T('Test Standard',11,'API 598 (default, mặc định) or API 6D for pipeline valves (van đường ống)','tstd'),T('Seat Type',9,'Soft (đế mềm) / Metal (đế kim loại). API 598: Soft = 0 leakage, empty = metal-seat rates; API 6D: empty = Rate A (API 598: đế mềm không rò, trống = rò đế kim loại; API 6D: trống = Rate A)','seat'),T('ISO 5208 Rate',9,'API 6D metal seat: B, C, CC, D, E, EE, F, G per project spec (theo spec dự án)','iso'));
   const PSI=[T('No',5,'Item no. (Số thứ tự)'),T('Tag Name',14,'Valve tag (Mã van)'),T('Size in',7,'Inlet size, inch (Size đầu vào)'),T('Size out',7,'Outlet size, inch (Size đầu ra)'),T('Class in',7,'Optional','cls'),T('Class out',7,'Optional','cls'),
     T('Set Pr',8,'Set pressure, unit chosen in the app – default psig (Áp suất cài đặt)'),T('CDTP',8,'Cold differential test pressure, empty = Set Pr (Trống = Set Pr)'),T('Back Pr',8,'Optional (Áp suất ngược)'),
-    T('Orrifice Size',8,'Orifice letter D…T (Ký hiệu lỗ thoát)','orf'),T('Medium',9,'Air / Nitrogen / Water – required (bắt buộc)','med3'),T('Vessel/Boiler',9,'Vessel = ASME VIII, Boiler = ASME I (Bình áp lực / Nồi hơi)','kind')];
+    T('Orrifice Size',8,'Orifice letter D…T (Ký hiệu lỗ thoát)','orf'),T('Medium',9,'Air / Nitrogen / Water / Steam – required (bắt buộc)','med3'),T('Vessel/Boiler',9,'Vessel = ASME VIII, Boiler = ASME I (Bình áp lực / Nồi hơi)','kind')];
   for(const k of ['Open actual','Close Actual']) for(const n of [1,2,3]) PSI.push(T(`${k} ${n}`,8,'Actual reading, optional (Số đọc thực tế)'));
-  PSI.push(T('Actual Leak 1',8,'Actual leakage, optional (Rò thực tế)'),T('Actual Leak 2',8,'Actual leakage, optional (Rò thực tế)'),T('Model',12,'Optional'),T('Serial',10,'Optional'),T('Manufacture',14,'Optional (Hãng sản xuất)'));
+  PSI.push(T('Actual Leak 1',8,'Actual leakage, optional (Rò thực tế)'),T('Actual Leak 2',8,'Actual leakage, optional (Rò thực tế)'),T('Model',12,'Optional'),T('Serial',10,'Optional'),T('Manufacture',14,'Optional (Hãng sản xuất)'),T('Seat Type',9,'Metal (default, mặc định) / Soft – soft seat: no leakage (đế mềm: không rò)','seat'));
   const EX={CV:[1,'FV-101',46,'U41',4,300,'IV','Globe','WCB','Control Valve','',406,'Water','N/A','Water','N/A','FISHER'],
             MV:[1,'HV-201','U41',8,150,'Gate','A105','',285,'Water','Water','Water','Water','KITZ'],
             PSV:[1,'PSV-301',1.5,3,150,150,90,90,'','H','Air','Vessel']};
