@@ -244,6 +244,7 @@ td{padding:10px 12px}
   <div class="tabs" role="tablist">
     <button role="tab" id="tab-calc" aria-selected="true">CV &amp; MV</button>
     <button role="tab" id="tab-psv" aria-selected="false">PSV</button>
+    <button role="tab" id="tab-test" aria-selected="false">Live test (Thử trực tiếp)</button>
     <button role="tab" id="tab-mat" aria-selected="false">Materials (Bảng vật liệu)</button>
     <button role="tab" id="tab-batch" aria-selected="false">Data &amp; Report</button>
   </div>
@@ -254,9 +255,10 @@ td{padding:10px 12px}
   <form class="panel" id="f" autocomplete="off">
     <h2>Valve data (Thông số van)</h2>
     <div class="fields">
-      <label class="full">Valve type (Loại van) <span class="hint">MV (manual valve / van tay): use On-Off (dùng chế độ On-Off)</span>
+      <label class="full">Valve type (Loại van)
         <div class="seg" id="tv">
-          <button type="button" data-v="On-Off Valve" aria-pressed="true">On-Off / MV</button>
+          <button type="button" data-v="Manual Valve" aria-pressed="true">MV – manual (Van tay)</button>
+          <button type="button" data-v="On-Off Valve" aria-pressed="false">On-Off – actuated (Có bộ truyền động)</button>
           <button type="button" data-v="Control Valve" aria-pressed="false">Control Valve</button>
         </div>
       </label>
@@ -427,6 +429,7 @@ td{padding:10px 12px}
 </div>
 </section>
 
+<section id="view-test" hidden></section>
 <section id="view-mat" hidden>
   <div class="panel" style="margin-bottom:12px">
     <label>Search material or class (Tìm vật liệu hoặc class)
@@ -497,7 +500,7 @@ td{padding:10px 12px}
 <script>
 const D = {"tp": [["WC9", 150, 290, 320, 440, null], ["WC9", 300, 750, 830, 1130, null], ["WC9", 600, 1500, 1650, 2250, null], ["WC9", 900, 2250, 2480, 3380, null], ["WC9", 1500, 3750, 4130, 5630, null], ["WC9", 2500, 6250, 6880, 9380, null], ["WC6", 150, 290, 320, 440, null], ["WC6", 300, 750, 830, 1130, null], ["WC6", 600, 1500, 1650, 2250, null], ["WC6", 900, 2250, 2480, 3380, null], ["WC6", 1500, 3750, 4130, 5630, null], ["WC6", 2500, 6250, 6880, 9380, null], ["WCB", 150, 285, 320, 430, null], ["WCB", 300, 740, 820, 1110, null], ["WCB", 900, 2220, 2450, 3330, null], ["WCB", 600, 1480, 1630, 2220, null], ["WCB", 1500, 3705, 4080, 5560, null], ["WCB", 2500, 6170, 6790, 9260, null], ["WCC", 150, 290, 320, 440, null], ["WCC", 300, 750, 830, 1130, null], ["WCC", 600, 1500, 1650, 2250, null], ["WCC", 900, 2250, 2480, 3380, null], ["WCC", 1500, 3750, 4130, 5630, null], ["WCC", 2500, 6250, 6880, 9380, null], ["A105N", 150, 285, 320, 430, "WCB"], ["ASTM A105N", 300, 740, 820, 1110, "WCB"], ["ASTM A105N", 600, 1480, 1630, 2220, null], ["ASTM A217 GR C5", 300, 750, 830, 1130, null], ["ASTM A217 GR C5", 1500, 3750, 4130, 5630, null], ["ASTM A216 GR WCC", 150, 290, 320, 440, null], ["ASTM A216 GR WCC", 300, 750, 830, 1130, null], ["ASTM A216 GR WCC", 600, 1500, 1650, 2250, null], ["ASTM A216 GR WCC", 1500, 3750, 4130, 5630, null], ["ASTM A216 GR WCC", 2500, 6250, 6880, 9380, null], ["CF8", 150, 275, 310, 420, null], ["CF8", 300, 750, 830, 1130, null], ["CF8", 600, 1440, 1590, 2160, null], ["CF8", 900, 2160, 2380, 3240, null], ["CF8", 1500, 3600, 3960, 5400, null], ["CF8", 2500, 6000, 6600, 9000, null], ["CF8M", 150, 275, 310, 420, null], ["CF8M", 300, 750, 830, 1130, null], ["CF8M", 600, 1440, 1590, 2160, null], ["CF8M", 900, 2160, 2380, 3240, null], ["CF8M", 1500, 3600, 3960, 5400, null], ["CF8M", 2500, 6000, 6600, 9000, null], ["CF3M", 300, 750, 830, 1130, null], ["CF3M", 600, 1440, 1590, 2160, null], ["CF3M", 900, 2160, 2380, 3240, null], ["CF3M", 1500, 3600, 3960, 5400, null], ["CF3M", 2500, 6000, 6600, 9000, null], ["A516 Gr60/70", 1500, 3705, 4080, 5560, null], ["ASTM A 182 GR F316", 300, 720, 800, 1080, null], ["ASTM A182 F316L", 300, 600, 660, 900, null], ["ASTM A 182 GR F316", 600, 1500, 1650, 2250, null], ["ASTM A312 TP316L", 300, 600, 660, 900, null], ["ASTM A352 LCB", 300, 695, 770, 1050, null], ["ASTM A 350 LF2", 300, 740, 820, 1110, null], ["ASTM A 350 LF2", 1500, 3705, 4080, 5560, null], ["C.STL./17-4PH ST.STL", 150, 290, 320, 440, null], ["2-1/4 Cr 1.0 Mo", 2500, 6250, 6880, 9380, "WC9"], ["2-1/4 Cr 1.0 Mo", 600, 1500, 1650, 2250, null], ["1-1/4 Cr 0.5 Mo", 600, 1500, 1650, 2250, "WC6"], ["STAINLESS STEEL", 150, 285, 320, 430, "WCB"], ["STAINLESS STEEL", 300, 740, 820, 1110, null], ["316L SST", 300, 720, 800, 1080, null], ["316L SST", 600, 1200, 1320, 1800, null], ["316L SST", 2500, 5000, 5500, 7500, null], ["A 106 Gr.B", 150, 290, 320, 440, null], ["A 106 Gr.B", 300, 750, 830, 1130, null], ["LCC", 300, 750, 830, 1130, null], ["CK3MCuN", 150, 290, 320, 440, null], ["Ductile iron", 150, null, null, 400, null], ["Ductile iron", 300, null, null, 975, null], ["Gray iron", "125 (2-12)", null, null, 350, null], ["Gray iron", "125 (14-48)", null, null, 265, null], ["Gray iron", "250 (2-12)", null, null, 875, null], ["Gray iron", "250 (14-48)", null, null, 525, null], ["CF3M", 150, 275, 310, 420, "Bo sung class - ASME B16.34 Gr 2.2"], ["A105N", 300, 740, 820, 1110, "Bo sung class - ASME B16.34 Gr 1.1"], ["A105N", 600, 1480, 1630, 2220, "Bo sung class - ASME B16.34 Gr 1.1"], ["A105N", 900, 2220, 2450, 3330, "Bo sung class - ASME B16.34 Gr 1.1"], ["A105N", 1500, 3705, 4080, 5560, "Bo sung class - ASME B16.34 Gr 1.1"], ["A105N", 2500, 6170, 6790, 9260, "Bo sung class - ASME B16.34 Gr 1.1"], ["ASTM A105N", 150, 285, 320, 430, "Bo sung class - ASME B16.34 Gr 1.1"], ["ASTM A105N", 900, 2220, 2450, 3330, "Bo sung class - ASME B16.34 Gr 1.1"], ["ASTM A105N", 1500, 3705, 4080, 5560, "Bo sung class - ASME B16.34 Gr 1.1"], ["ASTM A105N", 2500, 6170, 6790, 9260, "Bo sung class - ASME B16.34 Gr 1.1"], ["ASTM A217 GR C5", 150, 290, 320, 440, "Bo sung class - ASME B16.34 Gr 1.13"], ["ASTM A217 GR C5", 600, 1500, 1650, 2250, "Bo sung class - ASME B16.34 Gr 1.13"], ["ASTM A217 GR C5", 900, 2250, 2480, 3380, "Bo sung class - ASME B16.34 Gr 1.13"], ["ASTM A217 GR C5", 2500, 6250, 6880, 9380, "Bo sung class - ASME B16.34 Gr 1.13"], ["ASTM A216 GR WCC", 900, 2250, 2480, 3380, "Bo sung class - ASME B16.34 Gr 1.2"], ["ASTM A 182 GR F316", 150, 275, 310, 420, "Bo sung class - ASME B16.34 Gr 2.2"], ["ASTM A 182 GR F316", 900, 2160, 2380, 3240, "Bo sung class - ASME B16.34 Gr 2.2"], ["ASTM A 182 GR F316", 1500, 3600, 3960, 5400, "Bo sung class - ASME B16.34 Gr 2.2"], ["ASTM A 182 GR F316", 2500, 6000, 6600, 9000, "Bo sung class - ASME B16.34 Gr 2.2"], ["ASTM A182 F316L", 150, 230, 260, 350, "Bo sung class - ASME B16.34 Gr 2.3"], ["ASTM A182 F316L", 600, 1200, 1320, 1800, "Bo sung class - ASME B16.34 Gr 2.3"], ["ASTM A182 F316L", 900, 1800, 1980, 2700, "Bo sung class - ASME B16.34 Gr 2.3"], ["ASTM A182 F316L", 1500, 3000, 3300, 4500, "Bo sung class - ASME B16.34 Gr 2.3"], ["ASTM A182 F316L", 2500, 5000, 5500, 7500, "Bo sung class - ASME B16.34 Gr 2.3"], ["ASTM A312 TP316L", 150, 230, 260, 350, "Bo sung class - ASME B16.34 Gr 2.3"], ["ASTM A312 TP316L", 600, 1200, 1320, 1800, "Bo sung class - ASME B16.34 Gr 2.3"], ["ASTM A312 TP316L", 900, 1800, 1980, 2700, "Bo sung class - ASME B16.34 Gr 2.3"], ["ASTM A312 TP316L", 1500, 3000, 3300, 4500, "Bo sung class - ASME B16.34 Gr 2.3"], ["ASTM A312 TP316L", 2500, 5000, 5500, 7500, "Bo sung class - ASME B16.34 Gr 2.3"], ["ASTM A352 LCB", 150, 265, 300, 400, "Bo sung class - ASME B16.34 Gr 1.3"], ["ASTM A352 LCB", 600, 1390, 1530, 2090, "Bo sung class - ASME B16.34 Gr 1.3"], ["ASTM A352 LCB", 900, 2085, 2300, 3130, "Bo sung class - ASME B16.34 Gr 1.3"], ["ASTM A352 LCB", 1500, 3470, 3820, 5210, "Bo sung class - ASME B16.34 Gr 1.3"], ["ASTM A352 LCB", 2500, 5785, 6370, 8680, "Bo sung class - ASME B16.34 Gr 1.3"], ["ASTM A 350 LF2", 150, 285, 320, 430, "Bo sung class - ASME B16.34 Gr 1.1"], ["ASTM A 350 LF2", 600, 1480, 1630, 2220, "Bo sung class - ASME B16.34 Gr 1.1"], ["ASTM A 350 LF2", 900, 2220, 2450, 3330, "Bo sung class - ASME B16.34 Gr 1.1"], ["ASTM A 350 LF2", 2500, 6170, 6790, 9260, "Bo sung class - ASME B16.34 Gr 1.1"], ["2-1/4 Cr 1.0 Mo", 150, 290, 320, 440, "Bo sung class - ASME B16.34 Gr 1.10"], ["2-1/4 Cr 1.0 Mo", 300, 750, 830, 1130, "Bo sung class - ASME B16.34 Gr 1.10"], ["2-1/4 Cr 1.0 Mo", 900, 2250, 2480, 3380, "Bo sung class - ASME B16.34 Gr 1.10"], ["2-1/4 Cr 1.0 Mo", 1500, 3750, 4130, 5630, "Bo sung class - ASME B16.34 Gr 1.10"], ["1-1/4 Cr 0.5 Mo", 150, 290, 320, 440, "Bo sung class - ASME B16.34 Gr 1.9"], ["1-1/4 Cr 0.5 Mo", 300, 750, 830, 1130, "Bo sung class - ASME B16.34 Gr 1.9"], ["1-1/4 Cr 0.5 Mo", 900, 2250, 2480, 3380, "Bo sung class - ASME B16.34 Gr 1.9"], ["1-1/4 Cr 0.5 Mo", 1500, 3750, 4130, 5630, "Bo sung class - ASME B16.34 Gr 1.9"], ["1-1/4 Cr 0.5 Mo", 2500, 6250, 6880, 9380, "Bo sung class - ASME B16.34 Gr 1.9"], ["LCC", 150, 290, 320, 440, "Bo sung class - ASME B16.34 Gr 1.2"], ["LCC", 600, 1500, 1650, 2250, "Bo sung class - ASME B16.34 Gr 1.2"], ["LCC", 900, 2250, 2480, 3380, "Bo sung class - ASME B16.34 Gr 1.2"], ["LCC", 1500, 3750, 4130, 5630, "Bo sung class - ASME B16.34 Gr 1.2"], ["LCC", 2500, 6250, 6880, 9380, "Bo sung class - ASME B16.34 Gr 1.2"], ["CK3MCuN", 300, 750, 830, 1130, "Bo sung class - ASME B16.34 Gr 2.8"], ["CK3MCuN", 600, 1500, 1650, 2250, "Bo sung class - ASME B16.34 Gr 2.8"], ["CK3MCuN", 900, 2250, 2480, 3380, "Bo sung class - ASME B16.34 Gr 2.8"], ["CK3MCuN", 1500, 3750, 4130, 5630, "Bo sung class - ASME B16.34 Gr 2.8"], ["CK3MCuN", 2500, 6250, 6880, 9380, "Bo sung class - ASME B16.34 Gr 2.8"], ["ASTM A216 GR WCB", 150, 285, 320, 430, "ASME B16.34 Gr 1.1"], ["ASTM A216 GR WCB", 300, 740, 820, 1110, "ASME B16.34 Gr 1.1"], ["ASTM A216 GR WCB", 600, 1480, 1630, 2220, "ASME B16.34 Gr 1.1"], ["ASTM A216 GR WCB", 900, 2220, 2450, 3330, "ASME B16.34 Gr 1.1"], ["ASTM A216 GR WCB", 1500, 3705, 4080, 5560, "ASME B16.34 Gr 1.1"], ["ASTM A216 GR WCB", 2500, 6170, 6790, 9260, "ASME B16.34 Gr 1.1"], ["ASTM A105", 150, 285, 320, 430, "ASME B16.34 Gr 1.1"], ["ASTM A105", 300, 740, 820, 1110, "ASME B16.34 Gr 1.1"], ["ASTM A105", 600, 1480, 1630, 2220, "ASME B16.34 Gr 1.1"], ["ASTM A105", 900, 2220, 2450, 3330, "ASME B16.34 Gr 1.1"], ["ASTM A105", 1500, 3705, 4080, 5560, "ASME B16.34 Gr 1.1"], ["ASTM A105", 2500, 6170, 6790, 9260, "ASME B16.34 Gr 1.1"], ["ASTM A350 GR LF2 CL.1", 150, 285, 320, 430, "ASME B16.34 Gr 1.1"], ["ASTM A350 GR LF2 CL.1", 300, 740, 820, 1110, "ASME B16.34 Gr 1.1"], ["ASTM A350 GR LF2 CL.1", 600, 1480, 1630, 2220, "ASME B16.34 Gr 1.1"], ["ASTM A350 GR LF2 CL.1", 900, 2220, 2450, 3330, "ASME B16.34 Gr 1.1"], ["ASTM A350 GR LF2 CL.1", 1500, 3705, 4080, 5560, "ASME B16.34 Gr 1.1"], ["ASTM A350 GR LF2 CL.1", 2500, 6170, 6790, 9260, "ASME B16.34 Gr 1.1"], ["ASTM A515 GR70", 150, 285, 320, 430, "ASME B16.34 Gr 1.1"], ["ASTM A515 GR70", 300, 740, 820, 1110, "ASME B16.34 Gr 1.1"], ["ASTM A515 GR70", 600, 1480, 1630, 2220, "ASME B16.34 Gr 1.1"], ["ASTM A515 GR70", 900, 2220, 2450, 3330, "ASME B16.34 Gr 1.1"], ["ASTM A515 GR70", 1500, 3705, 4080, 5560, "ASME B16.34 Gr 1.1"], ["ASTM A515 GR70", 2500, 6170, 6790, 9260, "ASME B16.34 Gr 1.1"], ["ASTM A516 GR70", 150, 285, 320, 430, "ASME B16.34 Gr 1.1"], ["ASTM A516 GR70", 300, 740, 820, 1110, "ASME B16.34 Gr 1.1"], ["ASTM A516 GR70", 600, 1480, 1630, 2220, "ASME B16.34 Gr 1.1"], ["ASTM A516 GR70", 900, 2220, 2450, 3330, "ASME B16.34 Gr 1.1"], ["ASTM A516 GR70", 1500, 3705, 4080, 5560, "ASME B16.34 Gr 1.1"], ["ASTM A516 GR70", 2500, 6170, 6790, 9260, "ASME B16.34 Gr 1.1"], ["ASTM A352 GR LCC", 150, 290, 320, 440, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LCC", 300, 750, 830, 1130, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LCC", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LCC", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LCC", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LCC", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LC2", 150, 290, 320, 440, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LC2", 300, 750, 830, 1130, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LC2", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LC2", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LC2", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LC2", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LC3", 150, 290, 320, 440, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LC3", 300, 750, 830, 1130, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LC3", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LC3", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LC3", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.2"], ["ASTM A352 GR LC3", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.2"], ["ASTM A350 GR LF3", 150, 290, 320, 440, "ASME B16.34 Gr 1.2"], ["ASTM A350 GR LF3", 300, 750, 830, 1130, "ASME B16.34 Gr 1.2"], ["ASTM A350 GR LF3", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.2"], ["ASTM A350 GR LF3", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.2"], ["ASTM A350 GR LF3", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.2"], ["ASTM A350 GR LF3", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.2"], ["ASTM A106 GR C", 150, 290, 320, 440, "ASME B16.34 Gr 1.2"], ["ASTM A106 GR C", 300, 750, 830, 1130, "ASME B16.34 Gr 1.2"], ["ASTM A106 GR C", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.2"], ["ASTM A106 GR C", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.2"], ["ASTM A106 GR C", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.2"], ["ASTM A106 GR C", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.2"], ["ASTM A515 GR65", 150, 265, 300, 400, "ASME B16.34 Gr 1.3"], ["ASTM A515 GR65", 300, 695, 770, 1050, "ASME B16.34 Gr 1.3"], ["ASTM A515 GR65", 600, 1390, 1530, 2090, "ASME B16.34 Gr 1.3"], ["ASTM A515 GR65", 900, 2085, 2300, 3130, "ASME B16.34 Gr 1.3"], ["ASTM A515 GR65", 1500, 3470, 3820, 5210, "ASME B16.34 Gr 1.3"], ["ASTM A515 GR65", 2500, 5785, 6370, 8680, "ASME B16.34 Gr 1.3"], ["ASTM A516 GR65", 150, 265, 300, 400, "ASME B16.34 Gr 1.3"], ["ASTM A516 GR65", 300, 695, 770, 1050, "ASME B16.34 Gr 1.3"], ["ASTM A516 GR65", 600, 1390, 1530, 2090, "ASME B16.34 Gr 1.3"], ["ASTM A516 GR65", 900, 2085, 2300, 3130, "ASME B16.34 Gr 1.3"], ["ASTM A516 GR65", 1500, 3470, 3820, 5210, "ASME B16.34 Gr 1.3"], ["ASTM A516 GR65", 2500, 5785, 6370, 8680, "ASME B16.34 Gr 1.3"], ["ASTM A515 GR60", 150, 235, 260, 360, "ASME B16.34 Gr 1.4"], ["ASTM A515 GR60", 300, 620, 690, 930, "ASME B16.34 Gr 1.4"], ["ASTM A515 GR60", 600, 1235, 1360, 1860, "ASME B16.34 Gr 1.4"], ["ASTM A515 GR60", 900, 1850, 2040, 2780, "ASME B16.34 Gr 1.4"], ["ASTM A515 GR60", 1500, 3085, 3400, 4630, "ASME B16.34 Gr 1.4"], ["ASTM A515 GR60", 2500, 5145, 5660, 7720, "ASME B16.34 Gr 1.4"], ["ASTM A516 GR60", 150, 235, 260, 360, "ASME B16.34 Gr 1.4"], ["ASTM A516 GR60", 300, 620, 690, 930, "ASME B16.34 Gr 1.4"], ["ASTM A516 GR60", 600, 1235, 1360, 1860, "ASME B16.34 Gr 1.4"], ["ASTM A516 GR60", 900, 1850, 2040, 2780, "ASME B16.34 Gr 1.4"], ["ASTM A516 GR60", 1500, 3085, 3400, 4630, "ASME B16.34 Gr 1.4"], ["ASTM A516 GR60", 2500, 5145, 5660, 7720, "ASME B16.34 Gr 1.4"], ["ASTM A350 GR LF1 CL.1", 150, 235, 260, 360, "ASME B16.34 Gr 1.4"], ["ASTM A350 GR LF1 CL.1", 300, 620, 690, 930, "ASME B16.34 Gr 1.4"], ["ASTM A350 GR LF1 CL.1", 600, 1235, 1360, 1860, "ASME B16.34 Gr 1.4"], ["ASTM A350 GR LF1 CL.1", 900, 1850, 2040, 2780, "ASME B16.34 Gr 1.4"], ["ASTM A350 GR LF1 CL.1", 1500, 3085, 3400, 4630, "ASME B16.34 Gr 1.4"], ["ASTM A350 GR LF1 CL.1", 2500, 5145, 5660, 7720, "ASME B16.34 Gr 1.4"], ["ASTM A217 GR WC1", 150, 265, 300, 400, "ASME B16.34 Gr 1.5"], ["ASTM A217 GR WC1", 300, 695, 770, 1050, "ASME B16.34 Gr 1.5"], ["ASTM A217 GR WC1", 600, 1390, 1530, 2090, "ASME B16.34 Gr 1.5"], ["ASTM A217 GR WC1", 900, 2085, 2300, 3130, "ASME B16.34 Gr 1.5"], ["ASTM A217 GR WC1", 1500, 3470, 3820, 5210, "ASME B16.34 Gr 1.5"], ["ASTM A217 GR WC1", 2500, 5785, 6370, 8680, "ASME B16.34 Gr 1.5"], ["ASTM A352 GR LC1", 150, 265, 300, 400, "ASME B16.34 Gr 1.5"], ["ASTM A352 GR LC1", 300, 695, 770, 1050, "ASME B16.34 Gr 1.5"], ["ASTM A352 GR LC1", 600, 1390, 1530, 2090, "ASME B16.34 Gr 1.5"], ["ASTM A352 GR LC1", 900, 2085, 2300, 3130, "ASME B16.34 Gr 1.5"], ["ASTM A352 GR LC1", 1500, 3470, 3820, 5210, "ASME B16.34 Gr 1.5"], ["ASTM A352 GR LC1", 2500, 5785, 6370, 8680, "ASME B16.34 Gr 1.5"], ["ASTM A182 GR F1", 150, 265, 300, 400, "ASME B16.34 Gr 1.5"], ["ASTM A182 GR F1", 300, 695, 770, 1050, "ASME B16.34 Gr 1.5"], ["ASTM A182 GR F1", 600, 1390, 1530, 2090, "ASME B16.34 Gr 1.5"], ["ASTM A182 GR F1", 900, 2085, 2300, 3130, "ASME B16.34 Gr 1.5"], ["ASTM A182 GR F1", 1500, 3470, 3820, 5210, "ASME B16.34 Gr 1.5"], ["ASTM A182 GR F1", 2500, 5785, 6370, 8680, "ASME B16.34 Gr 1.5"], ["ASTM A217 GR WC4", 150, 290, 320, 440, "ASME B16.34 Gr 1.7"], ["ASTM A217 GR WC4", 300, 750, 830, 1130, "ASME B16.34 Gr 1.7"], ["ASTM A217 GR WC4", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.7"], ["ASTM A217 GR WC4", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.7"], ["ASTM A217 GR WC4", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.7"], ["ASTM A217 GR WC4", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.7"], ["ASTM A217 GR WC5", 150, 290, 320, 440, "ASME B16.34 Gr 1.7"], ["ASTM A217 GR WC5", 300, 750, 830, 1130, "ASME B16.34 Gr 1.7"], ["ASTM A217 GR WC5", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.7"], ["ASTM A217 GR WC5", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.7"], ["ASTM A217 GR WC5", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.7"], ["ASTM A217 GR WC5", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.7"], ["ASTM A182 GR F2", 150, 290, 320, 440, "ASME B16.34 Gr 1.7"], ["ASTM A182 GR F2", 300, 750, 830, 1130, "ASME B16.34 Gr 1.7"], ["ASTM A182 GR F2", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.7"], ["ASTM A182 GR F2", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.7"], ["ASTM A182 GR F2", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.7"], ["ASTM A182 GR F2", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.7"], ["ASTM A217 GR WC6", 150, 290, 320, 440, "ASME B16.34 Gr 1.9"], ["ASTM A217 GR WC6", 300, 750, 830, 1130, "ASME B16.34 Gr 1.9"], ["ASTM A217 GR WC6", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.9"], ["ASTM A217 GR WC6", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.9"], ["ASTM A217 GR WC6", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.9"], ["ASTM A217 GR WC6", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.9"], ["ASTM A182 GR F11 CL.2", 150, 290, 320, 440, "ASME B16.34 Gr 1.9"], ["ASTM A182 GR F11 CL.2", 300, 750, 830, 1130, "ASME B16.34 Gr 1.9"], ["ASTM A182 GR F11 CL.2", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.9"], ["ASTM A182 GR F11 CL.2", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.9"], ["ASTM A182 GR F11 CL.2", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.9"], ["ASTM A182 GR F11 CL.2", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.9"], ["ASTM A217 GR WC9", 150, 290, 320, 440, "ASME B16.34 Gr 1.10"], ["ASTM A217 GR WC9", 300, 750, 830, 1130, "ASME B16.34 Gr 1.10"], ["ASTM A217 GR WC9", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.10"], ["ASTM A217 GR WC9", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.10"], ["ASTM A217 GR WC9", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.10"], ["ASTM A217 GR WC9", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.10"], ["ASTM A182 GR F22 CL.3", 150, 290, 320, 440, "ASME B16.34 Gr 1.10"], ["ASTM A182 GR F22 CL.3", 300, 750, 830, 1130, "ASME B16.34 Gr 1.10"], ["ASTM A182 GR F22 CL.3", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.10"], ["ASTM A182 GR F22 CL.3", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.10"], ["ASTM A182 GR F22 CL.3", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.10"], ["ASTM A182 GR F22 CL.3", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.10"], ["ASTM A182 GR F5a", 150, 290, 320, 440, "ASME B16.34 Gr 1.13"], ["ASTM A182 GR F5a", 300, 750, 830, 1130, "ASME B16.34 Gr 1.13"], ["ASTM A182 GR F5a", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.13"], ["ASTM A182 GR F5a", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.13"], ["ASTM A182 GR F5a", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.13"], ["ASTM A182 GR F5a", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.13"], ["ASTM A182 GR F9", 150, 290, 320, 440, "ASME B16.34 Gr 1.14"], ["ASTM A182 GR F9", 300, 750, 830, 1130, "ASME B16.34 Gr 1.14"], ["ASTM A182 GR F9", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.14"], ["ASTM A182 GR F9", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.14"], ["ASTM A182 GR F9", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.14"], ["ASTM A182 GR F9", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.14"], ["ASTM A217 GR C12", 150, 290, 320, 440, "ASME B16.34 Gr 1.14"], ["ASTM A217 GR C12", 300, 750, 830, 1130, "ASME B16.34 Gr 1.14"], ["ASTM A217 GR C12", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.14"], ["ASTM A217 GR C12", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.14"], ["ASTM A217 GR C12", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.14"], ["ASTM A217 GR C12", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.14"], ["ASTM A182 GR F91", 150, 290, 320, 440, "ASME B16.34 Gr 1.15"], ["ASTM A182 GR F91", 300, 750, 830, 1130, "ASME B16.34 Gr 1.15"], ["ASTM A182 GR F91", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.15"], ["ASTM A182 GR F91", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.15"], ["ASTM A182 GR F91", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.15"], ["ASTM A182 GR F91", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.15"], ["ASTM A217 GR C12A", 150, 290, 320, 440, "ASME B16.34 Gr 1.15"], ["ASTM A217 GR C12A", 300, 750, 830, 1130, "ASME B16.34 Gr 1.15"], ["ASTM A217 GR C12A", 600, 1500, 1650, 2250, "ASME B16.34 Gr 1.15"], ["ASTM A217 GR C12A", 900, 2250, 2480, 3380, "ASME B16.34 Gr 1.15"], ["ASTM A217 GR C12A", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 1.15"], ["ASTM A217 GR C12A", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 1.15"], ["ASTM A351 GR CF8", 150, 275, 310, 420, "ASME B16.34 Gr 2.1"], ["ASTM A351 GR CF8", 300, 720, 800, 1080, "ASME B16.34 Gr 2.1"], ["ASTM A351 GR CF8", 600, 1440, 1590, 2160, "ASME B16.34 Gr 2.1"], ["ASTM A351 GR CF8", 900, 2160, 2380, 3240, "ASME B16.34 Gr 2.1"], ["ASTM A351 GR CF8", 1500, 3600, 3960, 5400, "ASME B16.34 Gr 2.1"], ["ASTM A351 GR CF8", 2500, 6000, 6600, 9000, "ASME B16.34 Gr 2.1"], ["ASTM A351 GR CF3", 150, 275, 310, 420, "ASME B16.34 Gr 2.1"], ["ASTM A351 GR CF3", 300, 720, 800, 1080, "ASME B16.34 Gr 2.1"], ["ASTM A351 GR CF3", 600, 1440, 1590, 2160, "ASME B16.34 Gr 2.1"], ["ASTM A351 GR CF3", 900, 2160, 2380, 3240, "ASME B16.34 Gr 2.1"], ["ASTM A351 GR CF3", 1500, 3600, 3960, 5400, "ASME B16.34 Gr 2.1"], ["ASTM A351 GR CF3", 2500, 6000, 6600, 9000, "ASME B16.34 Gr 2.1"], ["ASTM A182 GR F304", 150, 275, 310, 420, "ASME B16.34 Gr 2.1"], ["ASTM A182 GR F304", 300, 720, 800, 1080, "ASME B16.34 Gr 2.1"], ["ASTM A182 GR F304", 600, 1440, 1590, 2160, "ASME B16.34 Gr 2.1"], ["ASTM A182 GR F304", 900, 2160, 2380, 3240, "ASME B16.34 Gr 2.1"], ["ASTM A182 GR F304", 1500, 3600, 3960, 5400, "ASME B16.34 Gr 2.1"], ["ASTM A182 GR F304", 2500, 6000, 6600, 9000, "ASME B16.34 Gr 2.1"], ["ASTM A182 GR F304H", 150, 275, 310, 420, "ASME B16.34 Gr 2.1"], ["ASTM A182 GR F304H", 300, 720, 800, 1080, "ASME B16.34 Gr 2.1"], ["ASTM A182 GR F304H", 600, 1440, 1590, 2160, "ASME B16.34 Gr 2.1"], ["ASTM A182 GR F304H", 900, 2160, 2380, 3240, "ASME B16.34 Gr 2.1"], ["ASTM A182 GR F304H", 1500, 3600, 3960, 5400, "ASME B16.34 Gr 2.1"], ["ASTM A182 GR F304H", 2500, 6000, 6600, 9000, "ASME B16.34 Gr 2.1"], ["ASTM A351 GR CF8M", 150, 275, 310, 420, "ASME B16.34 Gr 2.2"], ["ASTM A351 GR CF8M", 300, 720, 800, 1080, "ASME B16.34 Gr 2.2"], ["ASTM A351 GR CF8M", 600, 1440, 1590, 2160, "ASME B16.34 Gr 2.2"], ["ASTM A351 GR CF8M", 900, 2160, 2380, 3240, "ASME B16.34 Gr 2.2"], ["ASTM A351 GR CF8M", 1500, 3600, 3960, 5400, "ASME B16.34 Gr 2.2"], ["ASTM A351 GR CF8M", 2500, 6000, 6600, 9000, "ASME B16.34 Gr 2.2"], ["ASTM A351 GR CF3M", 150, 275, 310, 420, "ASME B16.34 Gr 2.2"], ["ASTM A351 GR CF3M", 300, 720, 800, 1080, "ASME B16.34 Gr 2.2"], ["ASTM A351 GR CF3M", 600, 1440, 1590, 2160, "ASME B16.34 Gr 2.2"], ["ASTM A351 GR CF3M", 900, 2160, 2380, 3240, "ASME B16.34 Gr 2.2"], ["ASTM A351 GR CF3M", 1500, 3600, 3960, 5400, "ASME B16.34 Gr 2.2"], ["ASTM A351 GR CF3M", 2500, 6000, 6600, 9000, "ASME B16.34 Gr 2.2"], ["ASTM A182 GR F316H", 150, 275, 310, 420, "ASME B16.34 Gr 2.2"], ["ASTM A182 GR F316H", 300, 720, 800, 1080, "ASME B16.34 Gr 2.2"], ["ASTM A182 GR F316H", 600, 1440, 1590, 2160, "ASME B16.34 Gr 2.2"], ["ASTM A182 GR F316H", 900, 2160, 2380, 3240, "ASME B16.34 Gr 2.2"], ["ASTM A182 GR F316H", 1500, 3600, 3960, 5400, "ASME B16.34 Gr 2.2"], ["ASTM A182 GR F316H", 2500, 6000, 6600, 9000, "ASME B16.34 Gr 2.2"], ["ASTM A182 GR F304L", 150, 230, 260, 350, "ASME B16.34 Gr 2.3"], ["ASTM A182 GR F304L", 300, 600, 660, 900, "ASME B16.34 Gr 2.3"], ["ASTM A182 GR F304L", 600, 1200, 1320, 1800, "ASME B16.34 Gr 2.3"], ["ASTM A182 GR F304L", 900, 1800, 1980, 2700, "ASME B16.34 Gr 2.3"], ["ASTM A182 GR F304L", 1500, 3000, 3300, 4500, "ASME B16.34 Gr 2.3"], ["ASTM A182 GR F304L", 2500, 5000, 5500, 7500, "ASME B16.34 Gr 2.3"], ["ASTM A182 GR F321", 150, 275, 310, 420, "ASME B16.34 Gr 2.4"], ["ASTM A182 GR F321", 300, 720, 800, 1080, "ASME B16.34 Gr 2.4"], ["ASTM A182 GR F321", 600, 1440, 1590, 2160, "ASME B16.34 Gr 2.4"], ["ASTM A182 GR F321", 900, 2160, 2380, 3240, "ASME B16.34 Gr 2.4"], ["ASTM A182 GR F321", 1500, 3600, 3960, 5400, "ASME B16.34 Gr 2.4"], ["ASTM A182 GR F321", 2500, 6000, 6600, 9000, "ASME B16.34 Gr 2.4"], ["ASTM A182 GR F321H", 150, 275, 310, 420, "ASME B16.34 Gr 2.4"], ["ASTM A182 GR F321H", 300, 720, 800, 1080, "ASME B16.34 Gr 2.4"], ["ASTM A182 GR F321H", 600, 1440, 1590, 2160, "ASME B16.34 Gr 2.4"], ["ASTM A182 GR F321H", 900, 2160, 2380, 3240, "ASME B16.34 Gr 2.4"], ["ASTM A182 GR F321H", 1500, 3600, 3960, 5400, "ASME B16.34 Gr 2.4"], ["ASTM A182 GR F321H", 2500, 6000, 6600, 9000, "ASME B16.34 Gr 2.4"], ["ASTM A182 GR F347", 150, 275, 310, 420, "ASME B16.34 Gr 2.5"], ["ASTM A182 GR F347", 300, 720, 800, 1080, "ASME B16.34 Gr 2.5"], ["ASTM A182 GR F347", 600, 1440, 1590, 2160, "ASME B16.34 Gr 2.5"], ["ASTM A182 GR F347", 900, 2160, 2380, 3240, "ASME B16.34 Gr 2.5"], ["ASTM A182 GR F347", 1500, 3600, 3960, 5400, "ASME B16.34 Gr 2.5"], ["ASTM A182 GR F347", 2500, 6000, 6600, 9000, "ASME B16.34 Gr 2.5"], ["ASTM A351 GR CF8C", 150, 275, 310, 420, "ASME B16.34 Gr 2.5"], ["ASTM A351 GR CF8C", 300, 720, 800, 1080, "ASME B16.34 Gr 2.5"], ["ASTM A351 GR CF8C", 600, 1440, 1590, 2160, "ASME B16.34 Gr 2.5"], ["ASTM A351 GR CF8C", 900, 2160, 2380, 3240, "ASME B16.34 Gr 2.5"], ["ASTM A351 GR CF8C", 1500, 3600, 3960, 5400, "ASME B16.34 Gr 2.5"], ["ASTM A351 GR CF8C", 2500, 6000, 6600, 9000, "ASME B16.34 Gr 2.5"], ["ASTM A182 GR F51 (DUPLEX)", 150, 290, 320, 440, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F51 (DUPLEX)", 300, 750, 830, 1130, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F51 (DUPLEX)", 600, 1500, 1650, 2250, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F51 (DUPLEX)", 900, 2250, 2480, 3380, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F51 (DUPLEX)", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F51 (DUPLEX)", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F53 (SUPER DUPLEX)", 150, 290, 320, 440, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F53 (SUPER DUPLEX)", 300, 750, 830, 1130, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F53 (SUPER DUPLEX)", 600, 1500, 1650, 2250, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F53 (SUPER DUPLEX)", 900, 2250, 2480, 3380, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F53 (SUPER DUPLEX)", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F53 (SUPER DUPLEX)", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F55 (SUPER DUPLEX)", 150, 290, 320, 440, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F55 (SUPER DUPLEX)", 300, 750, 830, 1130, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F55 (SUPER DUPLEX)", 600, 1500, 1650, 2250, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F55 (SUPER DUPLEX)", 900, 2250, 2480, 3380, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F55 (SUPER DUPLEX)", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F55 (SUPER DUPLEX)", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F44 (6MO)", 150, 290, 320, 440, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F44 (6MO)", 300, 750, 830, 1130, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F44 (6MO)", 600, 1500, 1650, 2250, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F44 (6MO)", 900, 2250, 2480, 3380, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F44 (6MO)", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 2.8"], ["ASTM A182 GR F44 (6MO)", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 4A (CD3MN)", 150, 290, 320, 440, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 4A (CD3MN)", 300, 750, 830, 1130, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 4A (CD3MN)", 600, 1500, 1650, 2250, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 4A (CD3MN)", 900, 2250, 2480, 3380, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 4A (CD3MN)", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 4A (CD3MN)", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 5A (CE3MN)", 150, 290, 320, 440, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 5A (CE3MN)", 300, 750, 830, 1130, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 5A (CE3MN)", 600, 1500, 1650, 2250, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 5A (CE3MN)", 900, 2250, 2480, 3380, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 5A (CE3MN)", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 5A (CE3MN)", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 6A (CD3MWCUN)", 150, 290, 320, 440, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 6A (CD3MWCUN)", 300, 750, 830, 1130, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 6A (CD3MWCUN)", 600, 1500, 1650, 2250, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 6A (CD3MWCUN)", 900, 2250, 2480, 3380, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 6A (CD3MWCUN)", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 2.8"], ["ASTM A995 GR 6A (CD3MWCUN)", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 2.8"], ["ASTM B462 N08020 (ALLOY 20)", 150, 290, 320, 440, "ASME B16.34 Gr 3.1"], ["ASTM B462 N08020 (ALLOY 20)", 300, 750, 830, 1130, "ASME B16.34 Gr 3.1"], ["ASTM B462 N08020 (ALLOY 20)", 600, 1500, 1650, 2250, "ASME B16.34 Gr 3.1"], ["ASTM B462 N08020 (ALLOY 20)", 900, 2250, 2480, 3380, "ASME B16.34 Gr 3.1"], ["ASTM B462 N08020 (ALLOY 20)", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 3.1"], ["ASTM B462 N08020 (ALLOY 20)", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 3.1"], ["ASTM B160 N02200 (NICKEL 200)", 150, 140, 160, 210, "ASME B16.34 Gr 3.2"], ["ASTM B160 N02200 (NICKEL 200)", 300, 360, 400, 540, "ASME B16.34 Gr 3.2"], ["ASTM B160 N02200 (NICKEL 200)", 600, 720, 800, 1080, "ASME B16.34 Gr 3.2"], ["ASTM B160 N02200 (NICKEL 200)", 900, 1080, 1190, 1620, "ASME B16.34 Gr 3.2"], ["ASTM B160 N02200 (NICKEL 200)", 1500, 1800, 1980, 2700, "ASME B16.34 Gr 3.2"], ["ASTM B160 N02200 (NICKEL 200)", 2500, 3000, 3300, 4500, "ASME B16.34 Gr 3.2"], ["ASTM B564 N04400 (MONEL 400)", 150, 230, 260, 350, "ASME B16.34 Gr 3.4"], ["ASTM B564 N04400 (MONEL 400)", 300, 600, 660, 900, "ASME B16.34 Gr 3.4"], ["ASTM B564 N04400 (MONEL 400)", 600, 1200, 1320, 1800, "ASME B16.34 Gr 3.4"], ["ASTM B564 N04400 (MONEL 400)", 900, 1800, 1980, 2700, "ASME B16.34 Gr 3.4"], ["ASTM B564 N04400 (MONEL 400)", 1500, 3000, 3300, 4500, "ASME B16.34 Gr 3.4"], ["ASTM B564 N04400 (MONEL 400)", 2500, 5000, 5500, 7500, "ASME B16.34 Gr 3.4"], ["ASTM B564 N06625 (INCONEL 625)", 150, 290, 320, 440, "ASME B16.34 Gr 3.8"], ["ASTM B564 N06625 (INCONEL 625)", 300, 750, 830, 1130, "ASME B16.34 Gr 3.8"], ["ASTM B564 N06625 (INCONEL 625)", 600, 1500, 1650, 2250, "ASME B16.34 Gr 3.8"], ["ASTM B564 N06625 (INCONEL 625)", 900, 2250, 2480, 3380, "ASME B16.34 Gr 3.8"], ["ASTM B564 N06625 (INCONEL 625)", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 3.8"], ["ASTM B564 N06625 (INCONEL 625)", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 3.8"], ["ASTM B564 N10276 (HASTELLOY C276)", 150, 290, 320, 440, "ASME B16.34 Gr 3.8"], ["ASTM B564 N10276 (HASTELLOY C276)", 300, 750, 830, 1130, "ASME B16.34 Gr 3.8"], ["ASTM B564 N10276 (HASTELLOY C276)", 600, 1500, 1650, 2250, "ASME B16.34 Gr 3.8"], ["ASTM B564 N10276 (HASTELLOY C276)", 900, 2250, 2480, 3380, "ASME B16.34 Gr 3.8"], ["ASTM B564 N10276 (HASTELLOY C276)", 1500, 3750, 4130, 5630, "ASME B16.34 Gr 3.8"], ["ASTM B564 N10276 (HASTELLOY C276)", 2500, 6250, 6880, 9380, "ASME B16.34 Gr 3.8"]], "time": {"shell": {"0.5": 15, "0.75": 15, "1": 15, "1.5": 15, "2": 15, "2.5": 60, "3": 60, "4": 60, "6": 60, "8": 120, "10": 120, "12": 120, "14": 300, "16": 300, "18": 300, "20": 300, "22": 300, "24": 300, "26": 300, "28": 300, "30": 300, "32": 300, "42": 300, "46": 300}, "seatChk": {"0.5": 60, "0.75": 60, "1": 60, "1.5": 60, "2": 60, "2.5": 60, "3": 60, "4": 60, "6": 60, "8": 120, "10": 120, "12": 120, "14": 120, "16": 120, "18": 120, "20": 120, "22": 120, "24": 120, "26": 120, "28": 120, "30": 120, "32": 120, "42": 120, "46": 120}, "seatOth": {"0.5": 15, "0.75": 15, "1": 15, "1.5": 15, "2": 15, "2.5": 60, "3": 60, "4": 60, "6": 60, "8": 120, "10": 120, "12": 120, "14": 120, "16": 120, "18": 120, "20": 120, "22": 120, "24": 120, "26": 120, "28": 120, "30": 120, "32": 120, "42": 120, "46": 120}, "back": {"0.5": 15, "0.75": 15, "1": 15, "1.5": 15, "2": 15, "2.5": 60, "3": 60, "4": 60, "6": 60, "8": 60, "10": 60, "12": 60, "14": 60, "16": 60, "18": 60, "20": 60, "22": 60, "24": 60, "26": 60, "28": 60, "30": 60, "32": 60, "42": 60, "46": 60}}, "mp": {"liq": {"0.5": 0, "0.75": 0, "1": 0, "1.5": 0, "2": 0, "2.5": 0.3, "3": 0.4, "4": 0.5, "5": 0.6, "6": 0.8, "8": 1, "10": 1.3, "12": 1.5, "14": 1.6, "16": 2, "18": 2.3, "20": 2.5, "22": 2.8, "24": 3, "26": 3.3, "28": 3.5, "30": 3.8, "32": 4, "36": 4.5, "40": 5, "42": 5.3, "46": 5.8, "48": 6, "54": 7.3, "60": 7.5}, "air": {"0.5": 0, "0.75": 0, "1": 0, "1.5": 0, "2": 0, "2.5": 10, "3": 12, "4": 16, "5": 20, "6": 24, "8": 32, "10": 40, "12": 48, "14": 56, "16": 64, "18": 72, "20": 80, "22": 88, "24": 96, "26": 104, "28": 112, "30": 120, "32": 128, "36": 144, "40": 160, "42": 168, "46": 184, "48": 192, "54": 216, "60": 240}, "chkLiq": {"0.5": 6, "0.75": 6, "1": 6, "1.5": 6, "2": 6, "2.5": 7.5, "3": 9, "4": 12, "5": 15, "6": 18, "8": 24, "10": 30, "12": 36, "14": 42, "16": 48, "18": 54, "20": 60, "22": 66, "24": 72, "26": 78, "28": 84, "30": 90, "32": 96, "36": 108, "40": 120, "42": 126, "46": 138, "48": 144, "54": 162, "60": 180}, "chkAir": {"0.5": 1.3, "0.75": 1.3, "1": 1.3, "1.5": 1.3, "2": 1.3, "2.5": 1.8, "3": 2.2, "4": 2.8, "5": 3.5, "6": 4.2, "8": 5.7, "10": 7, "12": 8.3, "14": 9.8, "16": 11.2, "18": 12.7, "20": 14, "22": 15.3, "24": 16.8, "26": 18.2, "28": 19.7, "30": 21, "32": 22.3, "36": 25.2, "40": 28, "42": 29.3, "46": 32, "48": 33.7, "54": 37.8, "60": 42}}, "lvi": {"1": [0.15, 1], "1.5": [0.3, 2], "2": [0.45, 3], "2.5": [0.6, 4], "3": [0.9, 6], "4": [1.7, 11], "6": [4, 27], "8": [6.75, 45], "10": [11.1, "-"], "12": [16, "-"], "14": [21.6, "-"], "16": [28.4, "-"], "18": [32, "-"], "20": [35.6, "-"], "24": [42.7, "-"], "26": [46.3, "-"], "28": [50, "-"], "30": [53.6, "-"]}, "mats": ["WC9", "WC6", "WCB", "WCC", "A105N", "ASTM A105N", "ASTM A217 GR C5", "ASTM A216 GR WCC", "CF8", "CF8M", "CF3M", "A516 Gr60/70", "ASTM A 182 GR F316", "ASTM A312 TP316L", "ASTM A352 LCB", "ASTM A 350 LF2", "C.STL./17-4PH ST.STL", "2-1/4 Cr 1.0 Mo", "1-1/4 Cr 0.5 Mo", "STAINLESS STEEL", "316L SST", "A 106 Gr.B", "LCC", "CK3MCuN", "Ductile iron", "Gray iron", "ASTM A182 F316L", "ASTM A216 GR WCB", "ASTM A105", "ASTM A350 GR LF2 CL.1", "ASTM A515 GR70", "ASTM A516 GR70", "ASTM A352 GR LCC", "ASTM A352 GR LC2", "ASTM A352 GR LC3", "ASTM A350 GR LF3", "ASTM A106 GR C", "ASTM A515 GR65", "ASTM A516 GR65", "ASTM A515 GR60", "ASTM A516 GR60", "ASTM A350 GR LF1 CL.1", "ASTM A217 GR WC1", "ASTM A352 GR LC1", "ASTM A182 GR F1", "ASTM A217 GR WC4", "ASTM A217 GR WC5", "ASTM A182 GR F2", "ASTM A217 GR WC6", "ASTM A182 GR F11 CL.2", "ASTM A217 GR WC9", "ASTM A182 GR F22 CL.3", "ASTM A182 GR F5a", "ASTM A182 GR F9", "ASTM A217 GR C12", "ASTM A182 GR F91", "ASTM A217 GR C12A", "ASTM A351 GR CF8", "ASTM A351 GR CF3", "ASTM A182 GR F304", "ASTM A182 GR F304H", "ASTM A351 GR CF8M", "ASTM A351 GR CF3M", "ASTM A182 GR F316H", "ASTM A182 GR F304L", "ASTM A182 GR F321", "ASTM A182 GR F321H", "ASTM A182 GR F347", "ASTM A351 GR CF8C", "ASTM A182 GR F51 (DUPLEX)", "ASTM A182 GR F53 (SUPER DUPLEX)", "ASTM A182 GR F55 (SUPER DUPLEX)", "ASTM A182 GR F44 (6MO)", "ASTM A995 GR 4A (CD3MN)", "ASTM A995 GR 5A (CE3MN)", "ASTM A995 GR 6A (CD3MWCUN)", "ASTM B462 N08020 (ALLOY 20)", "ASTM B160 N02200 (NICKEL 200)", "ASTM B564 N04400 (MONEL 400)", "ASTM B564 N06625 (INCONEL 625)", "ASTM B564 N10276 (HASTELLOY C276)"], "psvTime": [[0.25, 1], [0.5, 1], [0.75, 1], [1, 1], [2, 1], [2.5, 2], [4, 2], [5, 5], [6, 5], [8, 5], [14, 5], [18, 5]], "orifice": [["C", 0.11], ["D", 0.11], ["E", 0.196], ["F", 0.307], ["G", 0.503], ["H", 0.785], ["J", 1.287], ["K", 1.838], ["L", 2.853], ["M", 3.6], ["N", 4.34], ["P", 6.38], ["Q", 11.05], ["R", 16], ["T", 26]], "mpSmall": [[15, 40, 12], [1000, 40, 12], [1500, 60, 18], [2000, 80, 24], [2500, 100, 30], [3000, 100, 30], [4000, 100, 30], [5000, 100, 30], [6000, 100, 30]], "mpLarge": [[15, 20, 6], [1000, 20, 6], [1500, 30, 9], [2000, 40, 12], [2500, 50, 15], [3000, 60, 18], [4000, 80, 24], [5000, 100, 30], [6000, 100, 30]]};
 const $ = id => document.getElementById(id);
-const st = {tv:'On-Off Valve', med:'auto', bar:false, disp:(load('dispu')||'psi')};
+const st = {tv:'Manual Valve', med:'auto', bar:false, disp:(load('dispu')||'psi')};
 const PSI2BAR = 0.0689476;
 // Don vi ap suat tab CV & MV (psig, bar(g), kg/cm2, MPa)
 const CVF={psi:1,bar:14.5037738,kg:14.2233433,mpa:145.037738}, CVL={psi:'psig',bar:'bar',kg:'kg/cm²',mpa:'MPa'};
@@ -633,7 +636,7 @@ function fillClasses(){
 
 // ---- core logic (mirrors CV module) ----
 function calc(i){
-  const W=[], isCV=i.tv==='Control Valve', on=i.tv==='On-Off Valve';
+  const W=[], isCV=i.tv==='Control Valve', on=i.tv!=='Control Valve';
   const H=i.body, size=i.size, F=parseFloat(i.cls), cl=i.cls;
   const lowTypes=['Gate','Plug','Ball','Butterfly'].includes(H);
   // medium seat A
@@ -793,7 +796,7 @@ function stage(title,s,extra){
 function inputs(){
   return {tv:st.tv,med:st.med,body:$('body').value,size:parseFloat($('size').value),mat:$('matq').value.trim(),
     cls:$('cls').value,design:$('design').value,leak:$('leak').value,cvstd:$('cvstd').value,cv:$('cv').value,cvu:$('cvu').value,dp:$('dp').value,fl:$('fl').value,xt:$('xt').value,port:$('port').value,
-    tstd:st.tv==='On-Off Valve'?$('tstd').value:'598',seatT:st.tv==='On-Off Valve'?$('seatT').value:'',isoR:$('isoR').value};
+    tstd:st.tv!=='Control Valve'?$('tstd').value:'598',seatT:st.tv!=='Control Valve'?$('seatT').value:'',isoR:$('isoR').value};
 }
 let last=null;
 function render(){
@@ -807,6 +810,7 @@ function render(){
   { const c=cvVal(i); $('cvconv').textContent = c>0 ? (i.cvu==='Kv' ? '= Cv '+(+c.toFixed(2)) : '= Kvs '+(+(c*0.865).toFixed(2))) : ''; }
   for(const k of ['body','size','matq','cls','design','leak','cvstd','cv','cvu','dp','tstd','seatT','isoR','fl','xt','port']) store(k,$(k).value);
   store('tv',st.tv); store('med',st.med);
+  if(window.x7r) x7r(i,r);
 }
 function text(){
   const {i,r}=last; const L=[];
@@ -851,7 +855,7 @@ $('copy').addEventListener('click',async()=>{const t=text();const b=$('copy');
   setTimeout(()=>b.textContent='Copy results (Sao chép kết quả)',1600);});
 $('f').addEventListener('submit',e=>e.preventDefault());
 function tab(which){
-  for(const t of ['calc','psv','mat','batch']){ $('tab-'+t).setAttribute('aria-selected',which===t); $('view-'+t).hidden = which!==t; }
+  for(const t of ['calc','psv','test','mat','batch']){ if(!$('tab-'+t)) continue; $('tab-'+t).setAttribute('aria-selected',which===t); $('view-'+t).hidden = which!==t; }
   store('tab',which);
 }
 $('tab-calc').onclick=()=>tab('calc'); $('tab-mat').onclick=()=>tab('mat'); $('tab-psv').onclick=()=>tab('psv'); $('tab-batch').onclick=()=>tab('batch');
@@ -998,6 +1002,7 @@ function psvRender(){
   </article>`;
   for(const k of ['p_size','p_orf','p_orf_d','p_orf_mm','p_set','p_cdtp']) store(k,$(k).value);
   store('p_kind',ps.kind); store('p_med',ps.med); store('p_unit',ps.unit); store('p_seat',ps.seat);
+  if(window.x7p) x7p(r);
 }
 function psvSeg(id,key){ $(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   ps[key]=b.dataset.v; [...$(id).children].forEach(x=>x.setAttribute('aria-pressed',x===b)); psvRender();}); }
@@ -1114,13 +1119,13 @@ const conv = (v,from,to) => v==null ? null : v*PU[from]/PU[to];
 // ---------- danh sach ma truong ----------
 const STAGES=[['SHELL','Shell'],['SEATA','Seat A'],['SEATB','Seat B'],['BACK','Back seat']];
 const FIELDS=[['STT','Item No. (Số thứ tự)'],['TAG','Tag No (mã van)'],['NGAY','Report date (Ngày lập biên bản)'],['TIEU_CHUAN','Applicable standard (Tiêu chuẩn áp dụng)'],
- ['LOAI_VAN','On-Off Valve / Control Valve'],['KIEU_THAN','Gate, Globe, Ball…'],['SIZE','Size (inch)'],['DN','Size DN'],
+ ['LOAI_VAN','Manual Valve / On-Off Valve / Control Valve'],['LOAI_VAN_VN','Valve type, Vietnamese (Loại van)'],['TC_THAM_CHIEU','Reference standard (Tiêu chuẩn tham chiếu)'],['BO_TD','Actuator type (Bộ truyền động)'],['VT_AN_TOAN','Fail position (Vị trí an toàn)'],['TG_DONG_MO','Required stroke time (Thời gian đóng / mở)'],['THU_BTD','Actuator test items (Nội dung thử bộ truyền động)'],['CV_ACTION','Air to open / Air to close (Kiểu tác động)'],['CV_FAIL','Fail position (Vị trí an toàn)'],['CV_ACT_TYPE','CV actuator type (Bộ chấp hành)'],['POSITIONER','Positioner (Bộ định vị)'],['SIGNAL','Input signal (Tín hiệu)'],['TRAVEL_MM','Rated travel, mm (Hành trình)'],['BENCH_SET','Bench set, psig (Dải lò xo)'],['SUPPLY_P','Supply pressure (Áp khí cấp)'],['TRAVEL_TOL','Travel tolerance (Dung sai hành trình)'],['STROKE_TIME','Stroke time (Thời gian đóng / mở)'],['SIG_0','Signal at 0 % (also SIG_25, SIG_50, SIG_75, SIG_100)'],['POS_0','Valve position % at 0 % signal (also POS_25 … POS_100)'],['MM_0','Travel mm at 0 % signal (also MM_25 … MM_100)'],['THU_HANH_TRINH','Travel test items (Nội dung thử hành trình)'],['KIEU_THAN','Gate, Globe, Ball…'],['SIZE','Size (inch)'],['DN','Size DN'],
  ['VAT_LIEU','Body material (Vật liệu thân)'],['CLASS','Class'],['NHOM_VL','ASME B16.34 material group (Nhóm vật liệu)'],['CWP_PSI','CWP 38°C (psi)'],['CWP_BAR','CWP 38°C (bar)'],
  ['DESIGN_PSI','Design pressure (psi)'],['DESIGN_BAR','Design pressure (bar)'],['LEAK_CLASS','Leakage class (CV)'],['CV','Cv'],['KVS','Kvs (m³/h)'],['DP','ΔP (psi)'],['FL','FL (CV)'],['XT','xT (CV)'],['PORT','Port diameter, inch (CV)'],
  ['CHE_DO','Low/High-Pressure Closure'],['MO_TA','Description column in Excel (Cột Mô tả)'],['GHI_CHU','App warnings (Cảnh báo của app)']];
 const SFIELDS=[['MOI_CHAT','Test medium (Môi chất)'],['P_PSI','Test pressure, psi (Áp suất test)'],['P_BAR','Test pressure, bar (Áp suất test)'],['P_KG','Test pressure, kg/cm² (Áp suất test)'],['P_MPA','Test pressure, MPa (Áp suất test)'],
  ['TG','Holding time, s (Thời gian giữ)'],['RO','Allowable leakage (Rò cho phép)'],['DES_PSI','By design pressure, psi (Áp theo design)'],['DES_BAR','By design pressure, bar (Áp theo design)']];
-const PFIELDS=[['STT','Item No. (Số thứ tự)'],['TAG','Tag No'],['NGAY','Date (Ngày)'],['TIEU_CHUAN','API 527:2020, ASME Section XIII / I-2025'],['LOAI','ASME Section VIII (Vessel) / Section I (Boiler)'],
+const PFIELDS=[['TC_THAM_CHIEU','Reference standard (Tiêu chuẩn tham chiếu)'],['KIEU_PSV','Conventional / Balanced bellows'],['BONNET','Closed / open bonnet'],['BACK_TEST','Back pressure test (Thử phía sau)'],['CDTP_GOI_Y','CDTP suggested by back pressure (CDTP gợi ý)'],['STT','Item No. (Số thứ tự)'],['TAG','Tag No'],['NGAY','Date (Ngày)'],['TIEU_CHUAN','API 527:2020, ASME Section XIII / I-2025'],['LOAI','ASME Section VIII (Vessel) / Section I (Boiler)'],
  ['SIZE','Size inlet (inch)'],['DN','DN'],['ORIFICE','Orifice letter or Ø (ký hiệu hoặc Ø)'],['ORIFICE_D','Orifice diameter, mm (Đường kính orifice)'],['ORIFICE_MM2','Orifice area, mm² (Diện tích orifice)'],
  ['DON_VI','Pressure unit in use (Đơn vị áp suất đang dùng)'],['SET_P','Set pressure'],['CDTP','CDTP'],['POP_P','Pop test pressure = CDTP if given, else Set (Áp suất pop test)'],
  ['OPEN_MIN','Min. allowable opening (Áp mở nhỏ nhất cho phép)'],['OPEN_MAX','Max. allowable opening (Áp mở lớn nhất cho phép)'],['DUNG_SAI','Tolerance: min – max (Dung sai)'],['CLOSE_MIN','Min. reseat pressure (Áp đóng lại tối thiểu)'],
@@ -1138,7 +1143,7 @@ function valveMap(i,r,extra){
   const m={}; const set=(k,v)=>{ m[keyN(k)] = v==null ? '' : String(v); };
   const row=r.row;
   set('STT',extra.stt); set('TAG',extra.tag); set('NGAY',extra.date??today());
-  set('TIEU_CHUAN', [...new Set(cvStds(i).map(k=>STD[k][0]))].join(', '));
+  set('TIEU_CHUAN', [...new Set(cvStds(i).map(k=>STD[k][0]))].join(', ')); if(window.x7map) x7map(set,i,r);
   set('LOAI_VAN',i.tv); set('KIEU_THAN',i.body); set('SIZE',sizeTxt(i.size)); set('DN',toDN(i.size)??'');
   set('VAT_LIEU',i.mat); set('CLASS',i.cls); set('NHOM_VL',row&&row[5]?row[5]:'');
   set('CWP_PSI',row&&row[2]!=null?fmtNum(row[2],0):''); set('CWP_BAR',row&&row[2]!=null?fmtNum(row[2]/CVF.bar,2):'');
@@ -1178,7 +1183,7 @@ function psvMap(it){
   P('POP_P',r.I); P('OPEN_MIN',r.Q); P('OPEN_MAX',r.P); P('CLOSE_MIN',r.R); P('LEAK_P',r.N);
   set('DUNG_SAI', r.Q!=null ? fmtNum(r.Q,pd(u))+' – '+fmtNum(r.P,pd(u)) : '');
   set('LEAK_MAX', r.Y!=null ? fmtNum(r.Y,2) : (r.Yt||'')); set('LEAK_UNIT', r.unit||''); set('TG', r.time??'');
-  set('MOI_CHAT', psvMed(it.x.med));
+  set('MOI_CHAT', psvMed(it.x.med)); if(window.x7pmap) x7pmap(set,it);
   (it.x.o||[]).forEach((v,ix)=>set('MO_'+(ix+1), v==null?'':fmtNum(v,pd(u))));
   set('KQ_POP',kq(psvAll(r.pop))); set('KQ_LEAK',kq(psvAll(r.leak))); set('GHI_CHU',(r.W||[]).join('; '));
   if(it.cols) for(const k in it.cols) if(!(keyN(k) in m)) set(k,it.cols[k]);
@@ -1397,7 +1402,7 @@ function cvProv(it){
       if(key==='allow'){ const l=s.leak; return !l?'':(l.t?l.t:fmtNum(l.v,2)+(l.u?' '+l.u:'')); }
       return null; },
     result(){ return null; },
-    field(n){ const C=a=>colv(it,a);
+    field(n){ const C=a=>colv(it,a); { const xf=window.x7field?x7field(n,i,r):null; if(xf!=null) return xf; }
       if(/date of issue|^ngay\b/.test(n)) return it.date??today();
       if(/tag/.test(n)) return it.tag;
       if(/size|kich thuoc/.test(n)) return i.size!=null ? sizeTxt(i.size)+'" (DN '+(toDN(i.size)??'')+')' : '';
@@ -1412,7 +1417,7 @@ function cvProv(it){
       if(/manufacturer|mfr|nha san xuat/.test(n)) return C(['nha san xuat','manufacturer','manufacture']);
       if(/model/.test(n)) return C(['model']);
       return null; },
-    tick(after){ return i.tv==='Control Valve' ? /^(ansi )?fci 70 2/.test(after) : /^api (std )?598/.test(after); }
+    tick(after,before){ { const xt=window.x7tick?x7tick(after||before||'',i,r):null; if(xt!=null) return xt; } return i.tv==='Control Valve' ? /^(ansi )?fci 70 2/.test(after) : /^api (std )?598/.test(after); }
   };
 }
 
@@ -1549,7 +1554,7 @@ const ALIAS={
   medB:['medium seat test b','medium seat b','moi chat seat b'],
   medS:['medium shell test','medium shell','moi chat shell','moi chat thu than'],
   medBk:['medium test back seat','medium back seat','moi chat back seat'],
-  tstd:['test standard','tieu chuan thu','test std','standard'], cvstd:['cv standard','control valve standard','tieu chuan cv','tieu chuan van dieu khien'], seatT:['seat type','loai de','seat material type'], isoR:['iso 5208 rate','iso rate','iso 5208','cap ro iso 5208','leakage rate iso 5208'],
+  tstd:['test standard','tieu chuan thu','test std','standard'], ref:['reference standard','tieu chuan tham chieu','design standard','product standard','ref standard'], actT:['actuator type','loai bo truyen dong','actuator','bo truyen dong'], fail:['fail position','fail safe','fail safe position','vi tri an toan'], strk:['stroke time req s','stroke time','stroke time req','thoi gian dong mo'], bel:['bellows','psv type','kieu psv','bellow'], bon:['bonnet','bonnet type','kieu bonnet'], back:['back pr','back pressure','ap suat nguoc','superimposed back pressure'], cvAct:['air action','actuator action','air to open close','kieu tac dong','ato atc','action'], cvPos:['positioner','bo dinh vi','positioner type'], cvSig:['signal','input signal','control signal','tin hieu'], cvTr:['rated travel mm','rated travel','travel mm','travel','hanh trinh'], cvBench:['bench set psig','bench set','spring range','dai lo xo'], cvSup:['supply pressure','ap khi cap','air supply'], cvTol:['travel tolerance','travel tolerance','dung sai hanh trinh'], cvstd:['cv standard','control valve standard','tieu chuan cv','tieu chuan van dieu khien'], seatT:['seat type','loai de','seat material type'], isoR:['iso 5208 rate','iso rate','iso 5208','cap ro iso 5208','leakage rate iso 5208'],
   la1:['leak seat a 1'], lb1:['leak seat b 1'], lbk1:['leak back seat 1'], lsh1:['leak shell 1'], la2:['leak seat a 2'], lb2:['leak seat b 2'], lbk2:['leak back seat 2'], lsh2:['leak shell 2'],
   desc:['mo ta','description','dien giai','valve description','desc'],
   // PSV
@@ -1606,7 +1611,7 @@ const BODIES=['Butterfly','Gate','Globe','Ball','Plug','Check','Angle'];
 function parseBody(s){ const n=norm(s); for(const b of BODIES) if(n.includes(b.toLowerCase())) return b;
   if(/\bcong\b/.test(n)) return 'Gate'; if(/\bcau\b/.test(n)) return 'Ball'; if(/\bbuom\b/.test(n)) return 'Butterfly'; if(/mot chieu|\bnhu\b/.test(n)) return 'Check'; return null; }
 function parseClass(s){ const t=String(s||''); const m=/(\d{3,4})\s*(#|lb|lbs)/i.exec(t) || /(?:class|cl)\s*(\d{3,4})/i.exec(t) || /^\s*(\d{3,4})\s*$/.exec(t); return m?m[1]:null; }
-function parseTv(s){ const n=norm(s); if(/control|\bcv\b|dieu khien|dieu chinh/.test(n)) return 'Control Valve'; return 'On-Off Valve'; }
+function parseTv(s){ const n=norm(s); if(/control|\bcv\b|dieu khien|dieu chinh/.test(n)) return 'Control Valve'; if(/manual|\bmv\b|van tay|hand|gear/.test(n)) return 'Manual Valve'; return 'On-Off Valve'; }
 function parseMed(s){ const n=norm(s); if(/water|nuoc|liq/.test(n)) return 'Water'; if(/air|khi|gas|n2|nitro/.test(n)) return 'Air'; return 'auto'; }
 const numv = s => { const v=parseFloat(String(s==null?'':s).replace(',','.').replace(/[^0-9.\-]/g,'')); return isNaN(v)?NaN:v; };
 const numOrNull = s => { const v=numv(s); return isNaN(v)?null:v; };
@@ -1766,7 +1771,7 @@ function processSheet(sh){
       const lunit = M==='Water' ? 'ml/min' : (/ml/.test(norm(g('lunit')))?'ml/min':'bubble/min');
       const ok = map.orfd!=null && g('orfd') ? parseOrf(g('orfd'),'orfd') : map.orfa!=null && g('orfa') ? parseOrf(g('orfa'),'orfa') : parseOrf(g('orf'),'orf');
       const rd=k=>{ const v=numOrNull(g(k)); return v==null?null:conv(v,setU,base.u); };
-      const x={size:parseSize(g('size')), I:base.v, u:base.u, kind, med: medOk?M:null, unit:lunit, seat:/soft|mem|resilient|o.?ring|elasto/i.test(g('seatT'))?'Soft':'Metal', ...ok,
+      const x={size:parseSize(g('size')), I:base.v, u:base.u, kind, med: medOk?M:null, unit:lunit, seat:/soft|mem|resilient|o.?ring|elasto/i.test(g('seatT'))?'Soft':'Metal', bel:/bellow/i.test(g('bel'))?'Bellows':'Conventional', bon:/open|\bho\b|hở|lever/i.test(g('bon'))?'Open':'Closed', back:(numOrNull(g('back'))==null?'':numOrNull(g('back'))), ref:g('ref'), ...ok,
         o:[rd('o1'),rd('o2'),rd('o3')], c:[rd('c1'),rd('c2'),rd('c3')], l:[numOrNull(g('l1')),numOrNull(g('l2'))]};
       n++;
       let rr; try{ rr=psvCalc(x); }catch(e){ rr={W:['Calculation error (Lỗi tính): '+e.message]}; }
@@ -1781,11 +1786,11 @@ function processSheet(sh){
       const matRaw = g('mat') || '';
       const mat = matchMat(matRaw||desc, cls);
       if(!body && size==null && !cls && !matRaw) continue;
-      const tv = g('tv') ? parseTv(g('tv')) : (S.sub==='CV' && !map.tv ? 'Control Valve' : (/control/i.test(desc)?'Control Valve':'On-Off Valve'));
+      const tv = g('tv') ? parseTv(g('tv')) : (S.sub==='CV' && !map.tv ? 'Control Valve' : (/control/i.test(desc)?'Control Valve':(S.sub==='MV'?'Manual Valve':'On-Off Valve')));
       let leak=g('leak').toUpperCase().replace(/CLASS|\s/g,''); if(leak==='IVS1') leak='IV-S1'; if(!['I','II','III','IV','IV-S1','V','VI'].includes(leak)) leak='IV';
       const dRaw=numv(g('design'));
       n++;
-      const i={tv, body:body||'', size, mat:mat||matRaw||'', cls:cls||'', leak, cv:g('cv'), kvs:g('kvs'), dp:g('dp'), fl:g('fl'), xt:g('xt'), port:g('port'), cvstd:/iec|60534/i.test(g('cvstd'))?'IEC':'FCI', tstd:/6\s*d/i.test(g('tstd'))?'6D':/mss|sp\W*61/i.test(g('tstd'))?'MSS':/12266|\ben\b/i.test(g('tstd'))?'EN':/5208|\biso\b/i.test(g('tstd'))?'ISO':'598', seatT:/metal|kim lo/i.test(g('seatT'))?'Metal':(/soft|mem|resilient|elasto|ptfe|rubber/i.test(g('seatT'))?'Soft':''), isoR:((/\b(AA|EE|CC|B|C|D|E|F|G)\b/.exec(g('isoR').toUpperCase().replace(/RATE|ISO\s*5208/g,' '))||[])[1]||''), dU:map.design!=null?unitOf(hdrTxt.design,'psi'):'psi', dRaw: dRaw>0?dRaw:NaN};
+      const i={tv, body:body||'', size, mat:mat||matRaw||'', cls:cls||'', leak, cv:g('cv'), kvs:g('kvs'), dp:g('dp'), fl:g('fl'), xt:g('xt'), port:g('port'), cvstd:/iec|60534/i.test(g('cvstd'))?'IEC':'FCI', ref:g('ref'), actT:g('actT'), fail:g('fail'), strk:g('strk'), cvAct:g('cvAct')||g('fail'), cvAT:(/piston.*(double|kep)/i.test(g('actT'))?'PD':/piston/i.test(g('actT'))?'PS':''), cvPos:(/hart|smart|digital|so/i.test(g('cvPos'))?'SMART':/i.?p|e.?p|analog/i.test(g('cvPos'))?'EP':/p.?p|pneu/i.test(g('cvPos'))?'PP':/none|khong/i.test(g('cvPos'))?'NONE':''), cvSig:(/psi/i.test(g('cvSig'))?'PSI':/bar/i.test(g('cvSig'))?'BAR':'MA'), cvTr:g('cvTr'), cvBench:g('cvBench'), cvSup:g('cvSup'), cvTol:g('cvTol'), cvStrk:g('strk'), tstd:/6\s*d/i.test(g('tstd'))?'6D':/mss|sp\W*61/i.test(g('tstd'))?'MSS':/12266|\ben\b/i.test(g('tstd'))?'EN':/5208|\biso\b/i.test(g('tstd'))?'ISO':'598', seatT:/metal|kim lo/i.test(g('seatT'))?'Metal':(/soft|mem|resilient|elasto|ptfe|rubber/i.test(g('seatT'))?'Soft':''), isoR:((/\b(AA|EE|CC|B|C|D|E|F|G)\b/.exec(g('isoR').toUpperCase().replace(/RATE|ISO\s*5208/g,' '))||[])[1]||''), dU:map.design!=null?unitOf(hdrTxt.design,'psi'):'psi', dRaw: dRaw>0?dRaw:NaN};
       const pre=[]; if(!body) pre.push('Body type not recognised (Không xác định được kiểu thân van).'); if(size==null) pre.push('Invalid size (Size không hợp lệ).');
       if(!cls) pre.push('Missing Class (Thiếu Class).'); if(!mat) pre.push('Material "'+(matRaw||'(empty / trống)')+'" not found in table TP_CV (Không tìm thấy vật liệu trong bảng TP_CV).');
       let r2; try{ r2=computeCv(i,{A:g('medA'),B:g('medB'),S:g('medS'),Bk:g('medBk')},cl); }catch(e){ r2={warns:['Calculation error (Lỗi tính): '+e.message],seatA:null,seatB:null,shell:{},back:null}; }
@@ -1928,7 +1933,7 @@ function renderList(){
         <td>${r.Y!=null?fmtNum(r.Y,2)+'<small>'+esc(r.unit)+'</small>':(r.Yt?esc(r.Yt):'—')}</td><td>${r.time??'—'}</td>
         <td class="b-note">${W.map(esc).join('<br>')||(it.ovr?'':'✓')}${it.ovr?'<span class="b-ovr">Actual values (Số liệu thực tế): '+esc(it.ovr.join(', '))+'</span>':''}</td><td>${fb}</td></tr>`; }
       const i=it.i,r=it.r;
-      return `<tr class="${W.length?'b-warnrow':''}"><td>${esc(it.stt)}</td><td>${esc(it.tag)}</td><td>${esc(i.tv==='Control Valve'?'CV':'On-Off')}</td><td>${esc(i.body)}</td>
+      return `<tr class="${W.length?'b-warnrow':''}"><td>${esc(it.stt)}</td><td>${esc(it.tag)}</td><td>${esc(i.tv==='Control Valve'?'CV':i.tv==='Manual Valve'?'MV':'On-Off')}</td><td>${esc(i.body)}</td>
       <td>${i.size!=null?esc(sizeTxt(i.size))+'"<small>DN '+(toDN(i.size)??'?')+'</small>':'—'}</td><td>${esc(i.mat)}${!it.matOk&&it.matRaw?'<small>'+esc(it.matRaw)+'</small>':''}</td><td>${esc(i.cls)}</td>
       <td>${r.shell?fP(r.shell.p):'—'}</td><td>${medCell(r.seatA)}${r.seatA&&!r.seatA.miss?' · '+fP(r.seatA.p):''}</td><td>${r.seatB===null?'N/A':medCell(r.seatB)+(r.seatB&&!r.seatB.miss?' · '+fP(r.seatB.p):'')}</td>
       <td>${r.seatA&&r.seatA.t!=null?r.seatA.t+' s':'—'}</td><td class="b-note">${W.map(esc).join('<br>')||(it.ovr?'':'✓')}${it.ovr?'<span class="b-ovr">Actual values (Số liệu thực tế): '+esc(it.ovr.join(', '))+'</span>':''}</td><td>${fb}</td></tr>`; }).join('');
@@ -2110,9 +2115,9 @@ renderForms(); renderList();
 // ---------- dan du lieu tu Excel ----------
 for(const id of ['hdr_form','gd_form','b_formdl']){ const e=$b(id); if(e) e.addEventListener('click',dlDataForm); }
 const PASTE_H={
-  CV:['No','Tag Name','CV','Unit','Size','Class','Leakage Class','Type Body','Material Body','Type Control Valve','Serial','Design Pressure','Medium Seat test A','Medium Seat test B','Medium Shell test','Medium test back seat','Manufacture','FL','XT','Port Diameter','Kvs','CV Standard'],
+  CV:['No','Tag Name','CV','Unit','Size','Class','Leakage Class','Type Body','Material Body','Type Control Valve','Serial','Design Pressure','Medium Seat test A','Medium Seat test B','Medium Shell test','Medium test back seat','Manufacture','FL','XT','Port Diameter','Kvs','CV Standard','Reference Standard','Actuator Type','Fail Position','Stroke Time Req (s)','Air Action','Positioner','Signal','Rated Travel (mm)','Bench Set (psig)','Supply Pressure','Travel Tolerance (%)'],
   MV:['No','Tag Name','Unit','Size','Class','Type Body','Material Body','Serial','Design Pressure','Medium Seat test A','Medium Seat test B','Medium Shell test','Medium test back seat','Manufacture','Leak Seat A 1','Leak Seat B 1','Leak Back seat 1','Leak Shell 1','Leak Seat A 2','Leak Seat B 2','Leak Back seat 2','Leak Shell 2','Test Standard','Seat Type','ISO 5208 Rate'],
-  PSV:['No','Tag Name','Size in','Size out','Class in','Class out','Set Pr','CDTP','Back Pr','Orrifice Size','Medium','Vessel/Boiler','Open actual 1','Open actual 2','Open actual 3','Close Actual 1','Close Actual 2','Close Actual 3','Actual Leak 1','Actual Leak 2','Model','Serial','Manufacture','Seat Type']};
+  PSV:['No','Tag Name','Size in','Size out','Class in','Class out','Set Pr','CDTP','Back Pr','Orrifice Size','Medium','Vessel/Boiler','Open actual 1','Open actual 2','Open actual 3','Close Actual 1','Close Actual 2','Close Actual 3','Actual Leak 1','Actual Leak 2','Model','Serial','Manufacture','Seat Type','Bellows','Bonnet','Reference Standard']};
 const PASTE_R={CV:['Seat A test','Holding time seat A (s)','Max permit leak A (ml/min)','Seat B test','Holding time seat B (s)','Max permit leak B (ml/min)','Shell test','Holding time shell. (s)','Back seat test','Holding time back seat (s)','Max permit','Test Pressure Seat A','Test Pressure Seat B','Class and Material','Seat A/Design','Seat B/Design','Shell/Design','Back seat/Design','Material lookup'],
   PSV:['Test Pressure (Pop test)','Leak Test','Test time','Open Pr. +','Open Pr. -','Close Pr.','Max permit leak','Orifice Inch','bubble/min or ml/min (Air) - ml/min (Water)','Result Pop 1','Result Pop 2','Result Pop 3','Result Leak 1','Result Leak 2']};
 function readTsv(text){ // clipboard Excel / Numbers / Google Sheets: tab giua cac o, o co xuong dong duoc boc ""
@@ -2153,23 +2158,23 @@ if($b('b_pastebtn')){
 // ---------- Form Data Valve: app tu tao file Excel trong de nhap (khong nhung file) ----------
 async function buildDataForm(){
   const mats=[]; for(const r of D.tp){ const n=String(r[0]); if(!mats.includes(n)) mats.push(n); }
-  const L={mat:mats, cls:['150','300','600','900','1500','2500','4500'], body:BODIES.slice(), med:['Water','Air','Nitrogen','N/A'], med3:['Air','Nitrogen','Water','Steam'], leak:['I','II','III','IV','IV-S1','V','VI'], cvstd:['ANSI/FCI 70-2','IEC 60534-4'], tv:['Control Valve','On-Off Valve'], kind:['Vessel','Boiler'], orf:'DEFGHJKLMNPQRT'.split(''), tstd:['API 598','API 6D','MSS SP-61','ISO 5208','EN 12266-1'], seat:['Soft','Metal'], iso:['AA','B','C','CC','D','E','EE','F','G']};
+  const L={mat:mats, cls:['150','300','600','900','1500','2500','4500'], body:BODIES.slice(), med:['Water','Air','Nitrogen','N/A'], med3:['Air','Nitrogen','Water','Steam'], leak:['I','II','III','IV','IV-S1','V','VI'], cvstd:['ANSI/FCI 70-2','IEC 60534-4'], tv:['Control Valve','On-Off Valve','Manual Valve'], actT:['Pneumatic spring-return','Pneumatic double-acting','Electric (MOV)','Hydraulic','Spring-diaphragm','Piston spring-return','Piston double-acting'], cvAct:['ATO','ATC','Double-acting'], cvPos:['Smart (HART)','Analog I/P','Pneumatic P/P','None'], cvSig:['4-20 mA','3-15 psig','0.2-1.0 bar'], fail:['FC','FO','FL'], bel:['Conventional','Bellows'], bon:['Closed','Open'], kind:['Vessel','Boiler'], orf:'DEFGHJKLMNPQRT'.split(''), tstd:['API 598','API 6D','MSS SP-61','ISO 5208','EN 12266-1'], seat:['Soft','Metal'], iso:['AA','B','C','CC','D','E','EE','F','G']};
   const LK=Object.keys(L), ref=k=>{ const j=LK.indexOf(k); return `Lists!$${colL(j)}$1:$${colL(j)}$${L[k].length}`; };
   const T=(h,w,n,li)=>({h,w,n,li});
   const CVI=[T('No',5,'Item no. (Số thứ tự)'),T('Tag Name',14,'Valve tag (Mã van)'),T('CV',7,'Cv value (Hệ số Cv). If only Kvs is known, leave empty and fill the Kvs column (Nếu chỉ có Kvs thì để trống, nhập cột Kvs)'),T('Unit',7,'Plant unit, optional (Khu vực)'),T('Size',7,'Inch: 4, 3/4, 1-1/2 (Kích thước inch)'),T('Class',7,'ASME class 150, 300, 600… (Cấp áp lực)','cls'),
     T('Leakage Class',9,'FCI 70-2: I…VI, empty = IV (Cấp độ kín, trống = IV)','leak'),T('Type Body',11,'Gate, Globe, Ball, Butterfly, Plug, Check, Angle (Kiểu thân)','body'),T('Material Body',18,'Pick from the list or type, e.g. WCB, CF8M, A105 (Chọn hoặc gõ vật liệu thân)','mat'),
-    T('Type Control Valve',14,'Control Valve / On-Off Valve (Loại van)','tv'),T('Serial',10,'Optional (Không bắt buộc)'),T('Design Pressure',10,'psig, optional (Áp suất thiết kế)'),
+    T('Type Control Valve',14,'Control Valve / On-Off Valve (actuated – có bộ truyền động) / Manual Valve (Loại van)','tv'),T('Serial',10,'Optional (Không bắt buộc)'),T('Design Pressure',10,'psig, optional (Áp suất thiết kế)'),
     T('Medium Seat test A',11,'Water / Air / Nitrogen – required (bắt buộc)','med'),T('Medium Seat test B',11,'Water / Air / Nitrogen, or N/A if no seat B (N/A nếu không test Seat B)','med'),
     T('Medium Shell test',11,'Usually Water (Thường là nước)','med'),T('Medium test back seat',11,'Water / Air, or N/A if no back seat (N/A nếu không có back seat)','med'),T('Manufacture',14,'Optional (Hãng sản xuất)'),
-    T('FL',6,'Control valve: FL from the manufacturer, empty = 0.8 (Hệ số FL của hãng)'),T('XT',6,'Control valve: xT from the manufacturer, empty = 0.54 (Hệ số xT của hãng)'),T('Port Diameter',8,'Control valve: port (seat) diameter, inch – Class V, VI (Đường kính cửa van)'),T('Kvs',7,'Kvs (m³/h) – used when Cv is empty, Cv = 1.156 × Kvs (Dùng khi không có Cv; Cv = 1,156 × Kvs)'),T('CV Standard',11,'Control valve: ANSI/FCI 70-2 (default, mặc định) or IEC 60534-4 per project spec (theo spec dự án)','cvstd')];
-  const MVI=CVI.filter(c=>!['CV','Leakage Class','Type Control Valve','FL','XT','Port Diameter','Kvs','CV Standard'].includes(c.h));
+    T('FL',6,'Control valve: FL from the manufacturer, empty = 0.8 (Hệ số FL của hãng)'),T('XT',6,'Control valve: xT from the manufacturer, empty = 0.54 (Hệ số xT của hãng)'),T('Port Diameter',8,'Control valve: port (seat) diameter, inch – Class V, VI (Đường kính cửa van)'),T('Kvs',7,'Kvs (m³/h) – used when Cv is empty, Cv = 1.156 × Kvs (Dùng khi không có Cv; Cv = 1,156 × Kvs)'),T('CV Standard',11,'Control valve: ANSI/FCI 70-2 (default, mặc định) or IEC 60534-4 per project spec (theo spec dự án)','cvstd'),T('Reference Standard',12,'Valve design standard, e.g. API 600, API 608, API 609 – empty = suggested by body type (Tiêu chuẩn thiết kế van – trống = gợi ý theo kiểu thân)'),T('Actuator Type',12,'On-Off valve: actuator type (Loại bộ truyền động)','actT'),T('Fail Position',8,'On-Off: FC / FO / FL (Vị trí an toàn)','fail'),T('Stroke Time Req (s)',8,'On-Off / CV: required stroke time, s (Thời gian đóng/mở yêu cầu)'),T('Air Action',9,'Control valve: ATO (air to open – fail close) / ATC (air to close – fail open) / Double-acting','cvAct'),T('Positioner',11,'Control valve: Smart (HART) / Analog I/P / Pneumatic P/P / None (Bộ định vị)','cvPos'),T('Signal',9,'Control valve: 4-20 mA / 3-15 psig / 0.2-1.0 bar (Tín hiệu)','cvSig'),T('Rated Travel (mm)',8,'Control valve: rated travel, mm (Hành trình định mức)'),T('Bench Set (psig)',8,'Control valve: spring range, e.g. 6-30 (Dải lò xo)'),T('Supply Pressure',9,'Control valve: air supply, e.g. 35 psig (Áp khí cấp)'),T('Travel Tolerance (%)',8,'Control valve: ± % of travel, empty = 1 (Dung sai hành trình)')];
+  const MVI=CVI.filter(c=>!['CV','Leakage Class','Type Control Valve','FL','XT','Port Diameter','Kvs','CV Standard','Actuator Type','Fail Position','Stroke Time Req (s)','Air Action','Positioner','Signal','Rated Travel (mm)','Bench Set (psig)','Supply Pressure','Travel Tolerance (%)'].includes(c.h));
   for(const n of [1,2]) for(const p of ['Seat A','Seat B','Back seat','Shell']) MVI.push(T(`Leak ${p} ${n}`,9,`Actual leak ${p} #${n}, optional (Rò thực tế lần ${n})`));
   MVI.push(T('Test Standard',11,'API 598 (default, mặc định), API 6D (pipeline – van đường ống), or per project spec (theo spec dự án): MSS SP-61, ISO 5208, EN 12266-1','tstd'),T('Seat Type',9,'Soft (đế mềm) / Metal (đế kim loại). API 598: Soft = 0 leakage, empty = metal-seat rates; API 6D: empty = Rate A (API 598: đế mềm không rò, trống = rò đế kim loại; API 6D: trống = Rate A)','seat'),T('ISO 5208 Rate',9,'API 6D / ISO 5208 / EN 12266-1 metal seat: AA, B, C, CC, D, E, EE, F, G per project spec (theo spec dự án)','iso'));
   const PSI=[T('No',5,'Item no. (Số thứ tự)'),T('Tag Name',14,'Valve tag (Mã van)'),T('Size in',7,'Inlet size, inch (Size đầu vào)'),T('Size out',7,'Outlet size, inch (Size đầu ra)'),T('Class in',7,'Optional','cls'),T('Class out',7,'Optional','cls'),
     T('Set Pr',8,'Set pressure, unit chosen in the app – default psig (Áp suất cài đặt)'),T('CDTP',8,'Cold differential test pressure, empty = Set Pr (Trống = Set Pr)'),T('Back Pr',8,'Optional (Áp suất ngược)'),
     T('Orrifice Size',8,'Orifice letter D…T (Ký hiệu lỗ thoát)','orf'),T('Medium',9,'Air / Nitrogen / Water / Steam – required (bắt buộc)','med3'),T('Vessel/Boiler',9,'Vessel = ASME VIII, Boiler = ASME I (Bình áp lực / Nồi hơi)','kind')];
   for(const k of ['Open actual','Close Actual']) for(const n of [1,2,3]) PSI.push(T(`${k} ${n}`,8,'Actual reading, optional (Số đọc thực tế)'));
-  PSI.push(T('Actual Leak 1',8,'Actual leakage, optional (Rò thực tế)'),T('Actual Leak 2',8,'Actual leakage, optional (Rò thực tế)'),T('Model',12,'Optional'),T('Serial',10,'Optional'),T('Manufacture',14,'Optional (Hãng sản xuất)'),T('Seat Type',9,'Metal (default, mặc định) / Soft – soft seat: no leakage (đế mềm: không rò)','seat'));
+  PSI.push(T('Actual Leak 1',8,'Actual leakage, optional (Rò thực tế)'),T('Actual Leak 2',8,'Actual leakage, optional (Rò thực tế)'),T('Model',12,'Optional'),T('Serial',10,'Optional'),T('Manufacture',14,'Optional (Hãng sản xuất)'),T('Seat Type',9,'Metal (default, mặc định) / Soft – soft seat: no leakage (đế mềm: không rò)','seat'),T('Bellows',10,'Conventional (default) / Bellows (Kiểu van)','bel'),T('Bonnet',9,'Closed (default) / Open (Bonnet kín / hở)','bon'),T('Reference Standard',12,'e.g. API 526, ASME XIII – empty = API 526 (Tiêu chuẩn tham chiếu)'));
   const EX={CV:[1,'FV-101',46,'U41',4,300,'IV','Globe','WCB','Control Valve','',406,'Water','N/A','Water','N/A','FISHER'],
             MV:[1,'HV-201','U41',8,150,'Gate','A105','',285,'Water','Water','Water','Water','KITZ'],
             PSV:[1,'PSV-301',1.5,3,150,150,90,90,'','H','Air','Vessel']};
@@ -2222,4 +2227,423 @@ window.__vtcBatch={B,fillDocx,mergeDocx,runAll,readXlsx,readXlsb,matchMat,parseS
 })();
 
 </script><!--/BATCH-JS-->
-<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){})}</script></body></html>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){})}</script><!--X7-JS--><script>
+/* x7 - Thu vien anh van, MV / On-Off (bo truyen dong), tieu chuan tham chieu, PSV bellows / bonnet, thu ap truc tiep. GV Le Duy Nam - PV College */
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ld=k=>{try{return localStorage.getItem('vtc_'+k)}catch(e){return null}}, sv=(k,v)=>{try{localStorage.setItem('vtc_'+k,v)}catch(e){}};
+
+/* ================= 1. THU VIEN ANH (hinh ve vector, tu ve) ================= */
+const C={b:'#c9d3da',l:'#1d3a4f',o:'#e07a2f',s:'#2e8b57',m:'#6b7a85'};
+const P=(d,f,w)=>`<path d="${d}" fill="${f||C.b}" stroke="${C.l}" stroke-width="${w||2}" stroke-linejoin="round"/>`;
+const R=(x,y,w,h,f,rx)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx||0}" fill="${f||C.b}" stroke="${C.l}" stroke-width="2"/>`;
+const T=(x,y,t,a)=>`<text x="${x}" y="${y}" font-size="10" font-weight="700" fill="${C.s}" text-anchor="${a||'middle'}">${t}</text>`;
+const L=(x1,y1,x2,y2,w,c)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c||C.l}" stroke-width="${w||2}" stroke-linecap="round"/>`;
+const flL=(y)=>R(8,(y||140)-30,12,60)+R(20,(y||140)-14,42,28);
+const flR=(y)=>R(240,(y||140)-30,12,60)+R(198,(y||140)-14,42,28);
+const flow=`<path d="M30 190 H70" stroke="${C.m}" stroke-width="2" marker-end="url(#x7a)"/><text x="78" y="193" font-size="9" fill="${C.m}">flow</text>`;
+const defs=`<defs><marker id="x7a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="${C.m}"/></marker></defs>`;
+// bo phan phia tren than van
+const TOP={
+ hand:(x,y)=>L(x-18,y,x-8,y-36)+L(x+18,y,x+8,y-36)+L(x,y+4,x,y-46,3)+`<ellipse cx="${x}" cy="${y-44}" rx="40" ry="7" fill="none" stroke="${C.l}" stroke-width="4"/>`+L(x-38,y-44,x+38,y-44,2),
+ lever:(x,y)=>L(x,y,x,y-24,4)+`<path d="M${x-6} ${y-28} L${x+78} ${y-38}" stroke="${C.l}" stroke-width="7" stroke-linecap="round"/>`,
+ gear:(x,y)=>L(x,y,x,y-14,4)+R(x-26,y-40,52,26,C.b,4)+L(x+26,y-27,x+44,y-27,3)+`<ellipse cx="${x+50}" cy="${y-27}" rx="5" ry="18" fill="none" stroke="${C.l}" stroke-width="3"/>`,
+ act:(x,y)=>L(x,y,x,y-14,4)+R(x-12,y-22,24,10)+R(x-54,y-62,108,40,'#a9bfcf',8)+R(x-62,y-58,8,32)+R(x+54,y-58,8,32)+R(x+66,y-56,30,22,'#f2d16b',3)+`<text x="${x+81}" y="${y-41}" font-size="8" text-anchor="middle" fill="${C.l}">SOV</text>`+`<text x="${x}" y="${y-38}" font-size="9" text-anchor="middle" fill="${C.l}">actuator</text>`,
+ diaph:(x,y)=>L(x-18,y,x-14,y-44)+L(x+18,y,x+14,y-44)+L(x,y+4,x,y-50,3)+P(`M${x-60} ${y-50} H${x+60} Q${x+60} ${y-92} ${x} ${y-92} Q${x-60} ${y-92} ${x-60} ${y-50}Z`,'#a9bfcf')+L(x-62,y-50,x+62,y-50,3)+R(x+28,y-36,34,24,'#f2d16b',3)+`<text x="${x+45}" y="${y-21}" font-size="8" text-anchor="middle" fill="${C.l}">P/I</text>`,
+ none:()=>''
+};
+const bonnet=(x,y)=>R(x-26,y-44,52,44)+L(x-30,y,x+30,y,3);
+const BODY={
+ Gate:t=>flL()+flR()+R(60,104,140,72,C.b,26)+bonnet(130,104)+R(108,124,6,32,C.s)+R(146,124,6,32,C.s)+P('M116 116 H144 L139 160 H121Z',C.o)+L(130,116,130,62,3)+P('M122 66 L130 58 L138 66Z',C.s,1)+T(102,120,'A')+T(158,120,'B')+T(158,64,'back seat','start')+TOP[t||'hand'](130,60),
+ Globe:t=>flL()+flR()+R(60,100,140,80,C.b,30)+'<path d="M86 176 Q96 142 116 142 H144 L162 104" fill="none" stroke="'+C.l+'" stroke-width="5"/>'+L(114,142,146,142,4,C.s)+R(116,124,28,14,C.o,3)+bonnet(130,100)+L(130,124,130,58,3)+P('M122 62 L130 54 L138 62Z',C.s,1)+T(130,158,'seat')+TOP[t||'hand'](130,56),
+ Ball:t=>flL()+flR()+`<circle cx="130" cy="140" r="48" fill="${C.b}" stroke="${C.l}" stroke-width="2"/>`+R(80,126,10,28,C.s)+R(170,126,10,28,C.s)+`<circle cx="130" cy="140" r="34" fill="${C.o}" stroke="${C.l}" stroke-width="2"/>`+R(118,108,24,64,'#fff')+R(118,82,24,10)+L(130,106,130,72,4)+T(85,120,'A')+T(175,120,'B')+TOP[t||'lever'](130,72),
+ Plug:t=>flL()+flR()+R(64,100,132,80,C.b,20)+R(78,124,8,32,C.s)+R(174,124,8,32,C.s)+P('M106 104 H154 L146 176 H114Z',C.o)+R(122,106,16,66,'#fff')+L(130,104,130,72,4)+TOP[t||'lever'](130,72),
+ Butterfly:t=>flL()+flR()+R(62,126,136,28,'#e6ebee')+R(108,92,44,96,C.b,8)+`<ellipse cx="130" cy="140" rx="7" ry="40" fill="${C.o}" stroke="${C.l}" stroke-width="2"/>`+L(110,100,110,180,3,C.s)+L(150,100,150,180,3,C.s)+L(130,92,130,66,4)+TOP[t||'gear'](130,66),
+ Check:()=>flL()+flR()+R(60,108,140,66,C.b,22)+P('M92 108 Q92 78 130 78 Q168 78 168 108Z')+R(96,72,68,8)+L(108,116,108,164,4,C.s)+`<circle cx="118" cy="112" r="4" fill="${C.l}"/>`+P('M114 114 L124 112 L118 160 L108 162Z',C.o)+T(96,182,'seat')+`<text x="150" y="70" font-size="9" fill="${C.m}">cover</text>`+flow,
+ Angle:t=>R(240,110,12,60)+R(176,126,64,28)+R(100,188,60,10)+R(116,166,28,22)+R(84,100,96,72,C.b,24)+L(114,150,146,150,4,C.s)+R(116,132,28,14,C.o,3)+bonnet(130,100)+L(130,132,130,58,3)+T(130,166,'seat')+`<text x="168" y="194" font-size="9" fill="${C.m}">inlet</text>`+TOP[t||'hand'](130,56),
+ PSV:v=>{ // v: {bel, bon}
+  const open=v.bon==='Open';
+  let s=R(98,186,64,10)+R(116,150,28,36)+R(84,96,120,64,C.b,16)+R(204,104,30,40)+R(234,94,12,60)+L(116,150,144,150,4,C.s)+R(112,136,36,12,C.o,3)+L(130,136,130,30,3);
+  const z=[];for(let k=0;k<8;k++)z.push(`${k%2?120:140} ${92-k*6}`);
+  const spring=`<polyline points="130 96 ${z.join(' ')} 130 44" fill="none" stroke="${C.l}" stroke-width="2"/>`;
+  if(v.bel==='Bellows'){ const b=[];for(let k=0;k<6;k++)b.push(`${k%2?114:146} ${130-k*5}`); s+=`<polyline points="130 134 ${b.join(' ')} 130 104" fill="none" stroke="#7a5aa6" stroke-width="3"/>`+`<text x="152" y="120" font-size="9" fill="#7a5aa6">bellows</text>`; }
+  if(open) s+=L(104,96,110,40,4)+L(156,96,150,40,4)+R(100,34,60,8)+spring+L(130,34,130,20,3)+`<path d="M130 22 L196 16" stroke="${C.l}" stroke-width="5" stroke-linecap="round"/>`+`<text x="168" y="12" font-size="9" fill="${C.m}">lever</text>`+`<text x="44" y="70" font-size="9" fill="${C.m}">open bonnet</text>`;
+  else s+=R(104,40,52,56)+spring+R(118,24,24,16)+(v.bel==='Bellows'?L(156,70,172,70,3)+`<text x="174" y="73" font-size="9" fill="${C.m}">vent</text>`:'')+`<text x="20" y="70" font-size="9" fill="${C.m}">closed bonnet</text>`;
+  return s+`<text x="92" y="200" font-size="9" fill="${C.m}">inlet</text><text x="210" y="160" font-size="9" fill="${C.m}">outlet</text>`+T(130,166,'seat'); }
+};
+const svg=(inner,title,vb)=>`<svg viewBox="${vb||'0 0 260 205'}" role="img" aria-label="${esc(title)}" xmlns="http://www.w3.org/2000/svg">${defs}<rect x="0" y="${vb?-45:0}" width="260" height="${vb?250:205}" rx="8" fill="#f4f7f9"/>${inner}</svg>`;
+const INFO={
+ Gate:['Gate valve (Van cổng)','Wedge between 2 seats: test seat A and seat B each side; back seat under bonnet (Cánh nêm giữa 2 đế: thử seat A, seat B từng phía; back seat dưới bonnet)'],
+ Globe:['Globe valve (Van cầu)','Disc on one horizontal seat – one seat test, flow under the disc; has back seat (Đĩa trên 1 đế – thử 1 seat; có back seat)'],
+ Ball:['Ball valve (Van bi)','Ball with bore between 2 seat rings – test both directions (Bi có lỗ giữa 2 vòng đế – thử 2 chiều)'],
+ Plug:['Plug valve (Van nút)','Tapered plug with port, quarter turn (Nút côn có lỗ, quay 1/4 vòng)'],
+ Butterfly:['Butterfly valve (Van bướm)','Disc rotates in the seat ring; class 150: one seat (Đĩa xoay trong vòng đế)'],
+ Check:['Check valve (Van một chiều)','Swing disc closes by back flow – seat test from downstream side (Đĩa lắc đóng khi dòng ngược – thử từ phía sau)'],
+ Angle:['Angle valve (Van góc)','Globe-type, inlet and outlet at 90° (Kiểu van cầu, vào – ra vuông góc)'],
+ CV:['Control valve (Van điều khiển)','Globe body + diaphragm actuator + positioner; seat leakage class per FCI 70-2 / IEC 60534-4 (Thân cầu + bộ chấp hành màng + bộ định vị)'],
+ PSVc:['PSV – conventional, closed bonnet (Van an toàn thường, bonnet kín)','Spring in closed bonnet; back pressure adds to set pressure (Lò xo trong bonnet kín; áp ngược cộng vào áp mở)'],
+ PSVb:['PSV – balanced bellows (Van an toàn có bellows)','Bellows isolates the spring from back pressure; bonnet vent must stay open (Bellows tách lò xo khỏi áp ngược; lỗ vent bonnet luôn để hở)'],
+ PSVo:['PSV – open bonnet / lever (Van an toàn bonnet hở, có tay giật)','Typical for steam / ASME Section I; secondary zone cannot be pressure tested (Thường dùng cho hơi nước; không thử được phía sau)']
+};
+function imgFor(i){ // i: tv, body
+  if(i.tv==='Control Valve') return {k:'CV', s:svg(BODY.Globe('diaph'),INFO.CV[0],'0 -45 260 250')};
+  const b=BODY[i.body]?i.body:'Gate', k=b;
+  if(i.tv==='On-Off Valve'){ return {k, s:svg(b==='Check'?BODY.Check():BODY[b]('act'),INFO[k][0]+' + actuator'), act:true}; }
+  return {k, s:svg(BODY[b](),INFO[k][0])};
+}
+function psvImg(v){ const k=v.bon==='Open'?'PSVo':(v.bel==='Bellows'?'PSVb':'PSVc'); return {k, s:svg(BODY.PSV(v),INFO[k][0])}; }
+const figure=(o,extra)=>`<figure class="x7fig">${o.s}<figcaption><b>${esc(INFO[o.k][0])}${o.act?' + actuator (bộ truyền động)':''}</b><br><span>${esc(INFO[o.k][1])}</span>${extra||''}</figcaption></figure>`;
+function gallery(){
+  const items=[...['Gate','Globe','Ball','Plug','Butterfly','Check','Angle'].map(b=>({k:b,s:svg(BODY[b](),INFO[b][0])})),
+    {k:'Ball',s:svg(BODY.Ball('act'),'On-Off'),act:true},{k:'CV',s:svg(BODY.Globe('diaph'),INFO.CV[0],'0 -45 260 250')},
+    {k:'PSVc',s:svg(BODY.PSV({bel:'Conventional',bon:'Closed'}),'')},{k:'PSVb',s:svg(BODY.PSV({bel:'Bellows',bon:'Closed'}),'')},{k:'PSVo',s:svg(BODY.PSV({bel:'Conventional',bon:'Open'}),'')}];
+  return items.map(o=>figure(o)).join('');
+}
+
+/* ================= 2. TIEU CHUAN THAM CHIEU (thiet ke / che tao van) ================= */
+const REF={Gate:['API 600','API 602','API 603','API 6D','ASME B16.34'],Globe:['API 623','API 602','BS 1873','ASME B16.34'],Ball:['API 608','ISO 17292','API 6D','ASME B16.34'],
+  Plug:['API 599','API 6D','ASME B16.34'],Butterfly:['API 609','ASME B16.34'],Check:['API 594','API 602','BS 1868','API 6D','ASME B16.34'],Angle:['ASME B16.34'],
+  CV:['IEC 60534 / ANSI/ISA-75','ASME B16.34'],PSV:['API 526','ASME BPVC Section XIII / VIII','ISO 4126-1','API 520']};
+function refList(i){ if(i.tv==='Control Valve') return REF.CV; const l=(REF[i.body]||['ASME B16.34']).slice(); if(i.tstd==='6D'){ const j=l.indexOf('API 6D'); if(j>0){l.splice(j,1);} l.unshift('API 6D'); } return l; }
+const refOf = i => (i.ref && String(i.ref).trim()) || refList(i)[0];
+window.x7refOf=refOf;
+
+/* ================= 3. BO TRUYEN DONG (van On-Off) ================= */
+const ACT={PSR:'Pneumatic spring-return (Khí nén – lò xo hồi)',PDA:'Pneumatic double-acting (Khí nén tác động kép)',MOV:'Electric – MOV (Điện)',HYD:'Hydraulic / electro-hydraulic (Thủy lực)'};
+const FAIL={FC:'Fail close – FC (Mất nguồn → đóng)',FO:'Fail open – FO (Mất nguồn → mở)',FL:'Fail last / stay put – FL (Giữ nguyên vị trí)'};
+const actKey=s=>{ const n=String(s||'').toLowerCase(); if(/double|kep|pda/.test(n)) return 'PDA'; if(/mov|electr|dien/.test(n)) return 'MOV'; if(/hydr|thuy/.test(n)) return 'HYD'; if(/spring|psr|lo xo|lò xo|single/.test(n)) return 'PSR'; return n?'PSR':''; };
+const failKey=s=>{ const n=String(s||'').toUpperCase(); if(/FO|OPEN|MO\b|MỞ/.test(n)) return 'FO'; if(/FL|LAST|STAY|GIU|GIỮ/.test(n)) return 'FL'; if(/FC|CLOSE|DONG|ĐÓNG/.test(n)) return 'FC'; return ''; };
+function actOf(i){
+  const a=actKey(i.actT)||'PSR', f=failKey(i.fail)||(a==='PSR'?'FC':'FL'), sr=parseFloat(String(i.strk??'').replace(',','.'));
+  const items=[
+    'Operational test: at least 3 full open → close cycles at the minimum supply pressure / voltage, smooth travel, no sticking (Thử vận hành: tối thiểu 3 lần đóng – mở hết hành trình ở áp khí / điện áp nhỏ nhất, chạy êm, không kẹt)',
+    'Stroke time open and close'+(sr>0?` ≤ ${sr} s (spec)`:' – record and compare with the datasheet')+' (Thời gian đóng / mở'+(sr>0?` ≤ ${sr} s theo spec`:' – ghi lại, so với datasheet')+')',
+    a==='PSR' ? `Fail-safe test: vent supply / de-energise solenoid → valve moves to ${f==='FO'?'OPEN':'CLOSED'} (Thử an toàn: xả khí / ngắt điện SOV → van về vị trí ${f==='FO'?'MỞ':'ĐÓNG'})`
+              : `Fail position ${f}: on loss of supply the valve ${f==='FO'?'opens':f==='FC'?'closes':'stays in position'} (Mất nguồn: van ${f==='FO'?'mở':f==='FC'?'đóng':'giữ nguyên vị trí'})`,
+    'Limit switches / position indicator and local / remote signals correct at both ends (Công tắc hành trình, chỉ thị vị trí, tín hiệu tại chỗ / từ xa đúng ở 2 đầu)',
+    'Seat test with the valve closed by the actuator only – no extra manual force (Thử seat khi van được đóng bằng bộ truyền động, không dùng thêm lực tay)'];
+  return {a, f, sr: sr>0?sr:null, aTxt:ACT[a], fTxt:FAIL[f], items, std:'Project spec / manufacturer test procedure – API 598 covers pressure tests only (Theo spec dự án / quy trình của hãng – API 598 chỉ quy định thử áp)'};
+}
+const actText = A => A ? `${A.aTxt}; ${A.fTxt}${A.sr?'; stroke ≤ '+A.sr+' s':''}` : '';
+
+/* ================= 3b. VAN DIEU KHIEN: ATO / ATC, hanh trinh, tin hieu ================= */
+const CVACT={ATO:'Air to open – ATO (Khí mở, mất khí → đóng / fail close)',ATC:'Air to close – ATC (Khí đóng, mất khí → mở / fail open)',DA:'Double-acting – fail last (Tác động kép, mất khí giữ nguyên)'};
+const CVAT={SD:'Spring-diaphragm (Màng – lò xo)',PS:'Piston, spring-return (Piston – lò xo hồi)',PD:'Piston, double-acting (Piston tác động kép)'};
+const CVPOS={SMART:'Smart / HART digital positioner (Bộ định vị số)',EP:'Analog electro-pneumatic I/P (Bộ định vị điện – khí)',PP:'Pneumatic P/P (Bộ định vị khí)',NONE:'No positioner (Không có bộ định vị)'};
+const SIG={MA:{t:'4–20 mA',lo:4,hi:20,u:'mA'},PSI:{t:'3–15 psig',lo:3,hi:15,u:'psig'},BAR:{t:'0.2–1.0 bar(g)',lo:0.2,hi:1.0,u:'bar'}};
+const cvActKey=s=>{ const n=String(s||'').toUpperCase(); if(/ATC|AIR TO CLOSE|KHI DONG|KHÍ ĐÓNG|\bFO\b|FAIL OPEN/.test(n)) return 'ATC'; if(/DOUBLE|\bDA\b|FAIL LAST|\bFL\b/.test(n)) return 'DA'; if(/ATO|AIR TO OPEN|KHI MO|KHÍ MỞ|\bFC\b|FAIL CLOSE/.test(n)) return 'ATO'; return ''; };
+const n2=v=>{ const x=parseFloat(String(v??'').replace(',','.')); return isNaN(x)?null:x; };
+function cvActOf(i){
+  const a=cvActKey(i.cvAct)||'ATO', at=CVAT[i.cvAT]?i.cvAT:(a==='DA'?'PD':'SD'), pos=CVPOS[i.cvPos]?i.cvPos:'SMART', sg=SIG[i.cvSig]?i.cvSig:'MA';
+  const tr=n2(i.cvTr), tol=n2(i.cvTol)||1, sr=n2(i.cvStrk), sup=String(i.cvSup||'').trim(), bench=String(i.cvBench||'').trim();
+  const S=SIG[sg], pts=[0,25,50,75,100].map(pc=>{ const sig=Math.round((S.lo+(S.hi-S.lo)*pc/100)*1000)/1000, open=a==='ATC'?100-pc:pc; return {pc,sig,open,mm:tr?Math.round(tr*open/100*100)/100:null}; });
+  const fail=a==='ATO'?'FC':a==='ATC'?'FO':'FL';
+  const items=[
+   `Travel / calibration test (Thử hành trình): apply ${S.t} at 0 – 25 – 50 – 75 – 100 % rising and falling; measured position within ±${tol} % of rated travel${tr?' ('+tr+' mm)':''}, hysteresis ≤ ${tol} % (Cấp tín hiệu 5 điểm lên và xuống; sai lệch vị trí ≤ ±${tol} % hành trình, độ trễ ≤ ${tol} %)`,
+   a==='DA' ? 'Fail position: on loss of air the valve stays in position – check with lock-up / volume tank per spec (Mất khí: van giữ vị trí)' : `Fail-safe test: vent the supply / cut the signal → valve goes fully ${fail==='FC'?'CLOSED':'OPEN'} (Thử an toàn: xả khí / mất tín hiệu → van ${fail==='FC'?'ĐÓNG':'MỞ'} hết)`,
+   bench ? `Bench set ${bench} psig (positioner by-passed): valve starts to move at the lower value and reaches full travel at the upper value (Bench set: van bắt đầu chạy ở giá trị dưới, hết hành trình ở giá trị trên)` : 'Bench set / spring range: check against the datasheet with the positioner by-passed (Kiểm tra dải lò xo theo datasheet, bỏ qua bộ định vị)',
+   'Stroke time open and close'+(sr?` ≤ ${sr} s`:' – record')+(sup?`, supply ${sup}`:'')+' (Thời gian đóng / mở'+(sr?` ≤ ${sr} s`:' – ghi lại')+')',
+   'Seat leakage test with the actuator closing the valve at the specified supply / bench set – no extra force (Thử rò seat khi van được bộ chấp hành đóng ở áp cấp theo spec)',
+   'Position transmitter / limit switches and feedback signal correct at 0 % and 100 % (Phản hồi vị trí, công tắc hành trình đúng ở 0 % và 100 %)'];
+  return {a,at,pos,sg,tr,tol,sr,sup,bench,fail,pts,S,aTxt:CVACT[a],atTxt:CVAT[at],posTxt:CVPOS[pos],items,std:'Project spec / manufacturer procedure – typical acceptance ±1 % of rated travel with a smart positioner (Theo spec dự án / quy trình hãng)'};
+}
+
+/* ================= 4. PSV: bellows / bonnet, back pressure test ================= */
+const UFX={psi:1,bar:14.5037738,kg:14.2233433,mpa:145.037738}, ULX={psi:'psig',bar:'bar(g)',kg:'kg/cm²',mpa:'MPa'};
+const fxx=(v,u)=>v==null?'—':(u==='mpa'?String(Math.round(v*1e4)/1e4):String(Math.round(v*100)/100));
+function psvExtra(X,r){
+  const u=r.u||X.u||'psi', f=UFX[u]||1, bel=X.bel==='Bellows'?'Bellows':'Conventional', bon=X.bon==='Open'?'Open':'Closed';
+  const back = X.back!=null && X.back!=='' && !isNaN(parseFloat(X.back)) ? parseFloat(X.back) : null;   // cung don vi voi set
+  const E={bel,bon,back,u,notes:[]};
+  if(bon==='Closed'){
+    const pt=Math.max(30/f, back!=null?back:0);
+    E.bp={p:pt, t:60, items:[
+      `Back pressure / secondary pressure zone test: air or N₂ at ${fxx(pt,u)} ${ULX[u]} (≥ 30 psig${back!=null?' and ≥ back pressure':''}) on the outlet side – no leakage at bonnet, cap, outlet joints (Thử phía sau: khí / N₂ ${fxx(pt,u)} ${ULX[u]} vào cửa ra – không rò ở bonnet, nắp chụp, mối nối cửa ra)`,
+      'Required by ASME BPVC Section XIII / VIII for closed-bonnet valves larger than NPS 1 discharging to a closed system (ASME yêu cầu cho van bonnet kín > NPS 1 xả vào hệ kín)'+(X.size!=null && X.size<=1?' – this valve ≤ NPS 1: per spec (van ≤ NPS 1: theo spec)':'')]};
+    if(bel==='Bellows') E.bp.items.push('Bellows test: apply the same pressure to the outlet with the bonnet vent open – no leakage from the vent = bellows tight; keep the vent open (do not plug) in service (Thử bellows: cấp áp vào cửa ra, mở lỗ vent bonnet – không rò ra vent là bellows kín; khi vận hành để vent hở, không bịt)');
+  } else {
+    E.notes.push('Open bonnet: the outlet / bonnet side cannot be pressure tested – typical for steam service, ASME Section I (Bonnet hở: không thử áp phía sau được – thường cho hơi nước, ASME Section I).');
+    if(bel==='Bellows') E.notes.push('Bellows valves need a closed bonnet with a vent – check the valve data (Van bellows cần bonnet kín có lỗ vent – kiểm tra lại thông số van).');
+  }
+  if(back!=null && back>0 && X.I!=null){
+    const set = X.setI!=null ? X.setI : X.I;
+    if(bel==='Conventional') E.cdtp={v:set-back, t:`Conventional valve with constant superimposed back pressure: CDTP = Set − back pressure = ${fxx(set-back,u)} ${ULX[u]} (API 520 Part I; add the manufacturer's temperature correction) (Van thường có áp ngược cố định: CDTP = Set − áp ngược)`};
+    else E.cdtp={v:set, t:`Balanced bellows: no back-pressure correction – CDTP = Set (temperature correction only) = ${fxx(set,u)} ${ULX[u]} (Bellows cân bằng: không trừ áp ngược, CDTP = Set)`};
+  }
+  return E;
+}
+
+/* ================= 5. GAN VAO APP ================= */
+const css=`
+.x7fig{margin:0 0 10px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px;display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:10px;align-items:center}
+.x7fig svg{width:100%;height:auto;max-height:170px}
+.x7fig figcaption{font-size:.82rem;color:var(--muted);line-height:1.35}.x7fig figcaption b{color:var(--ink)}
+#x7gal .x7grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+#x7gal .x7fig{grid-template-columns:minmax(0,1fr)}#x7gal .x7fig svg{max-height:180px}
+.x7modal{position:fixed;inset:0;background:rgba(10,20,30,.55);z-index:60;display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;overflow:auto}
+.x7modal[hidden]{display:none}.x7box{background:var(--bg);border-radius:10px;max-width:1100px;width:100%;padding:16px}
+.x7box h2{margin:0 0 10px;font-size:1.1rem}.x7x{float:right}
+.act-only[hidden],.cvx-only[hidden],.x7hide[hidden]{display:none}
+.x7tbl{border-collapse:collapse;width:100%;font-size:.82rem;margin:6px 0}.x7tbl td,.x7tbl th{border:1px solid var(--line);padding:3px 6px;text-align:center}
+.x7tbl input{padding:4px 6px;min-height:0;font-size:.85rem}
+.x7ref{margin:8px 0 0;font-size:.85rem}.x7ref b{color:var(--ink)}
+.x7info{background:var(--ok-bg);border-left:4px solid var(--water);padding:8px 10px;border-radius:4px;margin:6px 0;font-size:.85rem}
+.x7stage ul{margin:4px 0 0;padding-left:18px;font-size:.85rem}.x7stage li{margin:3px 0}
+.x7t{display:grid;gap:12px}.x7t .panel{padding:14px}
+.x7t .x7hdr{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.x7step{border:1px solid var(--line);border-left:5px solid var(--water);border-radius:6px;padding:10px 12px;background:var(--panel)}
+.x7step.pass{border-left-color:#2e8b57}.x7step.fail{border-left-color:var(--accent)}
+.x7step h3{margin:0 0 4px;font-size:1rem;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.x7step .tgt{font-size:.85rem;color:var(--muted)}
+.x7clock{font:700 2rem var(--f-mono);letter-spacing:.02em;margin:6px 0;color:var(--ink)}
+.x7clock.done{color:#2e8b57}.x7row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;align-items:end;margin-top:6px}
+.x7row label{font-size:.78rem}.x7btns{display:flex;flex-wrap:wrap;gap:6px}
+.x7res{font-weight:700}.x7res.pass{color:#2e8b57}.x7res.fail{color:var(--accent)}
+.x7log{width:100%;border-collapse:collapse;font-size:.85rem}.x7log td,.x7log th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left}
+@media print{body *{visibility:hidden}#x7pr,#x7pr *{visibility:visible}#x7pr{position:absolute;left:0;top:0;width:100%}}
+#x7pr{display:none}@media print{#x7pr{display:block}}
+.x7t{grid-template-columns:minmax(0,1fr)}#x7hist{overflow-x:auto}.x7btns .btn{white-space:normal}
+.x7row label.x7ck{flex-direction:row;align-items:center;gap:6px}.x7row input[type=checkbox]{width:22px;height:22px;min-height:0;padding:0;flex:0 0 auto}
+`;
+const stEl=document.createElement('style'); stEl.id='x7-css'; stEl.textContent=css; document.head.appendChild(stEl);
+
+// ---- 5a. o nhap them trong form CV & MV ----
+const form=$('f'); const fields=form?form.querySelector('.fields'):null;
+function addFields(){
+  if(!fields || $('refstd')) return;
+  const box=document.createElement('div'); box.style.display='contents';
+  box.innerHTML=`<label class="full">Reference standard (Tiêu chuẩn tham chiếu) <span class="hint">design / manufacturing standard of the valve – pick or type; empty = first suggestion (tiêu chuẩn thiết kế / chế tạo van – chọn hoặc gõ; trống = gợi ý đầu tiên)</span>
+      <input id="refstd" list="x7refl" autocomplete="off"><datalist id="x7refl"></datalist></label>
+    <label class="act-only">Actuator type (Loại bộ truyền động)<select id="x7actT">${Object.entries(ACT).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
+    <label class="act-only">Fail position (Vị trí an toàn)<select id="x7fail"><option value="">Auto (theo loại)</option>${Object.entries(FAIL).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
+    <label class="act-only">Required stroke time, s (Thời gian đóng / mở yêu cầu)<input id="x7strk" type="text" inputmode="decimal" autocomplete="off" placeholder="spec"></label>
+    <label class="cvx-only full">Actuator action (Kiểu tác động)<div class="seg" id="x7cvAct">${Object.entries(CVACT).map(([k,v])=>`<button type="button" data-v="${k}">${k==='ATO'?'Air to open (ATO)':k==='ATC'?'Air to close (ATC)':'Double-acting'}</button>`).join('')}</div><span class="hint" id="x7cvActH"></span></label>
+    <label class="cvx-only">Actuator type (Loại bộ chấp hành)<select id="x7cvAT">${Object.entries(CVAT).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
+    <label class="cvx-only">Positioner (Bộ định vị)<select id="x7cvPos">${Object.entries(CVPOS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
+    <label class="cvx-only">Input signal (Tín hiệu điều khiển)<select id="x7cvSig">${Object.entries(SIG).map(([k,v])=>`<option value="${k}">${v.t}</option>`).join('')}</select></label>
+    <label class="cvx-only">Rated travel, mm (Hành trình định mức)<input id="x7cvTr" type="text" inputmode="decimal" autocomplete="off"></label>
+    <label class="cvx-only">Bench set / spring range, psig (Dải lò xo)<input id="x7cvBench" type="text" autocomplete="off" placeholder="e.g. 6–30"></label>
+    <label class="cvx-only">Supply pressure (Áp khí cấp)<input id="x7cvSup" type="text" autocomplete="off" placeholder="e.g. 35 psig / 2.4 bar"></label>
+    <label class="cvx-only">Travel tolerance ± % (Dung sai hành trình)<input id="x7cvTol" type="text" inputmode="decimal" autocomplete="off" placeholder="1"></label>
+    <label class="cvx-only">Required stroke time, s (Thời gian đóng / mở)<input id="x7cvStrk" type="text" inputmode="decimal" autocomplete="off" placeholder="spec"></label>`;
+  fields.appendChild(box);
+  // dua o tieu chuan tham chieu xuong sau "Test standard"
+  const ts=$('tstd')?$('tstd').closest('label'):null, rl=$('refstd').closest('label');
+  if(ts && ts.parentNode===fields) fields.insertBefore(rl, ts.nextSibling); else fields.appendChild(rl);
+  { const el=$('x7cvAct'); let v=ld('x7_cvAct')||'ATO'; const paint=()=>{ [...el.children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v)); $('x7cvActH').textContent=CVACT[v]; }; el.dataset.v=v; paint();
+    el.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; v=b.dataset.v; el.dataset.v=v; sv('x7_cvAct',v); paint(); if(v==='DA' && $('x7cvAT').value==='SD'){ $('x7cvAT').value='PD'; sv('x7_x7cvAT','PD'); } window.render&&render(); }); }
+  for(const k of ['refstd','x7actT','x7fail','x7strk','x7cvAT','x7cvPos','x7cvSig','x7cvTr','x7cvBench','x7cvSup','x7cvTol','x7cvStrk']){ const v=ld('x7_'+k); if(v!==null) $(k).value=v; $(k).addEventListener('input',()=>{ sv('x7_'+k,$(k).value); window.render&&render(); }); $(k).addEventListener('change',()=>{ sv('x7_'+k,$(k).value); window.render&&render(); }); }
+}
+// ---- 5b. khung hinh van ----
+function addImgBox(id, before){ if($(id)||!before) return; const d=document.createElement('div'); d.id=id; before.parentNode.insertBefore(d,before); }
+addFields();
+addImgBox('vimg',$('summary')); addImgBox('pimg',$('p_summary'));
+// nut thu vien anh tren header
+(function(){ const t=document.querySelector('.hdr-tools'); if(t && !$('hdr_gal')){ const b=document.createElement('button'); b.type='button'; b.className='hbtn'; b.id='hdr_gal'; b.textContent='Valve images (Thư viện ảnh van)'; t.appendChild(b); b.onclick=()=>{ $('x7gal').hidden=false; }; }
+  const m=document.createElement('div'); m.id='x7gal'; m.className='x7modal'; m.hidden=true;
+  m.innerHTML=`<div class="x7box"><button type="button" class="btn ghost x7x" id="x7galx">Close (Đóng)</button><h2>Valve image library (Thư viện ảnh van)</h2><p class="hint">Simplified section drawings for orientation – not to scale; always follow the manufacturer's drawing (Hình cắt minh họa, không theo tỷ lệ; luôn theo bản vẽ của hãng).</p><div class="x7grid">${gallery()}</div></div>`;
+  document.body.appendChild(m); $('x7galx').onclick=()=>{m.hidden=true;}; m.addEventListener('click',e=>{ if(e.target===m) m.hidden=true; });
+})();
+
+// ---- 5c. mo rong inputs() / calc() / text() ----
+if(typeof inputs==='function'){ const _in=inputs; window.inputs=inputs=function(){ const i=_in(); if($('refstd')){ i.ref=$('refstd').value.trim(); i.actT=$('x7actT').value; i.fail=$('x7fail').value; i.strk=$('x7strk').value;
+    i.cvAct=$('x7cvAct').dataset.v; i.cvAT=$('x7cvAT').value; i.cvPos=$('x7cvPos').value; i.cvSig=$('x7cvSig').value; i.cvTr=$('x7cvTr').value; i.cvBench=$('x7cvBench').value; i.cvSup=$('x7cvSup').value; i.cvTol=$('x7cvTol').value; i.cvStrk=$('x7cvStrk').value; } return i; }; }
+if(typeof calc==='function'){ const _c=calc; window.calc=calc=function(i){ const r=_c(i); if(r && i){ r.ref=refOf(i); if(i.tv==='On-Off Valve') r.act=actOf(i); if(i.tv==='Control Valve') r.cva=cvActOf(i); } return r; }; }
+if(typeof text==='function'){ const _t=text; window.text=text=function(){ let s=_t(); try{ const {i,r}=last; s+='\nReference standard (Tiêu chuẩn tham chiếu): '+(r.ref||refOf(i)); if(r.act){ s+='\nActuator test (Thử bộ truyền động): '+actText(r.act)+'\n - '+r.act.items.join('\n - '); }
+    if(r.cva){ const A=r.cva; s+='\nActuator (Bộ chấp hành): '+A.aTxt+'; '+A.atTxt+'; '+A.posTxt+'; signal '+A.S.t+(A.tr?'; travel '+A.tr+' mm':'')+(A.bench?'; bench set '+A.bench+' psig':'')+(A.sup?'; supply '+A.sup:'')+'\nTravel test: '+A.pts.map(p=>p.sig+' '+A.S.u+' → '+p.open+' %'+(p.mm!=null?' ('+p.mm+' mm)':'')).join(' | ')+'\n - '+A.items.join('\n - '); } }catch(e){} return s; }; }
+
+// ---- 5d. hook sau render() ----
+window.x7r=function(i,r){
+  document.querySelectorAll('.act-only').forEach(e=>e.hidden = i.tv!=='On-Off Valve');
+  document.querySelectorAll('.cvx-only').forEach(e=>e.hidden = i.tv!=='Control Valve');
+  const dl=$('x7refl'); if(dl){ const l=refList(i); dl.innerHTML=l.map(x=>`<option value="${esc(x)}">`).join(''); $('refstd').placeholder='Suggested (Gợi ý): '+l.join(', '); }
+  if($('vimg')) $('vimg').innerHTML=figure(imgFor(i));
+  if(r.act && $('stages')) $('stages').insertAdjacentHTML('beforeend',`<article class="stage x7stage" style="border-top-color:#f2a541"><div class="stage-head"><h3>Actuator test (Thử bộ truyền động)</h3><span class="chip">${esc(r.act.a)}</span></div>
+    <p class="x7ref" style="margin-top:4px"><b>Actuator (Bộ truyền động):</b> ${esc(r.act.aTxt)}<br><b>Fail position (Vị trí an toàn):</b> ${esc(r.act.fTxt)}<br><b>Stroke time (Thời gian đóng / mở):</b> ${r.act.sr?'≤ '+r.act.sr+' s':'per datasheet (theo datasheet)'}</p>
+    <ul>${r.act.items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="hint">${esc(r.act.std)}</p></article>`);
+  if(r.cva && $('stages')){ const A=r.cva; $('stages').insertAdjacentHTML('beforeend',`<article class="stage x7stage" style="border-top-color:#f2a541"><div class="stage-head"><h3>Actuator &amp; travel test (Thử bộ chấp hành &amp; hành trình)</h3><span class="chip">${A.a} · ${A.fail}</span></div>
+    <p class="x7ref" style="margin-top:4px"><b>Action (Tác động):</b> ${esc(A.aTxt)}<br><b>Actuator / positioner:</b> ${esc(A.atTxt)} · ${esc(A.posTxt)}<br><b>Signal (Tín hiệu):</b> ${esc(A.S.t)}${A.tr?` · <b>Rated travel (Hành trình):</b> ${A.tr} mm`:''}${A.bench?` · <b>Bench set:</b> ${esc(A.bench)} psig`:''}${A.sup?` · <b>Supply (Áp cấp):</b> ${esc(A.sup)}`:''}</p>
+    <table class="x7tbl"><tr><th>Signal %</th><th>Signal (${A.S.u})</th><th>Valve position (% open)</th>${A.tr?'<th>Travel (mm)</th>':''}<th>Tolerance (Dung sai)</th></tr>${A.pts.map(p=>`<tr><td>${p.pc}</td><td>${p.sig}</td><td>${p.open}</td>${A.tr?`<td>${p.mm}</td>`:''}<td>±${A.tol} %</td></tr>`).join('')}</table>
+    <ul>${A.items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="hint">${esc(A.std)}</p></article>`); }
+  if($('stdbox')) $('stdbox').insertAdjacentHTML('beforeend',`<p class="x7ref"><b>Reference standard (Tiêu chuẩn tham chiếu):</b> ${esc(r.ref||refOf(i))} <span class="hint">– valve design / manufacturing standard; test values above follow the test standard (tiêu chuẩn thiết kế / chế tạo van; số liệu thử theo tiêu chuẩn thử ở trên)</span></p>`);
+};
+
+// ---- 5e. PSV ----
+const pv={bel:ld('x7_pbel')||'Conventional', bon:ld('x7_pbon')||'Closed'};
+(function(){
+  const fp=$('fp'); const pf=fp?fp.querySelector('.fields'):null; if(!pf || $('p_bel')) return;
+  const d=document.createElement('div'); d.style.display='contents';
+  d.innerHTML=`<label class="full">PSV type (Kiểu van)<div class="seg" id="p_bel"><button type="button" data-v="Conventional">Conventional (Thường)</button><button type="button" data-v="Bellows">Balanced bellows (Có bellows)</button></div></label>
+   <label class="full">Bonnet<div class="seg" id="p_bon"><button type="button" data-v="Closed">Closed bonnet (Bonnet kín)</button><button type="button" data-v="Open">Open bonnet / lever (Bonnet hở)</button></div></label>
+   <label class="full">Back pressure (Áp suất ngược) <span class="hint">superimposed, same unit as Set pressure – optional (áp ngược cố định, cùng đơn vị với Set – không bắt buộc)</span><input id="p_back" type="text" inputmode="decimal" autocomplete="off"></label>
+   <label class="full">Reference standard (Tiêu chuẩn tham chiếu)<input id="p_refstd" list="x7prefl" autocomplete="off" placeholder="Suggested (Gợi ý): ${REF.PSV.join(', ')}"><datalist id="x7prefl">${REF.PSV.map(x=>`<option value="${esc(x)}">`).join('')}</datalist></label>`;
+  const k=$('p_kind')?$('p_kind').closest('label'):null; if(k && k.parentNode===pf) pf.insertBefore(d,k.nextSibling); else pf.appendChild(d);
+  const seg=(id,key)=>{ const el=$(id); [...el.children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===pv[key])); el.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; pv[key]=b.dataset.v; sv('x7_p'+key,pv[key]); [...el.children].forEach(x=>x.setAttribute('aria-pressed',x===b)); window.psvRender&&psvRender(); }); };
+  seg('p_bel','bel'); seg('p_bon','bon');
+  for(const id of ['p_back','p_refstd']){ const v=ld('x7_'+id); if(v!==null) $(id).value=v; $(id).addEventListener('input',()=>{ sv('x7_'+id,$(id).value); window.psvRender&&psvRender(); }); }
+})();
+if(typeof psvInputs==='function'){ const _pi=psvInputs; window.psvInputs=psvInputs=function(){ const X=_pi(); X.bel=pv.bel; X.bon=pv.bon; X.back=$('p_back')?$('p_back').value.trim():''; X.ref=$('p_refstd')?$('p_refstd').value.trim():''; try{ const sp=$('p_set'); const su=(typeof U3SRC!=='undefined'&&U3SRC.p_set)||'psi'; const el=su==='psi'?sp:$('p_set_'+su); const v=parseFloat(el&&el.value); if(!isNaN(v)) X.setI=v*(UFX[su]||1)/(UFX[X.u||'psi']||1); }catch(e){} return X; }; }
+if(typeof psvCalc==='function'){ const _pc=psvCalc; window.psvCalc=psvCalc=function(X){ X=X||psvInputs(); const r=_pc(X); try{ r.x7=psvExtra(X,r); r.ref=(X.ref&&String(X.ref).trim())||REF.PSV[0]; }catch(e){} return r; }; }
+window.x7p=function(r){
+  const E=r.x7; if(!E) return;
+  if($('pimg')) $('pimg').innerHTML=figure(psvImg(E));
+  if($('p_warns')){ let h=E.notes.map(n=>`<div class="warn">${esc(n)}</div>`).join(''); if(E.cdtp) h+=`<div class="x7info">${esc(E.cdtp.t)}</div>`; $('p_warns').insertAdjacentHTML('beforeend',h); }
+  if(E.bp && $('p_stages')) $('p_stages').insertAdjacentHTML('beforeend',`<article class="stage air x7stage"><div class="stage-head"><h3>Back pressure test (Thử phía sau)</h3><span class="chip air">Air / N₂</span></div>
+    <dl class="rows"><dt>Test pressure (Áp suất thử)</dt><dd class="big">${fxx(E.bp.p,E.u)} ${ULX[E.u]}</dd><dt>Holding time (Thời gian giữ)</dt><dd>≥ 60 s (or per spec – hoặc theo spec)</dd><dt>Allowable leakage (Rò cho phép)</dt><dd>No leakage (Không rò)</dd></dl>
+    <ul>${E.bp.items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></article>`);
+  if($('p_stdbox')) $('p_stdbox').insertAdjacentHTML('beforeend',`<p class="x7ref"><b>Reference standard (Tiêu chuẩn tham chiếu):</b> ${esc(r.ref)} · <b>${E.bel==='Bellows'?'Balanced bellows':'Conventional'}</b>, <b>${E.bon==='Open'?'open bonnet':'closed bonnet'}</b></p>`);
+};
+
+// ---- 5f. truong cho bien ban Word (batch) ----
+window.x7map=function(set,i,r){ set('TC_THAM_CHIEU', refOf(i)); const A=r&&r.act; set('BO_TD', A?A.aTxt:''); set('VT_AN_TOAN', A?A.fTxt:''); set('TG_DONG_MO', A&&A.sr?A.sr+' s':''); set('THU_BTD', A?A.items.join(' / '):''); set('LOAI_VAN_VN', i.tv==='Control Valve'?'Van điều khiển (CV)':i.tv==='Manual Valve'?'Van tay (MV)':'Van đóng mở có bộ truyền động (On-Off)');
+  const C=r&&r.cva; set('CV_ACTION', C?(C.a==='ATO'?'Air to open (ATO)':C.a==='ATC'?'Air to close (ATC)':'Double-acting'):''); set('CV_FAIL', C?(C.fail==='FC'?'Fail close (FC)':C.fail==='FO'?'Fail open (FO)':'Fail last (FL)'):(A?A.f:''));
+  set('CV_ACT_TYPE', C?C.atTxt:''); set('POSITIONER', C?C.posTxt:''); set('SIGNAL', C?C.S.t:''); set('TRAVEL_MM', C&&C.tr?C.tr:''); set('BENCH_SET', C?C.bench:''); set('SUPPLY_P', C?C.sup:''); set('TRAVEL_TOL', C?'±'+C.tol+' %':''); set('STROKE_TIME', C&&C.sr?C.sr+' s':(A&&A.sr?A.sr+' s':''));
+  for(const p of (C?C.pts:[0,25,50,75,100].map(pc=>({pc})))){ set('SIG_'+p.pc, C?p.sig:''); set('POS_'+p.pc, C?p.open:''); set('MM_'+p.pc, C&&p.mm!=null?p.mm:''); }
+  set('THU_HANH_TRINH', C?C.items.join(' / '):''); };
+// dien tu dong vao Form bien ban co san (nhan o / o tick) cho van dieu khien va van On-Off
+window.x7field=function(n,i,r){ const C=r&&r.cva, A=r&&r.act; if(!C && !A) return null;
+  if(/air to (open|close)|actuator action|kieu tac dong|tac dong/.test(n)) return C?(C.a==='ATO'?'Air to open (ATO)':C.a==='ATC'?'Air to close (ATC)':'Double-acting'):null;
+  if(/fail (position|action|safe|mode)|vi tri an toan/.test(n)) return C?(C.fail==='FC'?'Fail close (FC)':C.fail==='FO'?'Fail open (FO)':'Fail last (FL)'):A.fTxt;
+  if(C && /bench ?set|spring range|dai lo xo/.test(n)) return C.bench||null;
+  if(C && /supply|ap (khi )?cap/.test(n)) return C.sup||null;
+  if(C && /rated travel|travel|hanh trinh/.test(n)) return C.tr?C.tr+' mm':null;
+  if(C && /input signal|control signal|tin hieu/.test(n)) return C.S.t;
+  if(C && /positioner|bo dinh vi/.test(n)) return C.posTxt;
+  if(/actuator type|loai bo (chap hanh|truyen dong)/.test(n)) return C?C.atTxt:A.aTxt;
+  if(/stroke time|thoi gian (dong|hanh trinh)/.test(n)) return (C&&C.sr)?C.sr+' s':(A&&A.sr?A.sr+' s':null);
+  return null; };
+window.x7tick=function(after,i,r){ const C=r&&r.cva, A=r&&r.act; const f=C?C.fail:(A?A.f:null);
+  if(C && /^(air to open|ato\b|khi mo)/.test(after)) return C.a==='ATO';
+  if(C && /^(air to close|atc\b|khi dong)/.test(after)) return C.a==='ATC';
+  if(f && /^(fail close|fail closed|\bfc\b)/.test(after)) return f==='FC';
+  if(f && /^(fail open|\bfo\b)/.test(after)) return f==='FO';
+  if(f && /^(fail last|fail in place|stay put|\bfl\b)/.test(after)) return f==='FL';
+  if(C && /^(smart|hart)/.test(after)) return C.pos==='SMART';
+  if(C && /^(4 20 ?ma|4 ?20ma)/.test(after)) return C.sg==='MA';
+  return null; };
+window.x7pmap=function(set,it){ const E=it.r&&it.r.x7; set('TC_THAM_CHIEU', it.r&&it.r.ref||REF.PSV[0]); set('KIEU_PSV', E?(E.bel==='Bellows'?'Balanced bellows':'Conventional'):''); set('BONNET', E?(E.bon==='Open'?'Open bonnet':'Closed bonnet'):'');
+  set('BACK_TEST', E&&E.bp?fxx(E.bp.p,E.u)+' '+ULX[E.u]+' – no leakage (không rò)':(E?'N/A (open bonnet)':'')); set('CDTP_GOI_Y', E&&E.cdtp?fxx(E.cdtp.v,E.u):''); };
+
+
+/* ================= 6. THU AP TRUC TIEP ================= */
+const view=$('view-test');
+const TS={steps:[], hdr:{}, src:'valve', timers:{}};
+const dispU=()=>(typeof st!=='undefined'&&st.disp)||'psi';
+const fmtPv=p=> p==null?'—':(typeof fmtP==='function'?fmtP(p):p+' psig');
+function stepsFromValve(){
+  if(!last) return [];
+  const {i,r}=last, S=[]; const add=(k,n,s)=>{ if(s) S.push({k,n,med:s.med||'Water',p:s.p,t:s.t,leak:s.leak,type:'p'}); };
+  add('shell','Shell (Thân van)',{...r.shell,leak:{t:'No visible leakage (Không rò nhìn thấy)'}}); add('seatA','Seat A (Đế kín A)',r.seatA); add('seatB','Seat B (Đế kín B)',r.seatB); add('back','Back seat',r.back);
+  if(r.act) S.push({k:'act',n:'Actuator test (Thử bộ truyền động)',type:'act',sr:r.act.sr,f:r.act.f});
+  if(r.cva) S.push({k:'trv',n:'Travel / calibration test (Thử hành trình)',type:'trv',A:r.cva,sr:r.cva.sr,f:r.cva.fail,up:{},dn:{}});
+  TS.title=`${i.tv} / ${i.body} / ${i.size}" / ${r.key}`; TS.std=[...new Set(cvStds(i).map(k=>STD[k][0]))].join(', ')+' · Ref: '+(r.ref||refOf(i));
+  return S;
+}
+function stepsFromPsv(){
+  const r=plast; if(!r) return []; const S=[]; const u=r.u||'psi';
+  for(const n of [1,2,3]) S.push({k:'pop'+n,n:`Pop test #${n}`,type:'pop',I:r.I,P:r.P,Q:r.Q,R:r.R,u,t:(r.time||1)*60});
+  S.push({k:'leak',n:'Leak test (API 527)',type:'p',med:ps.med,p:r.N,pu:u,t:(r.time||1)*60,leak:r.Yt&&r.Y==null?{t:r.Yt}:{v:r.Y,u:r.unit}});
+  if(r.x7&&r.x7.bp) S.push({k:'bp',n:'Back pressure test (Thử phía sau)',type:'p',med:'Air',p:r.x7.bp.p,pu:u,t:60,leak:{t:'No leakage (Không rò)'}});
+  TS.title=`PSV / ${ps.kind} / ${ps.med} / Orifice ${r.orfName} / Set ${r.I} ${ULX[u]}`; TS.std=psvStds(ps.kind).map(k=>STD[k][0]).join(', ')+' · Ref: '+(r.ref||REF.PSV[0]);
+  return S;
+}
+const tgtTxt=s=> s.type==='pop' ? `Open ${fxx(s.Q,s.u)} – ${fxx(s.P,s.u)} ${ULX[s.u]} · reseat ≥ ${fxx(s.R,s.u)} ${ULX[s.u]}`
+  : s.type==='act' ? `≥ 3 cycles${s.sr?' · stroke ≤ '+s.sr+' s':''} · fail ${s.f}`
+  : s.type==='trv' ? `${s.A.aTxt} · ${s.A.S.t} · ±${s.A.tol} % · hysteresis ≤ ${s.A.tol} %${s.sr?' · stroke ≤ '+s.sr+' s':''} · fail ${s.f}`
+  : `${s.med} · P ≥ ${s.pu?fxx(s.p,s.pu)+' '+ULX[s.pu]:fmtPv(s.p)} · t ≥ ${s.t??'—'} s · leak ${s.leak?(s.leak.t?s.leak.t:(s.leak.v??'—')+' '+(s.leak.u||'')):'—'}`;
+const mmss=s=>{ s=Math.max(0,Math.ceil(s)); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); };
+function evalStep(s){
+  const v=k=>{ const x=parseFloat(String(s[k]??'').replace(',','.')); return isNaN(x)?null:x; };
+  if(s.type==='pop'){ const o=v('open'), c=v('close'); if(o==null) return ''; return (o>=s.Q-1e-9 && o<=s.P+1e-9 && (c==null || c>=s.R-1e-9))?'Pass':'Fail'; }
+  if(s.type==='trv'){ const A=s.A; let n=0, bad=false; for(const p of A.pts){ const u=n2(s.up[p.pc]), d=n2(s.dn[p.pc]); if(u!=null){ n++; if(Math.abs(u-p.open)>A.tol+1e-9) bad=true; } if(d!=null){ n++; if(Math.abs(d-p.open)>A.tol+1e-9) bad=true; } if(u!=null&&d!=null && Math.abs(u-d)>A.tol+1e-9) bad=true; }
+    if(!n) return ''; const so=v('so'), scl=v('sc'); if(s.sr){ if(so!=null&&so>s.sr) bad=true; if(scl!=null&&scl>s.sr) bad=true; } if(bad) return 'Fail'; if(n<10 || !s.fsok) return 'Incomplete'; return 'Pass'; }
+  if(s.type==='act'){ const cy=v('cycles'), so=v('so'), scl=v('sc'); if(cy==null && !s.fsok) return ''; let ok=(cy||0)>=3 && !!s.fsok && !!s.lsok; if(s.sr){ if(so!=null && so>s.sr) ok=false; if(scl!=null && scl>s.sr) ok=false; } return ok?'Pass':'Fail'; }
+  const ps0=v('p0'), p1=v('p1'), lk=v('lk'); const started=s.el>0||ps0!=null||p1!=null||lk!=null||s.novis; if(!started) return '';
+  const pt = s.p!=null ? (s.pu ? s.p : s.p) : null;    // gia tri dich (psig hoac don vi PSV)
+  const pd = s.pu ? 1 : (UFX[dispU()]||1);            // gia tri nhap theo don vi hien thi (van) / don vi PSV
+  if(!(s.el>=(s.t||0)-0.5)) return 'Incomplete';
+  if(pt!=null){ if(ps0!=null && ps0*pd < pt-1e-6) return 'Fail'; if(p1!=null && p1*pd < pt-1e-6) return 'Fail'; }
+  if(s.leak){ if(s.leak.t!=null && s.leak.v==null){ if(lk!=null && lk>0) return 'Fail'; if(!s.novis && lk==null) return 'Incomplete'; }
+    else if(s.leak.v!=null){ const m = s.novis?0:lk; if(m==null) return 'Incomplete'; if(m>s.leak.v+1e-9) return 'Fail'; } }
+  return 'Pass';
+}
+function stepHtml(s,ix){
+  const res=evalStep(s), cls=res==='Pass'?'pass':res==='Fail'?'fail':'';
+  const unitIn = s.pu ? ULX[s.pu] : (typeof CVL!=='undefined'?CVL[dispU()]:'psig');
+  let body='';
+  if(s.type==='pop') body=`<div class="x7row"><label>Opening pressure (Áp mở), ${unitIn}<input data-f="open" data-i="${ix}" value="${esc(s.open??'')}" inputmode="decimal"></label><label>Reseat pressure (Áp đóng), ${unitIn}<input data-f="close" data-i="${ix}" value="${esc(s.close??'')}" inputmode="decimal"></label></div>`;
+  else if(s.type==='trv') body=`<table class="x7tbl"><tr><th>${esc(s.A.S.u)}</th><th>Expected % open</th><th>Measured ↑ %</th><th>Measured ↓ %</th></tr>${s.A.pts.map(p=>`<tr><td>${p.sig}</td><td>${p.open}</td><td><input data-up="${p.pc}" data-i="${ix}" value="${esc(s.up[p.pc]??'')}" inputmode="decimal"></td><td><input data-dn="${p.pc}" data-i="${ix}" value="${esc(s.dn[p.pc]??'')}" inputmode="decimal"></td></tr>`).join('')}</table>
+     <div class="x7row"><label>Stroke open, s (Thời gian mở)<input data-f="so" data-i="${ix}" value="${esc(s.so??'')}" inputmode="decimal"></label><label>Stroke close, s (Thời gian đóng)<input data-f="sc" data-i="${ix}" value="${esc(s.sc??'')}" inputmode="decimal"></label><label class="x7ck"><input type="checkbox" data-c="fsok" data-i="${ix}" ${s.fsok?'checked':''}> Fail-safe OK (${esc(s.f)})</label></div>`;
+  else if(s.type==='act') body=`<div class="x7row"><label>Full cycles done (Số lần đóng–mở)<input data-f="cycles" data-i="${ix}" value="${esc(s.cycles??'')}" inputmode="numeric"></label><label>Stroke open, s (Thời gian mở)<input data-f="so" data-i="${ix}" value="${esc(s.so??'')}" inputmode="decimal"></label><label>Stroke close, s (Thời gian đóng)<input data-f="sc" data-i="${ix}" value="${esc(s.sc??'')}" inputmode="decimal"></label>
+     <label class="x7ck"><input type="checkbox" data-c="fsok" data-i="${ix}" ${s.fsok?'checked':''}> Fail-safe OK (Về đúng vị trí an toàn)</label><label class="x7ck"><input type="checkbox" data-c="lsok" data-i="${ix}" ${s.lsok?'checked':''}> Limit switches OK (Công tắc hành trình đúng)</label></div>`;
+  else body=`<div class="x7clock ${s.el>=(s.t||0)&&s.t?'done':''}" id="x7c${ix}">${mmss((s.t||0)-(s.el||0))}</div>
+     <div class="x7btns"><button type="button" class="btn" data-a="start" data-i="${ix}">${s.run?'Pause (Tạm dừng)':(s.el>0?'Resume (Tiếp tục)':'Start (Bắt đầu)')}</button><button type="button" class="btn ghost" data-a="reset" data-i="${ix}">Reset</button></div>
+     <div class="x7row"><label>P at start (Áp đầu), ${unitIn}<input data-f="p0" data-i="${ix}" value="${esc(s.p0??'')}" inputmode="decimal"></label><label>P at end (Áp cuối), ${unitIn}<input data-f="p1" data-i="${ix}" value="${esc(s.p1??'')}" inputmode="decimal"></label>
+     <label>Measured leakage (Rò đo được)${s.leak&&s.leak.u?', '+esc(s.leak.u):''}<input data-f="lk" data-i="${ix}" value="${esc(s.lk??'')}" inputmode="decimal"></label><label class="x7ck"><input type="checkbox" data-c="novis" data-i="${ix}" ${s.novis?'checked':''}> No visible leakage (Không rò nhìn thấy)</label></div>`;
+  return `<div class="x7step ${cls}"><h3><span>${esc(s.n)}</span><span class="x7res ${cls}">${res||'—'}</span></h3><div class="tgt">${esc(tgtTxt(s))}</div>${body}<div class="x7row"><label style="grid-column:1/-1">Note (Ghi chú)<input data-f="note" data-i="${ix}" value="${esc(s.note??'')}"></label></div></div>`;
+}
+function drawSteps(){ const el=$('x7steps'); if(!el) return; el.innerHTML = TS.steps.length ? TS.steps.map(stepHtml).join('') : '<p class="hint">Press "Load steps" after calculating a valve or PSV (Bấm "Nạp các bước" sau khi tra cứu van hoặc PSV).</p>'; $('x7title').textContent=TS.title||''; $('x7std').textContent=TS.std||''; }
+let wake=null; async function keepAwake(on){ try{ if(on && !wake && navigator.wakeLock) wake=await navigator.wakeLock.request('screen'); if(!on && wake){ wake.release(); wake=null; } }catch(e){} }
+function beep(){ try{ const A=new (window.AudioContext||window.webkitAudioContext)(); const o=A.createOscillator(), g=A.createGain(); o.frequency.value=880; o.connect(g); g.connect(A.destination); g.gain.setValueAtTime(.25,A.currentTime); o.start(); o.stop(A.currentTime+.6); }catch(e){} try{ navigator.vibrate&&navigator.vibrate([300,150,300]); }catch(e){} }
+let tick=null;
+function loop(){ const now=Date.now(); let any=false;
+  TS.steps.forEach((s,ix)=>{ if(!s.run) return; any=true; s.el=(s.acc||0)+(now-s.t0)/1000; const c=$('x7c'+ix); if(c) c.textContent=mmss((s.t||0)-s.el);
+    if(s.t && s.el>=s.t && !s.done){ s.done=true; s.run=false; s.acc=s.el; beep(); drawSteps(); } });
+  if(!any){ clearInterval(tick); tick=null; keepAwake(false); } }
+function bindTest(){
+  if(!view) return;
+  view.innerHTML=`<div class="x7t">
+   <div class="panel"><h2>Live pressure test (Thử áp trực tiếp)</h2>
+    <p class="hint">Use at the test bench: load the steps from the CV &amp; MV or PSV tab, run the hold-time timer for each step, enter the readings – the app evaluates Pass / Fail, saves the record and exports CSV / prints (Dùng tại bàn thử: nạp các bước từ tab CV &amp; MV hoặc PSV, chạy đồng hồ thời gian giữ từng bước, nhập số đọc – app đánh giá Đạt / Không đạt, lưu và xuất CSV / in).</p>
+    <div class="x7btns"><button type="button" class="btn" id="x7ldv">Load steps – valve (Nạp các bước – van CV/MV)</button><button type="button" class="btn" id="x7ldp">Load steps – PSV (Nạp các bước – PSV)</button></div>
+    <div class="x7hdr" style="margin-top:10px">${[['tag','Tag No (Mã van)'],['serial','Serial No'],['tester','Tester (Người thử)'],['witness','Witness (Người chứng kiến)'],['gauge','Gauge ID / cal. due (Đồng hồ / hạn kiểm định)'],['wo','Work order / Report No (Số phiếu)']].map(([k,l])=>`<label>${l}<input data-h="${k}" autocomplete="off"></label>`).join('')}</div>
+    <p style="margin:8px 0 0"><b id="x7title"></b><br><span class="hint" id="x7std"></span></p></div>
+   <div id="x7steps"></div>
+   <div class="panel"><div class="x7btns"><button type="button" class="btn" id="x7save">Save record (Lưu biên bản thử)</button><button type="button" class="btn ghost" id="x7print">Print (In)</button><button type="button" class="btn ghost" id="x7csv">Export all to CSV (Xuất CSV)</button><button type="button" class="btn ghost" id="x7new">New test (Thử van mới)</button></div>
+    <h3 style="margin:12px 0 4px">Saved records (Biên bản đã lưu)</h3><div id="x7hist"></div></div></div><div id="x7printbox"></div>`;
+  view.querySelectorAll('[data-h]').forEach(e=>{ e.value=ld('x7h_'+e.dataset.h)||''; e.addEventListener('input',()=>{ TS.hdr[e.dataset.h]=e.value; if(['tester','witness','gauge'].includes(e.dataset.h)) sv('x7h_'+e.dataset.h,e.value); }); TS.hdr[e.dataset.h]=e.value; });
+  $('x7ldv').onclick=()=>{ TS.src='valve'; TS.steps=stepsFromValve(); drawSteps(); };
+  $('x7ldp').onclick=()=>{ TS.src='psv'; TS.steps=stepsFromPsv(); drawSteps(); };
+  $('x7new').onclick=()=>{ TS.steps.forEach(s=>s.run=false); TS.steps=[]; TS.title=''; TS.std=''; view.querySelectorAll('[data-h="tag"],[data-h="serial"],[data-h="wo"]').forEach(e=>{e.value=''; TS.hdr[e.dataset.h]='';}); drawSteps(); };
+  $('x7steps').addEventListener('click',e=>{ const b=e.target.closest('button[data-a]'); if(!b) return; const s=TS.steps[+b.dataset.i]; if(!s) return;
+    if(b.dataset.a==='start'){ if(s.run){ s.run=false; s.acc=s.el; } else { if(s.done){ return; } s.run=true; s.t0=Date.now(); if(!s.start) s.start=new Date().toISOString(); if(!tick) tick=setInterval(loop,250); keepAwake(true); } }
+    else { s.run=false; s.el=0; s.acc=0; s.done=false; s.start=null; }
+    drawSteps(); });
+  $('x7steps').addEventListener('change',e=>{ const t=e.target, s=TS.steps[+t.dataset.i]; if(!s) return; if(t.dataset.c) s[t.dataset.c]=t.checked; else if(t.dataset.f) s[t.dataset.f]=t.value; else if(t.dataset.up!=null) s.up[t.dataset.up]=t.value; else if(t.dataset.dn!=null) s.dn[t.dataset.dn]=t.value; drawSteps(); });
+  $('x7save').onclick=()=>{ if(!TS.steps.length){ alert('No steps loaded (Chưa nạp các bước thử).'); return; }
+    const rec={id:Date.now(), date:new Date().toISOString(), hdr:{...TS.hdr}, title:TS.title, std:TS.std, steps:TS.steps.map(s=>({n:s.n,target:tgtTxt(s),el:Math.round(s.el||0),p0:s.p0||'',p1:s.p1||'',lk:s.lk||'',novis:!!s.novis,open:s.open||'',close:s.close||'',cycles:s.cycles||'',so:s.so||'',sc:s.sc||'',fsok:!!s.fsok,lsok:!!s.lsok,trv:s.type==='trv'?s.A.pts.map(p=>p.sig+'→'+p.open+'%: ↑'+(s.up[p.pc]??'')+' ↓'+(s.dn[p.pc]??'')).join('; '):'',note:s.note||'',res:evalStep(s)||'—'}))};
+    rec.res = rec.steps.every(s=>s.res==='Pass') ? 'Pass' : (rec.steps.some(s=>s.res==='Fail')?'Fail':'Incomplete');
+    const L=logGet(); L.unshift(rec); logSet(L.slice(0,300)); hist(); alert('Saved (Đã lưu): '+rec.res); };
+  $('x7print').onclick=()=>{ printRec({date:new Date().toISOString(),hdr:TS.hdr,title:TS.title,std:TS.std,steps:TS.steps.map(s=>({n:s.n,target:tgtTxt(s),el:Math.round(s.el||0),p0:s.p0||'',p1:s.p1||'',lk:s.lk||'',novis:!!s.novis,open:s.open||'',close:s.close||'',cycles:s.cycles||'',so:s.so||'',sc:s.sc||'',fsok:!!s.fsok,trv:s.type==='trv'?s.A.pts.map(p=>p.sig+'→'+p.open+'%: ↑'+(s.up[p.pc]??'')+' ↓'+(s.dn[p.pc]??'')).join('; '):'',note:s.note||'',res:evalStep(s)||'—'}))}); };
+  $('x7csv').onclick=()=>{ const L=logGet(); if(!L.length){ alert('No saved records (Chưa có biên bản lưu).'); return; }
+    const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"'; const rows=[['Date','Tag','Serial','Tester','Witness','Gauge','Report No','Valve','Standards','Step','Target','Time s','P start','P end','Leak','No visible leak','Open P','Reseat P','Cycles','Stroke open s','Stroke close s','Fail-safe','Travel readings','Note','Step result','Overall']];
+    for(const r of L) for(const s of r.steps) rows.push([r.date,r.hdr.tag,r.hdr.serial,r.hdr.tester,r.hdr.witness,r.hdr.gauge,r.hdr.wo,r.title,r.std,s.n,s.target,s.el,s.p0,s.p1,s.lk,s.novis?'Yes':'',s.open,s.close,s.cycles,s.so,s.sc,s.fsok?'OK':'',s.trv||'',s.note,s.res,r.res]);
+    const blob=new Blob(['﻿'+rows.map(r=>r.map(q).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}); const name='Valve_test_records_'+new Date().toISOString().slice(0,10)+'.csv';
+    if(window.AndroidSave){ const fr=new FileReader(); fr.onload=()=>{ window.AndroidSave.save(name, blob.type, String(fr.result).split(',')[1]||''); }; fr.readAsDataURL(blob); return; }
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},1000); };
+  $('x7hist').addEventListener('click',e=>{ const b=e.target.closest('button[data-r]'); if(!b) return; const L=logGet(); const ix=L.findIndex(r=>String(r.id)===b.dataset.r); if(ix<0) return;
+    if(b.dataset.k==='del'){ if(confirm('Delete this record? (Xóa biên bản này?)')){ L.splice(ix,1); logSet(L); hist(); } } else printRec(L[ix]); });
+  drawSteps(); hist();
+}
+const logGet=()=>{ try{ return JSON.parse(ld('testlog')||'[]'); }catch(e){ return []; } }, logSet=L=>sv('testlog',JSON.stringify(L));
+function hist(){ const L=logGet(), el=$('x7hist'); if(!el) return; el.innerHTML = L.length ? `<table class="x7log"><tr><th>Date (Ngày)</th><th>Tag</th><th>Valve (Van)</th><th>Result (Kết quả)</th><th></th></tr>${L.map(r=>`<tr><td>${esc(r.date.slice(0,16).replace('T',' '))}</td><td>${esc(r.hdr.tag||'')}</td><td>${esc(r.title||'')}</td><td class="x7res ${r.res==='Pass'?'pass':r.res==='Fail'?'fail':''}">${esc(r.res)}</td><td><button type="button" class="btn ghost" data-r="${r.id}" data-k="p">Print</button> <button type="button" class="btn ghost" data-r="${r.id}" data-k="del">Delete</button></td></tr>`).join('')}</table>` : '<p class="hint">No records yet (Chưa có).</p>'; }
+function printRec(r){
+  const box=$('x7printbox'); const h=r.hdr||{};
+  box.innerHTML=`<div id="x7pr" style="font-family:Arial,sans-serif;color:#000;padding:10px"><h2 style="margin:0">VALVE PRESSURE TEST RECORD (BIÊN BẢN THỬ ÁP VAN)</h2><p style="margin:4px 0">${esc(r.title||'')}<br>${esc(r.std||'')}</p>
+   <p style="margin:4px 0">Date (Ngày): ${esc(String(r.date).slice(0,16).replace('T',' '))} · Tag: ${esc(h.tag||'')} · Serial: ${esc(h.serial||'')} · Report No: ${esc(h.wo||'')}<br>Tester: ${esc(h.tester||'')} · Witness: ${esc(h.witness||'')} · Gauge: ${esc(h.gauge||'')}</p>
+   <table style="border-collapse:collapse;width:100%;font-size:11px" border="1" cellpadding="4"><tr><th>Step (Bước)</th><th>Target (Yêu cầu)</th><th>Time s</th><th>Readings (Số đọc)</th><th>Note</th><th>Result</th></tr>
+   ${r.steps.map(s=>`<tr><td>${esc(s.n)}</td><td>${esc(s.target)}</td><td>${s.el||''}</td><td>${esc([s.p0&&'P0 '+s.p0,s.p1&&'P1 '+s.p1,s.lk&&'leak '+s.lk,s.novis&&'no visible leak',s.open&&'open '+s.open,s.close&&'reseat '+s.close,s.cycles&&'cycles '+s.cycles,s.so&&'open '+s.so+' s',s.sc&&'close '+s.sc+' s',s.fsok&&'fail-safe OK',s.trv&&'travel '+s.trv].filter(Boolean).join(' · '))}</td><td>${esc(s.note||'')}</td><td><b>${esc(s.res)}</b></td></tr>`).join('')}</table>
+   <p style="margin-top:24px">Tester (Người thử): ................................ &nbsp;&nbsp; Witness (Người chứng kiến): ................................</p><p style="font-size:10px">Valve Test Calculator – Lecturer Le Duy Nam – PV College</p></div>`;
+  setTimeout(()=>{ try{ window.print(); }catch(e){} },50);
+}
+bindTest();
+// tab
+const tb=$('tab-test'); if(tb) tb.onclick=()=>{ tab('test'); };
+// ve lai lan dau
+try{ window.render&&render(); }catch(e){} try{ window.psvRender&&psvRender(); }catch(e){}
+})();
+
+</script><!--/X7-JS-->
+</body></html>
