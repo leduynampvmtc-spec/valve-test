@@ -94,6 +94,7 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);ou
 .design b{font:500 .85rem var(--f-mono);color:var(--ink)}
 .warn{background:var(--air-bg);border-left:3px solid var(--accent);padding:8px 12px;font-size:.85rem;border-radius:3px;margin-bottom:12px}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.one-form{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-end;margin-top:10px;padding:10px 12px;border:1px dashed var(--line);border-radius:8px;background:var(--panel)}.one-form .one-file{cursor:pointer}.one-form .one-sel{display:flex;flex-direction:column;gap:4px;font-size:.85rem;flex:1 1 260px;min-width:0}.one-form .one-sel select{width:100%;min-width:0}.one-form .hint{flex:1 1 100%;margin:0}.one-form .one-ok{color:#2e7d32;font-weight:600}.one-form .one-bad{color:#c62828;font-weight:600}
 .btn{font:600 .85rem var(--f-body);padding:8px 14px;border-radius:4px;border:1px solid var(--steel);background:var(--steel);color:var(--panel);cursor:pointer}
 .btn.ghost{background:transparent;color:var(--steel)}
 .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:4px;background:var(--panel);max-height:70vh}
@@ -341,6 +342,11 @@ td{padding:10px 12px}
       <button class="btn" type="button" id="copy">Copy results (Sao chép kết quả)</button>
       <button class="btn ghost" type="button" id="wordOne">Export Word report (Xuất biên bản Word)</button>
     </div>
+    <div class="one-form" id="wordOneBox">
+      <label class="btn ghost one-file">Import report form (Nạp biên bản mẫu)<input id="wordOneTpl" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden></label>
+      <label class="one-sel">Report form used (Biên bản dùng để xuất)<select id="wordOneSel"></select></label>
+      <div class="hint" id="wordOneMsg">Load your own .docx test report form, then press Export: the report of this valve is filled into that form (Nạp Form biên bản .docx của anh/chị rồi bấm Xuất: biên bản của van này được điền vào đúng Form đó).</div>
+    </div>
   </div>
 </div>
 </section>
@@ -427,6 +433,11 @@ td{padding:10px 12px}
     <div class="actions">
       <button class="btn" type="button" id="p_copy">Copy results (Sao chép kết quả)</button>
       <button class="btn ghost" type="button" id="p_word">Export Word report (Xuất biên bản Word)</button>
+    </div>
+    <div class="one-form" id="p_wordBox">
+      <label class="btn ghost one-file">Import PSV report form (Nạp biên bản mẫu PSV)<input id="p_wordTpl" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden></label>
+      <label class="one-sel">Report form used (Biên bản dùng để xuất)<select id="p_wordSel"></select></label>
+      <div class="hint" id="p_wordMsg">Load your own PSV / PRD test report form (.docx), then press Export: the report of this PSV is filled into that form (Nạp Form biên bản PSV .docx rồi bấm Xuất: biên bản của van này được điền vào đúng Form đó).</div>
     </div>
   </div>
 </div>
@@ -1963,6 +1974,7 @@ function renderList(){
   $b('b_out').hidden=false;
 }
 function renderForms(){
+  renderOne();
   const box=$b('b_forms');
   if(!B.forms.length){ box.innerHTML='<p class="b-meta"><span class="b-bad">No report form loaded yet (Chưa nạp Form báo cáo).</span></p>'; return; }
   box.innerHTML='<ul class="b-flist">'+B.forms.map((f,ix)=>`<li><span class="b-fname">${esc(f.name)}</span>
@@ -2064,8 +2076,8 @@ async function exportRaw(){
   status(`Exported ${nDoc} reports with the values in the Data file – no lookup, empty cells left empty (Đã xuất ${nDoc} biên bản theo đúng số liệu trong file Data)`+(noForm.size?` · Sheets without a form (Sheet chưa có Form): ${[...noForm].join(', ')}`:'')+(miss.size?' · Unknown codes (Mã không nhận ra): '+[...miss].slice(0,6).map(k=>'{{'+esc(k)+'}}').join(', '):''), noForm.size>0||miss.size>0);
 }
 async function exportData(){ if(!B.res.length) return; saveBlob(await buildDataXlsx(), safeName(B.data.name.replace(/\.(xlsx|xlsm|xlsb|csv)$/i,''))+'_KetQua.xlsx'); status('Result Data file exported (Đã xuất file Data có kết quả).'); }
-async function exportForItem(it,btn,label){
-  let fs=formsFor(it);
+async function exportForItem(it,btn,label,forced){
+  let fs=forced||formsFor(it);
   if(!fs.length){ if(it.type==='psv'){ alert('No PSV report form loaded (Chưa nạp Form báo cáo PSV).'); return; } if(!confirm('No form for this valve. Use the app sample form? (Chưa có Form cho van này. Dùng Form mẫu của app?)')) return; fs=[{name:'Bien_ban_mau.docx',buf:await sampleDocx(),type:'valve'}]; }
   const miss=new Set(), st={codes:0,fields:0,ticks:0}; const docs=[];
   if(btn) btn.textContent='Exporting (Đang xuất)…';
@@ -2114,18 +2126,58 @@ $b('b_codesbtn').addEventListener('click',()=>{ const c=$b('b_codes'); c.hidden=
 $b('b_codes').addEventListener('click',async e=>{ const c=e.target.closest('code'); if(!c) return; try{ await navigator.clipboard.writeText(c.textContent); c.classList.add('b-copied'); setTimeout(()=>c.classList.remove('b-copied'),900);}catch(_){} });
 
 // ---------- xuat 1 van nhap tay (tab CV & MV, tab PSV) ----------
+// Nap bien ban mau ngay tai tab CV & MV / PSV, chon Form roi xuat 1 van theo dung Form do
+const ONE={cv:{sel:'wordOneSel',tpl:'wordOneTpl',msg:'wordOneMsg',btn:'wordOne'},psv:{sel:'p_wordSel',tpl:'p_wordTpl',msg:'p_wordMsg',btn:'p_word'}};
+const SAMPLE='__sample__';
+let onePending=null;
+function oneList(k){ return B.forms.filter(f=> k==='psv' ? f.type==='psv' : f.type!=='psv'); }
+function renderOne(){
+  for(const k of ['cv','psv']){ const s=$b(ONE[k].sel); if(!s) continue;
+    const L=oneList(k), want=s.dataset.want||ld('one_'+k)||'';
+    let h=L.map(f=>`<option value="${esc(f.name)}">${esc(f.name)}</option>`).join('');
+    if(k==='cv') h+=`<option value="${SAMPLE}">App sample form (Form mẫu của app – Bien_ban_mau.docx)</option>`;
+    else if(!L.length) h='<option value="">No PSV form loaded yet (Chưa nạp Form PSV)</option>';
+    s.innerHTML=h; const vals=[...s.options].map(o=>o.value);
+    s.value = vals.includes(want) ? want : vals[0]; delete s.dataset.want; }
+}
+function oneMsg(k,html){ const m=$b(ONE[k].msg); if(m) m.innerHTML=html; }
+function oneForms(k){ const s=$b(ONE[k].sel); const v=s?s.value:'';
+  if(v===SAMPLE) return 'sample'; const f=B.forms.find(x=>x.name===v && (k==='psv'?x.type==='psv':x.type!=='psv')); return f?[f]:null; }
+async function loadOneForm(k,file){
+  if(!/\.docx$/i.test(file.name)){ oneMsg(k,'<span class="one-bad">Not a .docx file – open it in Word and Save As .docx first (Không phải file .docx – mở bằng Word rồi Save As sang .docx).</span>'); return false; }
+  const buf=await file.arrayBuffer();
+  try{ const z=await JSZip.loadAsync(buf); if(!z.file('word/document.xml')) throw 0; }catch(_){ oneMsg(k,'<span class="one-bad">Cannot read this Word file (Không đọc được file Word này).</span>'); return false; }
+  let type=await detectForm(buf);
+  if(k==='psv') type='psv'; else if(type==='psv') type='valve';   // nap o tab nao thi dung cho tab do
+  const ex=B.forms.findIndex(x=>x.name===file.name);
+  if(ex>=0) B.forms[ex]={name:file.name,buf,type}; else B.forms.push({name:file.name,buf,type});
+  const ok=saveForms(); sv('one_'+k,file.name); const s=$b(ONE[k].sel); if(s) s.dataset.want=file.name;
+  renderForms(); renderList();
+  oneMsg(k,`<span class="one-ok">Form loaded (Đã nạp Form): ${esc(file.name)}</span> – press Export to fill the report of this valve into it (bấm Xuất để điền biên bản van này vào Form).`+(ok?' The app remembers it, also in the Data &amp; Report tab (App nhớ Form này, dùng chung với tab Data &amp; Report).':' Form too large to remember – load it again next time (Form lớn, lần sau cần nạp lại).'));
+  return true; }
+for(const k of ['cv','psv']){
+  const t=$b(ONE[k].tpl), s=$b(ONE[k].sel);
+  if(t) t.addEventListener('change',async e=>{ const f=e.target.files[0]; e.target.value=''; const p=onePending; onePending=null; if(!f) return;
+    try{ if(await loadOneForm(k,f) && p===k) $b(ONE[k].btn).click(); }catch(er){ oneMsg(k,'<span class="one-bad">Error (Lỗi): '+esc(er.message||er)+'</span>'); } });
+  if(s) s.addEventListener('change',()=>{ sv('one_'+k,s.value); });
+}
+async function oneFs(k){ const r=oneForms(k);
+  if(r==='sample') return [{name:'Bien_ban_mau.docx',buf:await sampleDocx(),type:'valve'}];
+  return r; }
 $b('wordOne').addEventListener('click',async()=>{
   if(!last) return;
+  if(!oneForms('cv')){ onePending='cv'; $b('wordOneTpl').click(); return; }
   const i={...last.i}; i.dU=CVSRC.design||'psi'; const el=$b(i.dU==='psi'?'design':'design_'+i.dU); i.dRaw=el?parseFloat(String(el.value).replace(',','.')):NaN;
   const tag=prompt('Tag No (mã van) – may be left blank (có thể bỏ trống):',''); if(tag===null) return;
-  exportForItem({type:'cv',sheet:'Van',sub:i.tv==='Control Valve'?'CV':'MV',stt:'1',tag,i,r:last.r,cols:{}}, $b('wordOne'), 'Export Word report (Xuất biên bản Word)').catch(e=>alert('Error (Lỗi): '+e.message));
+  exportForItem({type:'cv',sheet:'Van',sub:i.tv==='Control Valve'?'CV':'MV',stt:'1',tag,i,r:last.r,cols:{}}, $b('wordOne'), 'Export Word report (Xuất biên bản Word)', await oneFs('cv')).catch(e=>alert('Error (Lỗi): '+e.message));
 });
 $b('p_word') && $b('p_word').addEventListener('click',async()=>{
+  if(!oneForms('psv')){ onePending='psv'; oneMsg('psv','<span class="one-bad">Choose your PSV report form (.docx) first (Chọn Form biên bản PSV .docx trước).</span>'); $b('p_wordTpl').click(); return; }
   const X=psvInputs(); const r=psvCalc(X);
   const sU=U3SRC.p_set||'psi', cU=U3SRC.p_cdtp||'psi';
   const sv_=fld('p_set',sU).value.trim(), cv_=fld('p_cdtp',cU).value.trim();
   const tag=prompt('PSV Tag No – may be left blank (có thể bỏ trống):',''); if(tag===null) return;
-  exportForItem({type:'psv',sheet:'PSV',sub:'PSV',stt:'1',tag,x:X,r,cols:{},setV:sv_===''?null:parseFloat(sv_),setU:sU,cdtpV:cv_===''?null:parseFloat(cv_),cdtpU:cU}, $b('p_word'), 'Export Word report (Xuất biên bản Word)').catch(e=>alert('Error (Lỗi): '+e.message));
+  exportForItem({type:'psv',sheet:'PSV',sub:'PSV',stt:'1',tag,x:X,r,cols:{},setV:sv_===''?null:parseFloat(sv_),setU:sU,cdtpV:cv_===''?null:parseFloat(cv_),cdtpU:cU}, $b('p_word'), 'Export Word report (Xuất biên bản Word)', await oneFs('psv')).catch(e=>alert('Error (Lỗi): '+e.message));
 });
 $b('b_date').value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
 renderForms(); renderList();
