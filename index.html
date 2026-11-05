@@ -259,6 +259,9 @@ td{padding:10px 12px}
   <form class="panel" id="f" autocomplete="off">
     <h2>Valve data (Thông số van)</h2>
     <div class="fields">
+      <label class="full">Tag No / Tag name (Mã van) <span class="hint">filled into the report form where it has a Tag No box or {{TAG}} (điền vào biên bản ở ô Tag No hoặc mã {{TAG}})</span>
+        <input id="tagOne" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="e.g. (ví dụ): HV-1001">
+      </label>
       <label class="full">Valve type (Loại van)
         <div class="seg" id="tv">
           <button type="button" data-v="Manual Valve" aria-pressed="true">MV – manual (Van tay)</button>
@@ -357,6 +360,9 @@ td{padding:10px 12px}
   <form class="panel" id="fp" autocomplete="off">
     <h2>PSV data (Thông số PSV)</h2>
     <div class="fields">
+      <label class="full">Tag No / Tag name (Mã van) <span class="hint">filled into the report form where it has a Tag No box or {{TAG}} (điền vào biên bản ở ô Tag No hoặc mã {{TAG}})</span>
+        <input id="p_tag" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="e.g. (ví dụ): PSV-2001">
+      </label>
       <div class="full unit3"><span class="u3-title">Inlet size (Cỡ đầu vào) <span class="hint">enter inch or DN, the other converts (nhập inch hoặc DN, ô còn lại tự đổi)</span></span>
         <div class="u3 sz2">
           <label>inch<input id="p_size" type="text" inputmode="decimal" autocomplete="off" min="0" step="any"></label>
@@ -2168,7 +2174,7 @@ $b('wordOne').addEventListener('click',async()=>{
   if(!last) return;
   if(!oneForms('cv')){ onePending='cv'; $b('wordOneTpl').click(); return; }
   const i={...last.i}; i.dU=CVSRC.design||'psi'; const el=$b(i.dU==='psi'?'design':'design_'+i.dU); i.dRaw=el?parseFloat(String(el.value).replace(',','.')):NaN;
-  const tag=prompt('Tag No (mã van) – may be left blank (có thể bỏ trống):',''); if(tag===null) return;
+  const tag=($b('tagOne')?$b('tagOne').value:'').trim();   // o Tag No nhap tay o tab CV & MV
   exportForItem({type:'cv',sheet:'Van',sub:i.tv==='Control Valve'?'CV':'MV',stt:'1',tag,i,r:last.r,cols:{}}, $b('wordOne'), 'Export Word report (Xuất biên bản Word)', await oneFs('cv')).catch(e=>alert('Error (Lỗi): '+e.message));
 });
 $b('p_word') && $b('p_word').addEventListener('click',async()=>{
@@ -2176,7 +2182,7 @@ $b('p_word') && $b('p_word').addEventListener('click',async()=>{
   const X=psvInputs(); const r=psvCalc(X);
   const sU=U3SRC.p_set||'psi', cU=U3SRC.p_cdtp||'psi';
   const sv_=fld('p_set',sU).value.trim(), cv_=fld('p_cdtp',cU).value.trim();
-  const tag=prompt('PSV Tag No – may be left blank (có thể bỏ trống):',''); if(tag===null) return;
+  const tag=($b('p_tag')?$b('p_tag').value:'').trim();   // o Tag No nhap tay o tab PSV
   exportForItem({type:'psv',sheet:'PSV',sub:'PSV',stt:'1',tag,x:X,r,cols:{},setV:sv_===''?null:parseFloat(sv_),setU:sU,cdtpV:cv_===''?null:parseFloat(cv_),cdtpU:cU}, $b('p_word'), 'Export Word report (Xuất biên bản Word)', await oneFs('psv')).catch(e=>alert('Error (Lỗi): '+e.message));
 });
 $b('b_date').value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
